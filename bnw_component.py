@@ -32,7 +32,6 @@ import stupid_handler
 
 #import command_parsers
 #import commands
-#import dbutils
 import bnw_xmpp.base
 
 PRESENCE = '/presence' # this is an global xpath query to use in an observer

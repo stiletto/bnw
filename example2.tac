@@ -6,10 +6,6 @@ from twisted.application import service
 
 from twisted.words.protocols.jabber import component
 
-import dbutils,couchdb
-dbutils.db=couchdb.Server('http://10.254.230.1:5984/')['ololo_whores']
-dbutils.typeddb=dbutils.TypedDb(dbutils.db)
-
 import bnw_component
 
 application = service.Application("example-echo")
