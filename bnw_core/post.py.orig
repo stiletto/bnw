@@ -1,0 +1,83 @@
+def postMessage(msg,tags,clubs,text,anon=False,anoncom=False):
+        qn=0
+        if len(text)>2048:
+            raise XmppResponse('Message is too long. %d/2048' % (len(text),))
+        post_throttle=throttle_check(msg.user['name'])
+        message={ 'user': msg.user['name'],
+                  'tags': tags,
+                  'clubs': clubs,
+                  'id': genid(6),
+                  'date': time.time(),
+                  'text': text,
+                  'anonymous': anon,
+                  'anoncomments': anoncom,
+                }
+        if anon:
+            message['real_user']=message['user']
+            message['user']='anonymous'
+        get_db()['messages'].insert(message)
+        
+        sub_rec={ 'target': message['id'], 'type': 'sub_message', 'user': msg.user['name']}
+        get_db()['subscriptions'].insert(sub_rec)
+        
+        recipients=set()
+        queries=[{'target': tag, 'type': 'sub_tag'} for tag in tags]
+        queries+=[{'target': club, 'type': 'sub_club'} for club in clubs]
+        queries+=[{'target': 'anonymous' if anon else msg.user['name'], 'type': 'sub_user'}]
+        for query in queries: # fuuuuuuuuuuck this will be damn slow fix it someone plz
+            qn+=1
+            for result in get_db().subscriptions.find(query):
+                recipients.add(result['user'])
+        for target_name in recipients:
+            target=objs.User.find_one({'name': target_name})
+            qn+=1
+            if target:
+                if not target.get('off',False):
+                    target.send_post(message)
+                    log.msg('Sent %s to %s' % (message['id'],target['jid']))
+        throttle_update(msg.user['name'],post_throttle)
+        return 'Posted with id %s. $%d' % (message['id'].upper(),qn)
+
+def postComment(self,message_id,comment_id,rest,msg,anon=False):
+        qn=0
+            
+        if len(rest)>2048:
+            raise XmppResponse('Comment is too long. %d/2048' % (len(rest),))
+        post_throttle=throttle_check(msg.user['name'])
+        message=get_db().messages.find_one({'id': message_id})
+        if comment_id!=None:
+            old_comment=objs.Comment.find_one({'id': message_id+'/'+comment_id, 'message': message_id})
+        else:
+            old_comment=None
+        if old_comment==None and comment_id!=None:
+            raise XmppResponse('No such comment.')
+        if message==None:
+            raise XmppResponse('No such message.')
+        
+        comment={ 'user': msg.user['name'],
+                  'id': message_id+'/'+genid(3),
+                  'message': message_id,
+                  'date': time.time(),
+                  'replyto': old_comment['id'] if old_comment else None,
+                  'replytotext': cropstring(old_comment['text'] if comment_id else message['text'],128),
+                  'text': ('@'+old_comment['user']+' 'if comment_id else '')+rest,
+                  'anonymous': anon,
+                }
+        if anon:
+            comment['real_user']=comment['user']
+            comment['user']='anonymous'
+        get_db()['comments'].insert(comment)
+        sub_rec={ 'target': message_id, 'type': 'sub_message', 'user': msg.user['name']}
+        if get_db()['subscriptions'].find_one(sub_rec) is None: 
+            get_db()['subscriptions'].insert(sub_rec)
+        
+        for result in get_db().subscriptions.find({'target': message_id, 'type': 'sub_message'}):
+                target=objs.User.find_one({'name': result['user']})
+                qn+=1
+                if target:
+                    if not target.get('off',False):
+                        target.send_comment(comment)
+                        log.msg('Sent %s to %s' % (comment['id'],target['jid']))
+        throttle_update(msg.user['name'],post_throttle)
+        #log.debug
+        return 'Posted with id %s. $%d.' % (comment['id'].upper(),qn)
