@@ -8,3 +8,4 @@ mongo-async-python-driver
 *.log
 *.pid
 *.e4p
+passwords.py
