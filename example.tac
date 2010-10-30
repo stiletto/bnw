@@ -1,5 +1,6 @@
 # coding: utf-8
 import sys
+import passwords
 try:
     sys.setappdefaultencoding('utf-8')
 except:
@@ -17,7 +18,7 @@ import bnw_component
 application = service.Application("example-echo")
 
 # set up Jabber Component
-sm = component.buildServiceManager('bnw.blasux.ru', 'abnn5hhhhhuidsgatjdsfg',
+sm = component.buildServiceManager('bnw.blasux.ru', passwords.bnw,
                     ("tcp:127.0.0.1:6591" ))
 
 
