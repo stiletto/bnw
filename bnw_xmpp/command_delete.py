@@ -2,7 +2,8 @@
 #from twisted.words.xish import domish
 
 from base import *
-import bnw_base.bnw_objects as objs
+import bnw_core.bnw_objects as objs
+from twisted.internet import defer
 import random
 
 
@@ -46,7 +47,7 @@ class DeleteCommand(BaseCommand):
         postid=parameters[0]
         if not postid.startswith('#'):
             defer.returnValue('Usage: D #POST[/COMMENT]')
-        defer.returnValue(yield self.handleRedeye({'message':postid[1:]},'',msg))
+        defer.returnValue((yield self.handleRedeye({'message':postid[1:]},'',msg)))
 
     
 cmd = DeleteCommand()

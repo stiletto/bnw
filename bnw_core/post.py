@@ -98,7 +98,8 @@ def postMessage(user,tags,clubs,text,anon=False,anoncom=False):
     queries+=[{'target': club, 'type': 'sub_club'} for club in clubs]
     queries+=[{'target': 'anonymous' if anon else user['name'], 'type': 'sub_user'}]
     qn,recipients = yield send_to_subscribers(queries,True,message)
-    defer.returnValue('Posted with id %s and delivered to %d users. Total cost: $%d' % (message['id'].upper(),recipients,qn))
+    defer.returnValue((qn,recipients))
+    #defer.returnValue('Posted with id %s and delivered to %d users. Total cost: $%d' % (message['id'].upper(),recipients,qn))
 
 @defer.inlineCallbacks
 def postComment(message_id,comment_id,text,user,anon=False):

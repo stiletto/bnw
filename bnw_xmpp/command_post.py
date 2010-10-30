@@ -84,10 +84,10 @@ class CommentCommand(BaseCommand):
     @requireAuthSimplified
     @defer.inlineCallbacks
     def handleSimplified(self,command,msg,parameters):
-        message_id=parameters[0][0].lower()
+        message_id=parameters[0][0].upper()
         if parameters[0][1]:
             #raise Exception(parameters[0][1])
-            comment_id=parameters[0][1][1:].lower()
+            comment_id=parameters[0][1][1:].upper()
         else:
             comment_id=None
         defer.returnValue((yield self.postComment(message_id,comment_id,parameters[0][2],msg)))
@@ -99,7 +99,7 @@ class CommentCommand(BaseCommand):
         message_id=options.get('message',None)
         if message_id==None:
             raise XmppResponse('You must specify a message to comment.')
-        msplit=message_id.lower().split('/',1)
+        msplit=message_id.upper().split('/',1)
         message_id=msplit[0]
         if len(msplit)>1:
             comment_id=msplit[1]

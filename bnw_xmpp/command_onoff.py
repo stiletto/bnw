@@ -4,7 +4,7 @@
 from base import *
 import random
 
-import bnw_base.bnw_objects as objs
+import bnw_core.bnw_objects as objs
 from parser_redeye import requireAuthRedeye
 from parser_simplified import requireAuthSimplified
 

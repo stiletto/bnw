@@ -28,7 +28,7 @@ def send_plain(dst,src,msg):
     reactor.callFromThread(service.send_plain, dst, src, msg)
     # instead of service.send_plain(dst,src,msg)
 
-idchars='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.lower()
+idchars='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     
 def _(s,user):
     return s
