@@ -1,6 +1,5 @@
-# coding: utf-8
 """
-"""
+""" # coding: utf-8
 import bnw_objects as objs
 from base import get_db,genid,cropstring
 from twisted.internet import interfaces, defer, reactor
@@ -37,6 +36,12 @@ def unsubscribe(user,target_type,target,fast=False):
 
 @defer.inlineCallbacks
 def send_to_subscribers(queries,is_message,message):
+    """!Это дерьмо рассылает сообщение или коммент подписчикам.
+    @param queries Список запросов, по которым можно найти подписки.
+    @param is_message Является ли сообщением. Если нет - коммент.
+    @param message Собственно сообщение или коммент.
+    @todo Что-то как-то уныло и негибко.
+    """
     recipients=set()
     qn=0
     for query in queries:
