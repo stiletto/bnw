@@ -1,7 +1,8 @@
+# coding: utf-8
 """
-""" # coding: utf-8
+"""
 import bnw_objects as objs
-from base import get_db,genid,cropstring
+from base import genid,cropstring
 from twisted.internet import interfaces, defer, reactor
 import time
 from twisted.python import log
@@ -70,7 +71,6 @@ def postMessage(user,tags,clubs,text,anon=False,anoncom=False):
     @param anon Отправить от анона.
     @param anoncom Все комментарии принудительно анонимны.
     """
-    db=yield get_db()
     if len(text)==0:
         defer.returnValue('So where is your post?')
     if len(text)>2048:
@@ -92,9 +92,6 @@ def postMessage(user,tags,clubs,text,anon=False,anoncom=False):
     stored_message = objs.Message(message)
     stored_message_id = yield stored_message.save()
     
-    #raise Exception('ALL WRONG')
-    
-    #sub_rec={ 'target': message['id'], 'type': 'sub_message', 'user': user['name']}
     sub_result = yield subscribe(user,'sub_message',message['id'],True)
     
     queries=[{'target': tag, 'type': 'sub_tag'} for tag in tags]
@@ -141,7 +138,6 @@ def postComment(message_id,comment_id,text,user,anon=False):
         comment['user']='anonymous'
     comment = objs.Comment(comment)
     comment_id = yield comment.save()
-    sub_rec={ 'target': message_id, 'type': 'sub_message', 'user': user['name']}
     sub_result = yield subscribe(user,'sub_message',message_id)
     
     qn,recipients = yield send_to_subscribers([{'target': message_id, 'type': 'sub_message'}],False,comment)

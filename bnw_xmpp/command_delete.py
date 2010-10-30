@@ -2,6 +2,7 @@
 #from twisted.words.xish import domish
 
 from base import *
+import bnw_base.bnw_objects as objs
 import random
 
 
@@ -18,21 +19,21 @@ class DeleteCommand(BaseCommand):
         if not 'message' in options:
             defer.returnValue('Usage: delete -m POST[/COMMENT]')
         splitpost=options['message'].split('/')
-        message_id=splitpost[0].lower()
-        comment_id=splitpost[1].lower() if len(splitpost)>1 else None
+        message_id=splitpost[0].upper()
+        comment_id=splitpost[1].upper() if len(splitpost)>1 else None
         if comment_id:
-            comment=get_db().comments.find_one({'id':comment_id,'message':message_id})
-        message=get_db().messages.find_one({'id':message_id})
+            comment=yield objs.Comment.find_one({'id':comment_id,'message':message_id})
+        message=yield objs.Message.find_one({'id':message_id})
         if comment_id:
             if comment['user']!=msg.user['name'] and message['user']!=msg.user['name']:
                 defer.returnValue('Not your comment and not your message.')
-            get_db().comments.remove({'id':comment['id'],'message':comment['message'],'user':comment['user']})
+            _ = yield objs.Comment.remove({'id':comment['id'],'message':comment['message'],'user':comment['user']})
             defer.returnValue('Comment removed.')
         else:
             if message['user']!=msg.user['name']:
                 defer.returnValue('Not your message.')
-            get_db().messages.remove({'id':message['id'],'user':message['user']})
-            get_db().comments.remove({'message':message['id']})
+            _ = yield objs.Message.remove({'id':message['id'],'user':message['user']})
+            _ = yield objs.Comment.remove({'message':message['id']})
             defer.returnValue('Message removed.')
     handleRedeye.arguments= (
         ('m',   'message',True,'Message or comment to delete.'),
@@ -40,11 +41,12 @@ class DeleteCommand(BaseCommand):
             
 
     @requireAuthSimplified
-    def handleSimplified(self,command,msg,parameters): # TODO: asynchronize
+    @defer.inlineCallbacks
+    def handleSimplified(self,command,msg,parameters):
         postid=parameters[0]
         if not postid.startswith('#'):
             defer.returnValue('Usage: D #POST[/COMMENT]')
-        defer.returnValue(self.handleRedeye({'message':postid[1:]},'',msg))
+        defer.returnValue(yield self.handleRedeye({'message':postid[1:]},'',msg))
 
     
 cmd = DeleteCommand()

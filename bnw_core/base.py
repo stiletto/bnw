@@ -2,7 +2,7 @@
 import random,time
 from twisted.internet import interfaces, defer, reactor
 
-idchars='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.lower()
+idchars='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     
 def genid(idlen):
     return ''.join(random.choice(idchars) for i in xrange(0,idlen))

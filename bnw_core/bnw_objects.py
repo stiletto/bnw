@@ -138,7 +138,14 @@ class MongoObject(WrappedDict):
     def remove(self, *args,**kwargs):
         db=(yield get_db())
         res=yield db[self.collection_name].remove(*args,**kwargs)
-        defer.returnValue(res)  # wrap all documents in our class
+        defer.returnValue(res)
+
+    @classmethod
+    @defer.inlineCallbacks
+    def mupdate(self, *args,**kwargs):
+        db=(yield get_db())
+        res=yield db[self.collection_name].update(*args,**kwargs)
+        defer.returnValue(res)
 
     @defer.inlineCallbacks
     def save(self):
