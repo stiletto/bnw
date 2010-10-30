@@ -6,6 +6,11 @@ try:
 except:
     sys=reload(sys)
     sys.setdefaultencoding('utf-8')
+import os.path as path
+root=path.abspath(path.dirname(__file__))
+sys.path.append(root)
+sys.path.insert(0,path.join(root,'mongo-async-python-driver'))
+sys.path.insert(0,path.join(root,'tornado'))
 
 from twisted.application import service,internet
 
