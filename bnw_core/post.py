@@ -1,3 +1,6 @@
+# coding: utf-8
+"""
+"""
 import bnw_objects as objs
 from base import get_db,genid,cropstring
 from twisted.internet import interfaces, defer, reactor
@@ -6,22 +9,31 @@ from twisted.python import log
 
 @defer.inlineCallbacks
 def subscribe(user,target_type,target,fast=False):
+    """!Подписка пользователя на что-нибудь.
+    @param user Объект-пользователь.
+    @param target_type Тип цели - user,tag,club.
+    @param target Цель подписки.
+    @param fast Если равно true, не проверяем существование подписки."""
     sub_rec={ 'user': user['name'], 'target': target, 'type': target_type }
     if fast or ((yield objs.Subscription.find_one(sub_rec)) is None):
         sub=objs.Subscription(sub_rec)
         if (yield sub.save()):
-            defer.returnValue(True) #'Subscribed.'
+            defer.returnValue('Subscribed.')
         else:
-            defer.returnValue(False)
-    else:            
-        defer.returnValue(False)
+            defer.returnValue('Error while saving.')
+    else:
+        defer.returnValue('Already subscribed.')
 
 @defer.inlineCallbacks
 def unsubscribe(user,target_type,target,fast=False):
+    """!Отписка пользователя от чего-нибудь.
+    @param user Объект-пользователь.
+    @param target_type Тип цели - user,tag,club.
+    @param target Цель подписки.
+    @param fast Игнорируется."""
     sub_rec={ 'user': user['name'], 'target': target, 'type': target_type }
-    db = yield get_db()
-    rest = yield db['subscriptions'].remove(sub_rec) # even if there was no such subscription, we don't care
-    defer.returnValue(rest) #'Subscribed.'
+    rest = yield objs.Subscription.remove(sub_rec)
+    defer.returnValue(rest)
 
 @defer.inlineCallbacks
 def send_to_subscribers(queries,is_message,message):
@@ -45,6 +57,14 @@ def send_to_subscribers(queries,is_message,message):
 
 @defer.inlineCallbacks
 def postMessage(user,tags,clubs,text,anon=False,anoncom=False):
+    """!Это дерьмо создает новое сообщение и рассылает его.
+    @param user Объект-пользователь.
+    @param tags Список тегов.
+    @param clubs Список клубов.
+    @param text Текст сообщения.
+    @param anon Отправить от анона.
+    @param anoncom Все комментарии принудительно анонимны.
+    """
     db=yield get_db()
     if len(text)==0:
         defer.returnValue('So where is your post?')
@@ -79,13 +99,19 @@ def postMessage(user,tags,clubs,text,anon=False,anoncom=False):
     defer.returnValue('Posted with id %s and delivered to %d users. Total cost: $%d' % (message['id'].upper(),recipients,qn))
 
 @defer.inlineCallbacks
-def postComment(message_id,comment_id,rest,user,anon=False):
-    db = yield get_db()        
+def postComment(message_id,comment_id,text,user,anon=False):
+    """!Это дерьмо постит комментарий.
+    @param message_id Id сообщения к которому комментарий.
+    @param comment_id Если ответ - id комментария, на который отвечаем.
+    @param text Текст комментария.
+    @param user Объект-пользователь.
+    @param anon Анонимный ответ.
+    """
 
-    if len(rest)==0:
+    if len(text)==0:
         defer.returnValue('So where is your comment?')
-    if len(rest)>2048:
-        defer.returnValue('Comment is too long. %d/2048' % (len(rest),))
+    if len(text)>2048:
+        defer.returnValue('Comment is too long. %d/2048' % (len(text),))
     message=yield objs.Message.find_one({'id': message_id})
     if comment_id!=None:
         old_comment=yield objs.Comment.find_one({'id': message_id+'/'+comment_id, 'message': message_id})
@@ -102,7 +128,7 @@ def postComment(message_id,comment_id,rest,user,anon=False):
               'date': time.time(),
               'replyto': old_comment['id'] if old_comment else None,
               'replytotext': cropstring(old_comment['text'] if comment_id else message['text'],128),
-              'text': ('@'+old_comment['user']+' 'if comment_id else '')+rest,
+              'text': ('@'+old_comment['user']+' 'if comment_id else '')+text,
               'anonymous': anon,
             }
     if anon:
@@ -112,10 +138,7 @@ def postComment(message_id,comment_id,rest,user,anon=False):
     comment_id = yield comment.save()
     sub_rec={ 'target': message_id, 'type': 'sub_message', 'user': user['name']}
     sub_result = yield subscribe(user,'sub_message',message_id)
-    #if get_db()['subscriptions'].find_one(sub_rec) is None: 
-    #    get_db()['subscriptions'].insert(sub_rec)
     
-    #for result in get_db().subscriptions.find({'target': message_id, 'type': 'sub_message'}):
     qn,recipients = yield send_to_subscribers([{'target': message_id, 'type': 'sub_message'}],False,comment)
     #defer.returnValue((qn,recipients))
     defer.returnValue('Posted with id %s and delivered to %d users. Total cost: $%d' % (message['id'].upper(),recipients,qn))

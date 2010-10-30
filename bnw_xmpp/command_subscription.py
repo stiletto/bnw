@@ -8,6 +8,9 @@ import random
 from parser_redeye import requireAuthRedeye
 from parser_simplified import requireAuthSimplified
 
+import bnw_core.bnw_objects as objs
+import bnw_core.post
+
 def _(s,user):
     return s
 
@@ -20,7 +23,7 @@ class SubscribeCommand(BaseCommand):
     def parseSubscription(self,options,msg):
         for stype in ['message','user','club','tag']:
             if options.get(stype)!=None:
-                return { 'user': msg.user['name'], 'target': options[stype].lower(), 'type': 'sub_'+stype }
+                return options[stype].lower(), 'sub_'+stype
         raise XmppResponse(self.usageHelp())
     
     stypes={ '*': 'tag', '!': 'club', '@': 'user', '#': 'message' }
@@ -28,31 +31,27 @@ class SubscribeCommand(BaseCommand):
     def parseSimplifiedSub(self,sub,msg):
         if not sub[0] in self.stypes:
             raise XmppResponse('Unknown subscription type')
-        return { 'user': msg.user['name'], 'target': sub[1:], 'type': 'sub_'+self.stypes[sub[0]] }
+        return sub[1:], 'sub_'+self.stypes[sub[0]]
         
     @requireAuthSimplified
+    @defer.inlineCallbacks
     def handleSimplified(self,command,msg,parameters):
         if len(parameters)==0: # show subscriptions
-            return 'Your subscriptions:\n'+\
-                '\n'.join((self.srtypes[x['type'][4:]]+x['target']) for x in get_db().subscriptions.find({'user':msg.user['name']}))
+            defer.returnValue('Your subscriptions:\n'+\
+                '\n'.join((
+                self.srtypes[x['type'][4:]]+x['target']) for x in
+                (yield objs.Subscriptions.find({'user':msg.user['name'],
+                    'type':{'$ne':'sub_message'}}))
+                ))
         else:
-            sub_rec=self.parseSimplifiedSub(parameters[0],msg)
-            if get_db()['subscriptions'].find_one(sub_rec) is None: 
-                get_db()['subscriptions'].insert(sub_rec)
-                return 'Subscribed.'
-            else:
-                return 'Already subscribed.'
+            starget,stype=self.parseSimplifiedSub(parameters[0],msg)
+            defer.returnValue((yield bnw_core.post.subscribe(msg.user, stype, starget)))
     
     @requireAuthRedeye
+    @defer.inlineCallbacks
     def handleRedeye(self,options,rest,msg):
-        sub_rec=self.parseSubscription(options,msg)
-        if get_db()['subscriptions'].find_one(sub_rec) is None: 
-            # actually it's not fatal if duplicate subscription records appear,
-            # so we won't seriously care about it
-            get_db()['subscriptions'].insert(sub_rec)
-            return 'Subscribed.'
-        else:
-            return 'Already subscribed.'
+        starget,stype=self.parseSubscription(options,msg)
+        defer.returnValue((yield bnw_core.post.subscribe(msg.user, stype, starget)))
     handleRedeye.arguments = (
         ("m", "message", True, u"Subscribe to message."),
         ("u", "user", True, u"Subscribe to user."),
@@ -64,18 +63,16 @@ class UnSubscribeCommand(SubscribeCommand): # unsubscription is a special case o
     redeye_name='unsubscribe'
 
     @requireAuthRedeye
+    @defer.inlineCallbacks
     def handleRedeye(self,options,rest,msg):
-        sub_rec=self.parseSubscription(options,msg)
-        get_db()['subscriptions'].remove(sub_rec) # even if there was no such subscription, we don't care
-        return 'Unsubscribed.' 
+        starget,stype=self.parseSubscription(options,msg)
+        defer.returnValue((yield bnw_core.post.unsubscribe(msg.user, stype, starget)))
     handleRedeye.arguments=SubscribeCommand.handleRedeye.arguments
     
     @requireAuthSimplified
     def handleSimplified(self,command,msg,parameters):
-        sub_rec=self.parseSimplifiedSub(parameters[0],msg)
-        get_db()['subscriptions'].remove(sub_rec) # even if there was no such subscription, it won't hurt
-        return 'Unsubscribed.' 
-
+        starget,stype=self.parseSimplifiedSub(parameters[0],msg)
+        defer.returnValue((yield bnw_core.post.unsubscribe(msg.user, stype, starget)))
 
 class SubscriptionsCommand(BaseCommand):
     redeye_name='subscriptions'
@@ -89,13 +86,18 @@ class SubscriptionsCommand(BaseCommand):
     
     
     @requireAuthRedeye
+    @defer.inlineCallbacks
     def handleRedeye(self,options,rest,msg):
         incmsg=options.get('messages',False)
-        return 'You subscriptions:\n' + \
+        defer.returnValue('You subscriptions:\n' + \
             '\n'.join(
                 self.subchars[sub['type']]+sub['target'] for sub in
-                    get_db()['subscriptions'].find({ 'user': msg.user['name']}).sort('type',pymongo.ASCENDING) if incmsg or sub['type']!='sub_message'
+                (yield objs.Subscription.find_sort({ 'user': msg.user['name'],
+                    'type':{'$ne':'sub_message'}},
+                    [('type',pymongo.ASCENDING)]))
+                if incmsg or sub['type']!='sub_message'
             )
+        )
     handleRedeye.arguments=(
         ('m','messages',False,'Include messages'),
     )

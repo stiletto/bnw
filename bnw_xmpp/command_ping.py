@@ -27,12 +27,12 @@ class PingCommand(BaseCommand):
 
     @requireAuthSimplified
     @defer.inlineCallbacks
-    def handleSimplified(self,command,msg,parameters): # TODO: asynchronize
+    def handleSimplified(self,command,msg,parameters):
         defer.returnValue(random.choice(self.answers))
         
     @requireAuthRedeye
     @defer.inlineCallbacks
-    def handleRedeye(self,options,rest,msg): # TODO: asynchronize
+    def handleRedeye(self,options,rest,msg):
         defer.returnValue('Pong.' if options.get('safe',False) else random.choice(self.answers))
     handleRedeye.arguments= (
             ("s", "safe", False, u"Do not vyebyvatsya."),

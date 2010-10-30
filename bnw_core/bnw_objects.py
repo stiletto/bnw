@@ -5,8 +5,11 @@ from twisted.internet import interfaces, defer, reactor
 from bnw_xmpp.parser_redeye import requireAuthRedeye, formatMessage, formatComment
 from bnw_xmpp.parser_simplified import requireAuthSimplified, formatMessageSimple, formatCommentSimple
 import txmongo
+from twisted.python import log
 # TODO: suck cocks
 class LazyRelated(object):
+    """
+    \todo suck cocks """
     def __getattr__(self, name):
         cache=super(LazyRelated, self).getattr('_lazy_relations_cache')
         relations=super(LazyRelated, self).getattr('_lazy_relations')
@@ -44,6 +47,7 @@ class LazyRelated(object):
             return super(LazyRelated, self).__delattr__(name)
 
 class WrappedDict(object):
+    """Обертка для говна словаря содержащегося в поле doc."""
     def __getitem__(self, name):
         return self.doc.__getitem__(name)
     def __setitem__(self, name, value):
@@ -94,6 +98,8 @@ class AdvancedWrappedDict(object):
 
 INDEX_TTL = 946080000 # one year. i don't think you will ever need to change this
 class MongoObject(WrappedDict):
+    """ Обертка для куска говна хранящегося в бд.
+    Это чтобы опечатки не убивали."""
     # any subclass MUST define "collection_name"
     # 
     def __init__(self, src=None):
@@ -112,7 +118,7 @@ class MongoObject(WrappedDict):
     def find_one(self, *args,**kwargs):
         db=(yield get_db())
         res=yield db[self.collection_name].find_one(*args,**kwargs)
-        defer.returnValue(None if res is None else self(res))
+        defer.returnValue(None if (not res) else self(res))
         
     @classmethod
     @defer.inlineCallbacks
@@ -120,7 +126,20 @@ class MongoObject(WrappedDict):
         db=(yield get_db())
         res=yield db[self.collection_name].find(*args,**kwargs)
         defer.returnValue(self(doc) for doc in res)  # wrap all documents in our class
-    
+    @classmethod
+    @defer.inlineCallbacks
+    def find_sort(self, spec,sort,**kwargs):
+        db=(yield get_db())
+        res=yield db[self.collection_name].find(spec,filter=txmongo.filter.sort(sort),**kwargs)
+        defer.returnValue(self(doc) for doc in res)  # wrap all documents in our class
+
+    @classmethod
+    @defer.inlineCallbacks
+    def remove(self, *args,**kwargs):
+        db=(yield get_db())
+        res=yield db[self.collection_name].remove(*args,**kwargs)
+        defer.returnValue(res)  # wrap all documents in our class
+
     @defer.inlineCallbacks
     def save(self):
         id=yield self.collection.save(self.doc)
@@ -137,6 +156,7 @@ class MongoObject(WrappedDict):
         defer.returnValue(None)
 
 class Message(MongoObject):
+    """ Сообщение. Просто объект сообщения."""
     collection_name = "messages"
     @defer.inlineCallbacks
     def deliver(self):
@@ -167,9 +187,11 @@ class Message(MongoObject):
         
 
 class Comment(MongoObject):
+    """ Объект комментария."""
     collection_name = "comments"
 
 class User(MongoObject):
+    """ Няшка-пользователь."""
     collection_name = "users"
     def send_comment(self,comment):
         targetif=self.get('interface','redeye')
@@ -196,7 +218,16 @@ class User(MongoObject):
         defer.returnValue(None)
         
 class Subscription(MongoObject):
+    """ Сраная подписка. """
     collection_name = "subscriptions"
+
+    @classmethod
+    @defer.inlineCallbacks
+    def ensure_indexes(self):
+        collection=(yield get_db())[self.collection_name]
+        _ = yield collection.ensure_index('id', ttl=INDEX_TTL, unique=True)
+        _ = yield collection.ensure_index({'user':1,'type':1}, ttl=INDEX_TTL)
+        defer.returnValue(None)
 
     def is_remote(self):
         return '@' in self['target']

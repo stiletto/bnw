@@ -146,7 +146,7 @@ class RedEyeParser(BaseParser):
         wordbuf=[] # i know it's ugly and slow. is there any better way to implement quotes?
         for i,c in enumerate(text):
             if c==' ' and not inquotes:
-                if len(wordbuf)>0: #1: TODO: check why there was 1
+                if len(wordbuf)>0: #1: \todo check why there was 1
                     if waitcommand:
                         waitcommand=False
                         command=''.join(wordbuf).lower()#text[wordbegin:i]
