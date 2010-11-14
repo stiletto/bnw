@@ -28,15 +28,7 @@ def send_plain(dst,src,msg):
     reactor.callFromThread(service.send_plain, dst, src, msg)
     # instead of service.send_plain(dst,src,msg)
 
-idchars='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    
 def _(s,user):
     return s
             
-import pymongo
-connection=None
-def get_db():
-    global connection
-    if connection is None:
-        connection = pymongo.Connection()['bnw']
-    return connection
+from bnw_core.base import get_db

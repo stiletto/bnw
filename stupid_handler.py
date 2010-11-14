@@ -1,6 +1,7 @@
 # coding: utf-8
 import bnw_xmpp
 from bnw_xmpp.base import CommandParserException, XmppMessage, get_db
+import bnw_core.bnw_objects as objs
 import pymongo
 import traceback
 import bnw_xmpp.handlers
@@ -14,7 +15,7 @@ def idiotic(msg):
         #return str(request.body)
         message_from=msg['from']
         message_bare_from=message_from.split('/',1)[0]
-        message_user=get_db().users.find_one({'jid':message_bare_from.lower()})
+        message_user=(yield objs.User.find_one({'jid':message_bare_from.lower()}))
         #if message.body is None:
         #    return ''
 
@@ -35,11 +36,14 @@ def idiotic(msg):
             defer.returnValue((yield bnw_xmpp.handlers.parsers[iparser].handleCommand(xmsg)))
         except CommandParserException, exc:
             defer.returnValue((yield exc.args[0]))
-        except pymongo.errors.AutoReconnect:
-            defer.returnValue((yield 'Sorry, our database is down.'))
+        #except pymongo.errors.AutoReconnect:
+        #    defer.returnValue((yield 'Sorry, our database is down.'))
         except _DefGen_Return:
             raise
         except:
             #raise
-            defer.returnValue((yield "BACKEND (CATCHED) ERROR! IMMEDIATELY REPORT THIS SHIT TO MY STUPID AUTHOR!!!\n\n"+traceback.format_exc()))
+            #defer.returnValue((yield "BACKEND (CATCHED) ERROR! IMMEDIATELY REPORT THIS SHIT TO MY STUPID AUTHOR!!!\n\n"+traceback.format_exc()))
+            defer.returnValue("BACKEND (CATCHED) ERROR! IMMEDIATELY REPORT THIS SHIT TO MY STUPID AUTHOR!!!\n\n"+\
+                traceback.format_exc()+"\n"+\
+                "Command which caused this exception: "+message_body)
 

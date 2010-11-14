@@ -13,19 +13,21 @@ import bnw_core.post
 def _(s,user):
     return s
 
+@defer.inlineCallbacks
 def throttle_check(user):
-    post_throttle=get_db()['post_throttle'].find_one({'user':user})
+    post_throttle=yield (yield get_db())['post_throttle'].find_one({'user':user})
     if post_throttle and post_throttle['time']>=(time.time()-5):
         raise XmppResponse('You are sending messages too fast!')
-    return post_throttle
+    defer.returnValue(post_throttle)
     
+@defer.inlineCallbacks
 def throttle_update(user,post_throttle):
         db=yield get_db()
         throttledoc={'user':user,'time':time.time()}
         if post_throttle:
-            yield db['post_throttle'].update({'user':user},throttledoc)
+            _ = yield db['post_throttle'].update({'user':user},throttledoc)
         else:
-            yield db['post_throttle'].insert(throttledoc)
+            _ = yield db['post_throttle'].insert(throttledoc)
         defer.returnValue(None)
 
 class PostCommand(BaseCommand):
@@ -44,11 +46,11 @@ class PostCommand(BaseCommand):
         post_throttle=yield throttle_check(msg.user['name'])
         rest = yield bnw_core.post.postMessage(msg.user,tags,clubs,text,anon,anoncom)
         if type(rest)==tuple:
-            qn,recepients = rest
+            msgid,qn,recepients = rest
         else:
             defer.returnValue(rest)
         _ = yield throttle_update(msg.user['name'],post_throttle)
-        defer.returnValue('Posted with id %s. Delivered to %d users. Total cost: $%d' % (message['id'].upper(),recepients,qn))
+        defer.returnValue('Posted with id %s. Delivered to %d users. Total cost: $%d' % (msgid,recepients,qn))
 
     @requireAuthRedeye
     @defer.inlineCallbacks
@@ -74,12 +76,12 @@ class CommentCommand(BaseCommand):
         post_throttle=yield throttle_check(msg.user['name'])
         rest = yield bnw_core.post.postComment(message_id,comment_id,rest,msg.user,anon)
         if type(rest)==tuple:
-            qn,recepients = rest
+            msgid,qn,recepients = rest
         else:
             defer.returnValue(rest)
         _ = yield throttle_update(msg.user['name'],post_throttle)
         #log.debug
-        defer.returnValue('Posted with id %s. Delivered to %d users. Total cost: $%d' % (message['id'].upper(),recepients,qn))
+        defer.returnValue('Posted with id %s. Delivered to %d users. Total cost: $%d' % (msgid,recepients,qn))
 
     @requireAuthSimplified
     @defer.inlineCallbacks

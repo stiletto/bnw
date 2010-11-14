@@ -47,7 +47,7 @@ def formatCommentSimple(msg,short=False):
 
 class SimplifiedParser(BaseParser):
     SHOW_RE=re.compile(r'^#([0-9A-Za-z]+)(/[0-9A-Za-z]+)?(\+)?$')
-    SHOW_USER_RE=re.compile(r'^@([0-9A-Za-z]+)(\+)?$')
+    SHOW_USER_RE=re.compile(r'^@([0-9A-Za-z_-]+)(\+)?$')
     #TAG_SYMS=u'0-9A-Za-zА-Яа-я_-'
     SHOW_TAG_RE=re.compile(r'^\*(\S+)(\+)?$')
     REPLY_RE=re.compile(r'^#([0-9A-Za-z]+)(/[0-9A-Za-z]+)? (.+)$')

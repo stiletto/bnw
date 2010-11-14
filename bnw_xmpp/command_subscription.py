@@ -10,6 +10,7 @@ from parser_simplified import requireAuthSimplified
 
 import bnw_core.bnw_objects as objs
 import bnw_core.post
+import pymongo
 
 def _(s,user):
     return s
@@ -40,7 +41,7 @@ class SubscribeCommand(BaseCommand):
             defer.returnValue('Your subscriptions:\n'+\
                 '\n'.join((
                 self.srtypes[x['type'][4:]]+x['target']) for x in
-                (yield objs.Subscriptions.find({'user':msg.user['name'],
+                (yield objs.Subscription.find({'user':msg.user['name'],
                     'type':{'$ne':'sub_message'}}))
                 ))
         else:

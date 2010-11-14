@@ -26,11 +26,15 @@ class DeleteCommand(BaseCommand):
             comment=yield objs.Comment.find_one({'id':comment_id,'message':message_id})
         message=yield objs.Message.find_one({'id':message_id})
         if comment_id:
+            if not comment:
+                defer.returnValue('No such comment')
             if comment['user']!=msg.user['name'] and message['user']!=msg.user['name']:
                 defer.returnValue('Not your comment and not your message.')
             _ = yield objs.Comment.remove({'id':comment['id'],'message':comment['message'],'user':comment['user']})
             defer.returnValue('Comment removed.')
         else:
+            if not message:
+                defer.returnValue('No such message.')
             if message['user']!=msg.user['name']:
                 defer.returnValue('Not your message.')
             _ = yield objs.Message.remove({'id':message['id'],'user':message['user']})

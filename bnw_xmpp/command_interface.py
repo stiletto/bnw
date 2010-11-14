@@ -14,21 +14,22 @@ def _(s,user):
 class InterfaceCommand(BaseCommand):
     
     @requireAuthRedeye
-
+    @defer.inlineCallbacks
     def handleRedeye(self,options,rest,msg): # TODO: asynchronize
         parsers=('simplified','redeye')
         if rest=='':
             defer.returnValue('Possible interfaces: '+', '.join(parsers))
         if rest in parsers:
             msg.user['interface']=rest
-            _ =yield objs.User.mupdate({'name':msg.user['name']},msg.user)
+            _ =yield objs.User.save(msg.user)
             defer.returnValue('Interface changed.')
         else:
             defer.returnValue('No such interface.')
     handleRedeye.arguments= ()
 
     @requireAuthSimplified
+    @defer.inlineCallbacks
     def handleSimplified(self,command,msg,parameters): # TODO: asynchronize
-        defer.returnValue(self.handleRedeye({},' '.join(parameters),msg))
+        defer.returnValue((yield self.handleRedeye({},' '.join(parameters),msg)))
 
 cmd = InterfaceCommand()

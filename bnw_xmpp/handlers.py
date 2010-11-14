@@ -15,6 +15,8 @@ parsers['simplified']=SimplifiedParser(commands)
 commands.registerCommand('bnw_xmpp.command_ping',redeye={'name':'ping','handler':'cmd.handleRedeye'},
         simplified={'name':'PING','handler':'cmd.handleSimplified'})
 
+commands.registerCommand('bnw_xmpp.command_except',redeye={'name':'except','handler':'cmd.handleRedeye'})
+
 commands.registerCommand('bnw_xmpp.command_register',redeye={'name':'register','handler':'cmd.handleRedeye'})
 
 commands.registerCommand('bnw_xmpp.command_interface',redeye={'name':'interface','handler':'cmd.handleRedeye'},

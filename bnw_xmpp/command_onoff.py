@@ -23,7 +23,7 @@ class OnCommand(BaseCommand):
     @requireAuthSimplified
     @defer.inlineCallbacks
     def handleSimplified(self,command,msg,parameters):
-        defer.returnValue(self.handleRedeye({},' '.join(parameters),msg))
+        defer.returnValue((yield self.handleRedeye({},' '.join(parameters),msg)))
 
 
 class OffCommand(OnCommand):

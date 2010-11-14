@@ -11,18 +11,21 @@ from parser_simplified import requireAuthSimplified
 def _(s,user):
     return s
 from uuid import uuid4
+import re
 
+NAME_RE=re.compile('^[0-9A-Za-z_-]+$')
 class RegisterCommand(BaseCommand):
     redeye_name='register'
 
     def usageHelp(self):
         return 'Usage %s <nickname>\n\tNickname must be alphanumeric' % (self.redeye_name,)
 
+    @defer.inlineCallbacks
     def handleRedeye(self,options,rest,msg):
         if msg.user:
             raise XmppResponse(_(u'You are already registered as %s',msg.user) % (msg.user['name'],))
         else:
-            if not rest.isalnum():
+            if not (NAME_RE.match(rest)):
                 raise XmppResponse(self.usageHelp())
 
             rest=rest.lower()
@@ -34,11 +37,11 @@ class RegisterCommand(BaseCommand):
                    'regdate': int(time.time()),
                    'jid': msg.bare_jid,
                  }
-            if get_db()['users'].find_one({'name':rest}) is None:
-                get_db()['users'].insert(user)
-                return 'We registered you as %s.' % (rest,)
+            if not (yield (yield get_db())['users'].find_one({'name':rest})):
+                (yield get_db())['users'].insert(user)
+                defer.returnValue('We registered you as %s.' % (rest,))
             else:
-                return 'This username is already taken'
+                defer.returnValue('This username is already taken')
     handleRedeye.arguments= ()
 
 cmd = RegisterCommand()
