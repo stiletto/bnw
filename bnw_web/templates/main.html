@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}BnW - Гланге{% end %}
+{% block body %}
+    <div class='outerborder'>
+        <div class='msg'>
+            TbI - HRWKA!
+        </div>
+    </div>
+    <hr/>
+    {% for msg in messages %}
+    <div class='outerborder'>
+    <div class='msg' id="{{ msg['id'] }}">
+        {{ linkify(msg['text']).replace('\n','<br/>') }}
+        <div>
+            {{ w.msgl(msg['id']) }} ({{ int(msg['replycount']) }}) / {{ w.userl(msg['user']) }} 
+        </div>
+    </div>
+    </div>
+    {% end %}
+    {% if page>0 %}<a class='pagelink' href='pg{{ page-1 }}'>&lt;&lt; Позже</a> -- {% end %}<a class='pagelink' href='pg{{ page+1 }}'> Раньше &gt;&gt;</a>
+{% end %}

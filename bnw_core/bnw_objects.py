@@ -142,9 +142,11 @@ class MongoObject(WrappedDict):
 
     @classmethod
     @defer.inlineCallbacks
-    def mupdate(self, *args,**kwargs):
+    def mupdate(self, spec, document, *args,**kwargs):
         db=(yield get_db())
-        res=yield db[self.collection_name].update(*args,**kwargs)
+        if not isinstance(document,dict):
+            document=document.doc
+        res=yield db[self.collection_name].update(spec,document,*args,**kwargs)
         defer.returnValue(res)
 
     @defer.inlineCallbacks

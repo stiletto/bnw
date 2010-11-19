@@ -17,6 +17,7 @@ def subscribe(user,target_type,target,fast=False):
     sub_rec={ 'user': user['name'], 'target': target, 'type': target_type }
     if fast or ((yield objs.Subscription.find_one(sub_rec)) is None):
         sub=objs.Subscription(sub_rec)
+        sub['jid']=user['jid']
         if (yield sub.save()):
             defer.returnValue('Subscribed.')
         else:
@@ -47,10 +48,10 @@ def send_to_subscribers(queries,is_message,message):
     qn=0
     for query in queries:
         qn+=1
-        for result in (yield objs.Subscription.find(query)):
+        for result in (yield objs.Subscription.find(query,fields=['user'])):
             recipients.add(result['user'])
     for target_name in recipients:
-        target=yield objs.User.find_one({'name': target_name})
+        target=yield objs.User.find_one({'name': target_name},fields=['jid','off','interface'])
         qn+=1
         if target:
             if not target.get('off',False):
@@ -82,6 +83,7 @@ def postMessage(user,tags,clubs,text,anon=False,anoncom=False):
               'clubs': clubs,
               'id': genid(6),
               'date': time.time(),
+              'replycount': 0,
               'text': text,
               'anonymous': anon,
               'anoncomments': anoncom,
@@ -116,6 +118,7 @@ def postComment(message_id,comment_id,text,user,anon=False):
     if len(text)>2048:
         defer.returnValue('Comment is too long. %d/2048' % (len(text),))
     message=yield objs.Message.find_one({'id': message_id})
+    _ = (yield objs.Message.mupdate({'id':message_id},{'$inc': { 'replycount': 1}}))
     if comment_id!=None:
         old_comment=yield objs.Comment.find_one({'id': message_id+'/'+comment_id, 'message': message_id})
     else:
@@ -130,6 +133,7 @@ def postComment(message_id,comment_id,text,user,anon=False):
               'message': message_id,
               'date': time.time(),
               'replyto': old_comment['id'] if old_comment else None,
+              'num': message['replycount']+1,
               'replytotext': cropstring(old_comment['text'] if comment_id else message['text'],128),
               'text': ('@'+old_comment['user']+' 'if comment_id else '')+text,
               'anonymous': anon,

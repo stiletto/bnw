@@ -41,3 +41,8 @@ internet.TCPServer(8081, server.Site(s.getResource()), interface="127.0.0.1"
                    
 sm.setServiceParent(serviceCollection)#application)
 
+import bnw_web.site
+internet.TCPServer(7808, bnw_web.site.get_site(), interface="0.0.0.0"
+                   ).setServiceParent(serviceCollection)
+                   
+sm.setServiceParent(serviceCollection)#application)

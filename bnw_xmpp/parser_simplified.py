@@ -16,7 +16,7 @@ def requireAuthSimplified(fun):
     return newfun
 
 def formatMessageSimple(msg,short=False):
-       return '\n@%(author)s: %(tags)s %(clubs)s\n%(text)s\n\n#%(id)s http://bnw.blasux.ru:7808/#m=%(id)s' % \
+       return '\n@%(author)s: %(tags)s %(clubs)s\n%(text)s\n\n#%(id)s http://bnw.blasux.ru:7808/p/%(id)s' % \
             { 'id':    msg['id'].upper(),
               'author':msg['user'],
               'tags':  ' '.join('*'+tag for tag in msg['tags']),
@@ -42,7 +42,7 @@ def formatCommentSimple(msg,short=False):
         formatstring+='\n'
     formatstring+='#%(message)s/%(id)s'
     if not short:
-        formatstring+=' http://bnw.blasux.ru:7808/#m=%(message)s'
+        formatstring+=' http://bnw.blasux.ru:7808/p/%(message)s#%(id)s'
     return formatstring % args
 
 class SimplifiedParser(BaseParser):

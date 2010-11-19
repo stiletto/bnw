@@ -16,7 +16,7 @@ class OnCommand(BaseCommand):
     @defer.inlineCallbacks
     def handleRedeye(self,options,rest,msg):
         msg.user['off']=False
-        _ = yield objs.User.update({'name':msg.user['name']},msg.user)
+        _ = yield objs.User.mupdate({'name':msg.user['name']},msg.user)
         defer.returnValue('Welcome back!')
     handleRedeye.arguments= ()
 
@@ -31,7 +31,7 @@ class OffCommand(OnCommand):
     @defer.inlineCallbacks
     def handleRedeye(self,options,rest,msg):
         msg.user['off']=True
-        _ = yield objs.User.update({'name':msg.user['name']},msg.user)
+        _ = yield objs.User.mupdate({'name':msg.user['name']},msg.user)
         defer.returnValue('C u l8r!')
     handleRedeye.arguments= ()
 

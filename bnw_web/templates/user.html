@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}BnW - @{{ username }}{% end %}
+{% block body %}
+{% if not user %}
+    <div id="err_outer">
+        <div id="err_middle">
+            <div id="err_inner">
+                <div id="err_inner2">
+                    Ошибка<br/>
+                    Пользователь с таким id не найден
+                </div>
+              </div>
+        </div>
+    </div>
+{% else %}
+    <div class='outerborder'>
+        <div class='msg'>
+            УНЯНЯ. Что бы сюда сунуть?
+        </div>
+    </div>
+    <hr/>
+    {% for msg in messages %}
+    <div class='outerborder'>
+    <div class='msg' id="{{ msg['id'] }}">
+        {{ linkify(msg['text']).replace('\n','<br/>') }}
+        <div>
+            {{ w.msgl(msg['id']) }} / {{ w.userl(msg['user']) }}</a>
+        </div>
+    </div>
+    </div>
+    {% end %}
+    {% if page>0 %}<a class='pagelink' href='pg{{ page-1 }}'>&lt;&lt; Позже</a> -- {% end %}<a class='pagelink' href='pg{{ page+1 }}'> Раньше &gt;&gt;</a>
+{% end %}
+{% end %}

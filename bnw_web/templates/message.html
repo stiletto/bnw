@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}BnW - {{ msgid }}{% end %}
+{% block body %}
+{% if not msg %}
+    <div id="err_outer">
+        <div id="err_middle">
+            <div id="err_inner">
+                <div id="err_inner2">
+                    Ошибка<br/>
+                    Сообщение с таким id не найдено
+                </div>
+              </div>
+        </div>
+    </div>
+{% else %}
+    <div class='outerborder'>
+        <div class='msg'>{{ linkify(msg['text']).replace('\n','<br/>') }}
+            <div><a class="msgid" href="/p/{{ msgid }}">#{{ msgid }}</a> / <a class="usrid">@{{ msg['user'] }}</a></div>
+        </div>
+    </div>
+    <hr/>
+    {% for comment in comments %}
+    <div class='outerborder'>
+    <div class='comment' id="{{ comment['id'].split('/')[1] }}">
+        {{ linkify(comment['text']).replace('\n','<br/>') }}
+        <div>
+            <a class="msgid" href="/p/{{ comment['id'].replace('/','#') }}">#{{ comment['id'] }}</a> / <a class="usrid">@{{ comment['user'] }}</a>
+            {% if comment['replyto'] %} (in reply to <a href="/p/{{ comment['replyto'].replace('/','#') }}" class="msgid">#{{ comment['replyto']}}</a>){% end %}
+        </div>
+    </div>
+    </div>
+    {% end %}
+{% end %}
+{% end %}
