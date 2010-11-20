@@ -14,7 +14,9 @@
     </div>
 {% else %}
     <div class='outerborder'>
-        <div class='msg'>{{ linkify(msg['text']).replace('\n','<br/>') }}
+        <div class='msg'>
+            {{ w.tags(msg['tags']) }}
+            {{ linkify(msg['text']).replace('\n','<br/>') }}
             <div>{{ w.msgl(msgid) }} / {{ w.userl(msg['user']) }}</div>
         </div>
     </div>

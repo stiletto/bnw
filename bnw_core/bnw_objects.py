@@ -210,6 +210,8 @@ class Comment(MongoObject):
 class User(MongoObject):
     """ Няшка-пользователь."""
     collection_name = "users"
+    def send_plain(self,message):
+        send_plain(self['jid'],None,message)
     def send_comment(self,comment):
         targetif=self.get('interface','redeye')
         if targetif=='simplified':

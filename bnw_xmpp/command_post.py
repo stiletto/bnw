@@ -50,7 +50,7 @@ class PostCommand(BaseCommand):
         else:
             defer.returnValue(rest)
         _ = yield throttle_update(msg.user['name'],post_throttle)
-        defer.returnValue('Posted with id %s. Delivered to %d users. Total cost: $%d' % (msgid,recepients,qn))
+        defer.returnValue('Posted with id %s. Delivered to %d users. Total cost: $%d. http://bnw.blasux.ru/p/%s' % (msgid,recepients,qn,msgid))
 
     @requireAuthRedeye
     @defer.inlineCallbacks
@@ -82,7 +82,8 @@ class CommentCommand(BaseCommand):
             defer.returnValue(rest)
         _ = yield throttle_update(msg.user['name'],post_throttle)
         #log.debug
-        defer.returnValue('Posted with id %s. Delivered to %d users. Total cost: $%d' % (msgid,recepients,qn))
+        defer.returnValue('Posted with id %s. Delivered to %d users. Total cost: $%d. http://bnw.blasux.ru/p/%s' % 
+            (msgid,recepients,qn,msgid.replace('/','#')))
 
     @requireAuthSimplified
     @defer.inlineCallbacks

@@ -20,6 +20,12 @@ def subscribe(user,target_type,target,fast=False,sfrom=None):
         sub['jid']=user['jid']
         if sfrom:
             sub['from']=sfrom
+        if target_type=='sub_user':
+            tuser=yield objs.User.find_one({'name':target})
+            if not tuser:
+                defer.returnValue('No such user.')
+            _ = yield tuser.send_plain('@%s subscribed to your blog. http://bnw.blasux.ru/u/%s' % (user['name'],user['name']))
+            pass
         if (yield sub.save()):
             defer.returnValue('Subscribed.')
         else:

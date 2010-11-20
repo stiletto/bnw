@@ -10,7 +10,7 @@ from tornado.escape import _unicode,xhtml_escape
 #    return value
 
 linkhostings = [
-    (re.compile('http://rghost.ru/([0-9]+)'), lambda h,p,u,m,n: (u'<a class="imglink" href="%s"%s>[%d]</a>'% (h,p,n),u'<a class="imglink" href="%s"%s><img class="imgpreview" src="http://rghost.ru/%s/thumb.png"/></a>'% (h,p,m.group(1)))),
+    (re.compile('http://rghost.ru/([0-9]+)'), lambda h,p,u,m,n: (u'<a class="imglink" href="%s"%s>[%d]</a>'% (h,p,n),u'<a class="imglink" href="%s.view"%s><img class="imgpreview" src="http://rghost.ru/%s/thumb.png"/></a>'% (h,p,m.group(1)))),
     (re.compile('http://imgur.com/([A-Za-z0-9]+)'), lambda h,p,u,m,n: (
         u'<a class="imglink" href="%s"%s>[%d]</a>'% (h,p,n),
         u'<a class="imglink" href="%s"%s><img class="imgpreview" src="http://i.imgur.com/%ss.png"/></a>'% (h,p,m.group(1))))

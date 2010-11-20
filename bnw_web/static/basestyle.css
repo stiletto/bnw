@@ -34,6 +34,12 @@
             max-height: 4em;
             margin-right: 1em;
         }
+        .tag {
+            color: #CD0000;
+        }
+        .club {
+            color: #00CD00;
+        }
         
         #err_outer {width: 100%; overflow: hidden; position: relative;}
         #err_outer[id] {display: table; position: static;}

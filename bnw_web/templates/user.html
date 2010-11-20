@@ -22,9 +22,10 @@
     {% for msg in messages %}
     <div class='outerborder'>
     <div class='msg' id="{{ msg['id'] }}">
+        {{ w.tags(msg['tags']) }}
         {{ linkify(msg['text']).replace('\n','<br/>') }}
         <div>
-            {{ w.msgl(msg['id']) }} / {{ w.userl(msg['user']) }}</a>
+            {{ w.msgl(msg['id']) }} ({{ int(msg['replycount']) }}) / {{ w.userl(msg['user']) }}</a>
         </div>
     </div>
     </div>
