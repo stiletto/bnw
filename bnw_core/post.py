@@ -8,7 +8,7 @@ import time
 from twisted.python import log
 
 @defer.inlineCallbacks
-def subscribe(user,target_type,target,fast=False):
+def subscribe(user,target_type,target,fast=False,sfrom=None):
     """!Подписка пользователя на что-нибудь.
     @param user Объект-пользователь.
     @param target_type Тип цели - user,tag,club.
@@ -18,6 +18,8 @@ def subscribe(user,target_type,target,fast=False):
     if fast or ((yield objs.Subscription.find_one(sub_rec)) is None):
         sub=objs.Subscription(sub_rec)
         sub['jid']=user['jid']
+        if sfrom:
+            sub['from']=sfrom
         if (yield sub.save()):
             defer.returnValue('Subscribed.')
         else:

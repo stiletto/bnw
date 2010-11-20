@@ -15,7 +15,7 @@
 {% else %}
     <div class='outerborder'>
         <div class='msg'>
-            УНЯНЯ. Что бы сюда сунуть?
+            УНЯНЯ. У нас есть <a href="/u/{{ username }}/info">немножечко инфы</a> об этом пользователе.
         </div>
     </div>
     <hr/>
@@ -29,6 +29,6 @@
     </div>
     </div>
     {% end %}
-    {% if page>0 %}<a class='pagelink' href='pg{{ page-1 }}'>&lt;&lt; Позже</a> -- {% end %}<a class='pagelink' href='pg{{ page+1 }}'> Раньше &gt;&gt;</a>
+    {% if page>0 %}<a class='pagelink' href='/u/{{ username }}/pg{{ page-1 }}'>&lt;&lt; Позже</a> -- {% end %}<a class='pagelink' href='/u/{{ username }}/pg{{ page+1 }}'> Раньше &gt;&gt;</a>
 {% end %}
 {% end %}

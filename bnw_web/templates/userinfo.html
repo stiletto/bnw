@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}BnW - @{{ username }} info{% end %}
+{% block body %}
+{% if not user %}
+    <div id="err_outer">
+        <div id="err_middle">
+            <div id="err_inner">
+                <div id="err_inner2">
+                    Ошибка<br/>
+                    Пользователь с таким id не найден
+                </div>
+              </div>
+        </div>
+    </div>
+{% else %}
+    <div class='outerborder'>
+        <div class='msg'>
+            Пользователь {{ w.userl(user['name']) }} - няшка. Он зарегистрировался здесь {{ regdate }} и написал с тех пор <a href="/u/{{ username }}/">{{ messages_count }} сообщений</a>.
+        </div>
+    </div>
+    <hr/>
+    <div class='outerborder'>
+    <div class='msg' id="none">
+    <p>Подписчики:</p>
+    <ul>
+    {% for sub in subscribers %}
+        <li>
+            {{ w.userl(sub['user']) }}
+        </li>
+    {% end %}
+    </ul>
+    </div>
+    </div>
+{% end %}
+{% end %}

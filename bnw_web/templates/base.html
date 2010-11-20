@@ -2,46 +2,10 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>{% block title %}BnW - Somewhere in Nevada{% end %}</title>
+    <link rel="stylesheet" href="http://bnw.blasux.ru/static/basestyle.css" type="text/css" />
     <style type="text/css">
     {% block basestyles %}
     /* dark: CD, light: FF, gray E5 */
-        body {
-            margin: 0;
-            background-color: #000;
-            color: #e5e5e5;
-            font-family: Unifont, Monaco, Consolas, Terminus, monospace;
-            padding: 1em;
-        }
-        .bodyshit {
-            padding: 1em;
-        }
-        .outerborder {
-            background-color: #e5e5e5;
-            padding: 1em;
-        }
-        .msg {
-            color: #000;
-            padding: 1em;
-            border: thin solid black;
-            background-color: #e5e5e5;
-        }
-        .comment {
-            color: #000;
-            padding: 1em;
-            border: thin solid black;
-            background-color: #e5e5e5;
-        }
-        .pagelink {
-            color: #FFFF00;
-            background-color: #0000CD;
-        }
-        
-        #err_outer {width: 100%; overflow: hidden; position: relative;}
-        #err_outer[id] {display: table; position: static;}
-        #err_middle {position: absolute; top: 50%;} /* for explorer only*/
-        #err_middle[id] {display: table-cell; vertical-align: middle; width: 100%;}
-        #err_inner { background-color: #CD0000; padding: 1em; width: 40em; margin-left: auto; margin-right: auto; position: relative; top: -50%} /* for explorer only */        
-        #err_inner2 { padding: 1em; border: thin solid white; text-align: center; }
     {% end %}
     {% block extrastyle %}
     {% end %}
@@ -54,9 +18,11 @@
     <div style='text-align: right; overflow: hidden; width: 100%;'>
         <a href='/' style='color: #e5e5e5; text-decoration: none;'>{{ ranq }}</a>
     </div>
-
 {% block body %}
 {% end %}
+    <div style='text-align: right; overflow: hidden; width: 100%;'>
+        <a href="http://bnw.blasux.ru/static/" class='pagelink'>Сырцы и инфа о проекте</a>
+    </div>
 </div>
 </body>
 </html>

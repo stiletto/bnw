@@ -16,7 +16,7 @@ def requireAuthRedeye(fun):
 
 
 def formatMessage(msg):
-       return '+++ [%(date)s] %(author)s:\nTags: %(tags)s\nClubs: %(clubs)s\n\n%(text)s\n--- %(id)s (%(rc)d) http://bnw.blasux.ru:7808/p/%(id)s' % \
+       return '+++ [%(date)s] %(author)s:\nTags: %(tags)s\nClubs: %(clubs)s\n\n%(text)s\n--- %(id)s (%(rc)d) http://bnw.blasux.ru/p/%(id)s' % \
             { 'id':    msg['id'].upper(),
               'author':msg['user'],
               'tags':  ', '.join(msg['tags']),
@@ -43,7 +43,7 @@ def formatComment(msg,short=False):
         formatstring+=' (in reply to %(message)s):\n'
     if not short:
         formatstring+='>%(replytotext)s\n'
-    formatstring+='\n%(text)s\n--- %(message)s/%(id)s (%(num)d) http://bnw.blasux.ru:7808/p/%(message)s#%(id)s'
+    formatstring+='\n%(text)s\n--- %(message)s/%(id)s (%(num)d) http://bnw.blasux.ru/p/%(message)s#%(id)s'
     return formatstring % args
 
 class RedEyeParser(BaseParser):

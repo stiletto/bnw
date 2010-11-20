@@ -52,12 +52,18 @@ class SubscribeCommand(BaseCommand):
     @defer.inlineCallbacks
     def handleRedeye(self,options,rest,msg):
         starget,stype=self.parseSubscription(options,msg)
-        defer.returnValue((yield bnw_core.post.subscribe(msg.user, stype, starget)))
+        if options.get('newtab',False):
+            subc=''.join(c for c in starget[:10] if (c>='a' and c<='z'))
+            sfrom=stype[4]+'-'+subc
+        else:
+            sfrom=msg.to
+        defer.returnValue((yield bnw_core.post.subscribe(msg.user, stype, starget,sfrom=sfrom)))
     handleRedeye.arguments = (
         ("m", "message", True, u"Subscribe to message."),
         ("u", "user", True, u"Subscribe to user."),
         ("t", "tag", True, u"Subscribe to tag."),
         ("c", "club", True, u"Subscribe to club."),
+        ("n", "newtab", False, u"Receive messages for this subscription from into tab"),
     )
 
 class UnSubscribeCommand(SubscribeCommand): # unsubscription is a special case of subscription, lol

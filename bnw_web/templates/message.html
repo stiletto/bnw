@@ -15,7 +15,7 @@
 {% else %}
     <div class='outerborder'>
         <div class='msg'>{{ linkify(msg['text']).replace('\n','<br/>') }}
-            <div><a class="msgid" href="/p/{{ msgid }}">#{{ msgid }}</a> / <a class="usrid">@{{ msg['user'] }}</a></div>
+            <div>{{ w.msgl(msgid) }} / {{ w.userl(msg['user']) }}</div>
         </div>
     </div>
     <hr/>
@@ -24,7 +24,7 @@
     <div class='comment' id="{{ comment['id'].split('/')[1] }}">
         {{ linkify(comment['text']).replace('\n','<br/>') }}
         <div>
-            <a class="msgid" href="/p/{{ comment['id'].replace('/','#') }}">#{{ comment['id'] }}</a> / <a class="usrid">@{{ comment['user'] }}</a>
+            {{ w.msgl(comment['id']) }} / {{ w.userl(comment['user']) }}
             {% if comment['replyto'] %} (in reply to <a href="/p/{{ comment['replyto'].replace('/','#') }}" class="msgid">#{{ comment['replyto']}}</a>){% end %}
         </div>
     </div>

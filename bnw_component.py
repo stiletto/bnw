@@ -150,7 +150,7 @@ class BnwService(component.Service):
         #    println(msg.body)
         cmsg = domish.Element((None, "message"))
         cmsg["to"] = msg['from']
-        cmsg["from"] = self.jabberId
+        cmsg["from"] = msg['to']
         cmsg["type"] = 'chat'
         cmsg.addChild(domish.Element(('http://jabber.org/protocol/chatstates','composing')))
         self.xmlstream.send(cmsg)

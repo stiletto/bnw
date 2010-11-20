@@ -74,6 +74,7 @@ class CommentCommand(BaseCommand):
     @defer.inlineCallbacks
     def postComment(self,message_id,comment_id,rest,msg,anon=False):
         post_throttle=yield throttle_check(msg.user['name'])
+        
         rest = yield bnw_core.post.postComment(message_id,comment_id,rest,msg.user,anon)
         if type(rest)==tuple:
             msgid,qn,recepients = rest
@@ -100,7 +101,11 @@ class CommentCommand(BaseCommand):
         qn=0
         message_id=options.get('message',None)
         if message_id==None:
-            raise XmppResponse('You must specify a message to comment.')
+            if msg['to'].startswith('m-'):
+                message_id=msg['to'].split('@')[0][2:]
+            else:
+                raise XmppResponse('You must specify a message to comment.')
+            
         msplit=message_id.upper().split('/',1)
         message_id=msplit[0]
         if len(msplit)>1:

@@ -128,6 +128,14 @@ class MongoObject(WrappedDict):
         defer.returnValue(self(doc) for doc in res)  # wrap all documents in our class
     @classmethod
     @defer.inlineCallbacks
+    def count(self, *args,**kwargs):
+        db=(yield get_db())
+        res=yield db[self.collection_name].count(*args,**kwargs)
+        defer.returnValue(res)  # return raw result
+
+
+    @classmethod
+    @defer.inlineCallbacks
     def find_sort(self, spec,sort,**kwargs):
         db=(yield get_db())
         res=yield db[self.collection_name].find(spec,filter=txmongo.filter.sort(sort),**kwargs)

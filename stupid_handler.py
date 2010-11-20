@@ -26,7 +26,7 @@ def idiotic(msg):
         message_body=message_body.strip()
         if type(message_body)!=unicode:
             message_body=unicode(message_body,'utf-8','replace')
-        xmsg=XmppMessage(message_body,message_from,message_bare_from,message_user)
+        xmsg=XmppMessage(message_body,msg['to'],message_from,message_bare_from,message_user)
 
         try:
             iparser='redeye'
