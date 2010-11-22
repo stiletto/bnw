@@ -4,6 +4,8 @@ class Widgets(object):
         return '<a href="#" class="tag">%(u)s</a>' % {'u':tornado.escape.xhtml_escape(tag[:10])}
     def tags(self,tags):
         return '<div class="tags">'+' '.join(self.tag(t) for t in tags)+'</div>'
+    def user_url(self,name):
+        return '/u/%(u)s' % {'u':name}
     def userl(self,name):
         return '<a href="/u/%(u)s" class="usrid">@%(u)s</a>' % {'u':name}
     def msgl(self,msg):

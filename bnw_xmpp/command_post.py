@@ -102,8 +102,8 @@ class CommentCommand(BaseCommand):
         qn=0
         message_id=options.get('message',None)
         if message_id==None:
-            if msg['to'].startswith('m-'):
-                message_id=msg['to'].split('@')[0][2:]
+            if msg.to.startswith('m-'):
+                message_id=msg.to.split('@')[0][2:]
             else:
                 raise XmppResponse('You must specify a message to comment.')
             

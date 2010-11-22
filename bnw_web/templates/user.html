@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block title %}BnW - @{{ username }}{% end %}
+{% block extrahead %}
+    <link rel="alternate" type="application/rss+xml" title="Поток сознания @{{ username }}" href="/u/{{ username }}/?format=rss" />
+{% end %}
 {% block body %}
 {% if not user %}
     <div id="err_outer">
@@ -16,6 +19,7 @@
     <div class='outerborder'>
         <div class='msg'>
             УНЯНЯ. У нас есть <a href="/u/{{ username }}/info">немножечко инфы</a> об этом пользователе.
+            А ещё у нас есть <a href="/u/{{ username }}/?format=rss">RSS</a>.
         </div>
     </div>
     <hr/>

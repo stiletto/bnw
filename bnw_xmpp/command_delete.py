@@ -21,7 +21,7 @@ class DeleteCommand(BaseCommand):
             defer.returnValue('Usage: delete -m POST[/COMMENT]')
         splitpost=options['message'].split('/')
         message_id=splitpost[0].upper()
-        comment_id=splitpost[1].upper() if len(splitpost)>1 else None
+        comment_id=options['message'] if len(splitpost)>1 else None
         if comment_id:
             comment=yield objs.Comment.find_one({'id':comment_id,'message':message_id})
         message=yield objs.Message.find_one({'id':message_id})
@@ -30,6 +30,7 @@ class DeleteCommand(BaseCommand):
                 defer.returnValue('No such comment')
             if comment['user']!=msg.user['name'] and message['user']!=msg.user['name']:
                 defer.returnValue('Not your comment and not your message.')
+            _ = (yield objs.Message.mupdate({'id':message_id},{'$inc': { 'replycount': -1}}))
             _ = yield objs.Comment.remove({'id':comment['id'],'message':comment['message'],'user':comment['user']})
             defer.returnValue('Comment removed.')
         else:

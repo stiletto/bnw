@@ -126,7 +126,6 @@ def postComment(message_id,comment_id,text,user,anon=False):
     if len(text)>2048:
         defer.returnValue('Comment is too long. %d/2048' % (len(text),))
     message=yield objs.Message.find_one({'id': message_id})
-    _ = (yield objs.Message.mupdate({'id':message_id},{'$inc': { 'replycount': 1}}))
     if comment_id!=None:
         old_comment=yield objs.Comment.find_one({'id': message_id+'/'+comment_id, 'message': message_id})
     else:
@@ -152,6 +151,7 @@ def postComment(message_id,comment_id,text,user,anon=False):
     comment = objs.Comment(comment)
     comment_id = yield comment.save()
     sub_result = yield subscribe(user,'sub_message',message_id)
+    _ = (yield objs.Message.mupdate({'id':message_id},{'$inc': { 'replycount': 1}}))
     
     qn,recipients = yield send_to_subscribers([{'target': message_id, 'type': 'sub_message'}],False,comment)
     defer.returnValue((comment['id'],qn,recipients))
