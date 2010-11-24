@@ -5,6 +5,7 @@ nbproject
 tornado
 pymongo
 mongo-async-python-driver
+txWebSocket
 *.log
 *.pid
 *.e4p

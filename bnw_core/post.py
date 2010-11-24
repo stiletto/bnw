@@ -7,6 +7,8 @@ from twisted.internet import interfaces, defer, reactor
 import time
 from twisted.python import log
 
+listeners={}
+
 @defer.inlineCallbacks
 def subscribe(user,target_type,target,fast=False,sfrom=None):
     """!Подписка пользователя на что-нибудь.
@@ -156,3 +158,18 @@ def postComment(message_id,comment_id,text,user,anon=False):
     qn,recipients = yield send_to_subscribers([{'target': message_id, 'type': 'sub_message'}],False,comment)
     defer.returnValue((comment['id'],qn,recipients))
     defer.returnValue('Posted with id %s and delivered to %d users. Total cost: $%d' % (message['id'].upper(),recipients,qn))
+
+def register_listener(etype,name,handler):
+    global listeners
+    if not (etype in listeners):
+        listeners[etype]={}
+    listeners[etype][name]=handler
+
+def publish(etype,*args,**kwargs):
+    global listeners
+    for rtype in (etype,None):
+        if etype in listeners:
+            for listener in listeners[etype]:
+                listener(*args,**kwargs)
+
+        

@@ -3,6 +3,8 @@ from twisted.internet import epollreactor
 #epollreactor.install()
 from twisted.internet import reactor
 from twisted.internet import interfaces, defer
+from twisted.web.server import Site, NOT_DONE_YET
+from twisted.web.resource import Resource, NoResource
 
 import tornado.options
 import tornado.twister
@@ -15,6 +17,8 @@ import os,random,time
 import escape
 from widgets import widgets
 import PyRSS2Gen
+import websocket_site
+from datetime import datetime
 
 from tornado.options import define, options
 
@@ -52,13 +56,12 @@ class TwistedHandler(tornado.web.RequestHandler):
             self.write(traceback.format_exc())
             self.finish()
 
-
-class MessageHandler(TwistedHandler):
-    @defer.inlineCallbacks
-    def respond(self,query):
-        f = txmongo.filter.sort(txmongo.filter.DESCENDING("date"))
-        shitres=list((yield objs.Message.find(limit=20,filter=f)))
-        defer.returnValue(json.dumps(shitres,default=self.json_fuckup,indent=4))
+#class MessageHandler(TwistedHandler):
+#    @defer.inlineCallbacks
+#    def respond(self,query):
+#        f = txmongo.filter.sort(txmongo.filter.DESCENDING("date"))
+#        shitres=list((yield objs.Message.find(limit=20,filter=f)))
+#        defer.returnValue(json.dumps(shitres,default=self.json_fuckup,indent=4))
 
 ranq=(
     'Где блекджек, где мои шлюхи? Ничерта не работает!',
@@ -87,6 +90,7 @@ class BnwWebHandler(TwistedHandler):
             self.render(self.templatename,**text)
         else:
             super(BnwWebHandler,self).writeandfinish(text)
+
 
 class MessageHandler(BnwWebHandler):
     templatename='message.html'
@@ -119,6 +123,9 @@ class UserHandler(BnwWebHandler):
                         docs=None,
                         items=rss_items)
             defer.returnValue(rss_feed.to_xml(encoding='utf-8'))
+        elif format=='json':
+            json_messages=[message.filter_fields() for message in messages]
+            defer.returnValue(json.dumps(json_messages,ensure_ascii=False))
         else:
             defer.returnValue({
                 'username': username,
@@ -126,6 +133,7 @@ class UserHandler(BnwWebHandler):
                 'messages': messages,
                 'page': page,
             })
+
 
 class UserInfoHandler(BnwWebHandler):
     templatename='userinfo.html'
@@ -157,6 +165,7 @@ class MainHandler(BnwWebHandler):
             'page': page,
         })
 
+        
 def get_site():
     settings={
         'template_path':os.path.join(os.path.dirname(__file__), "templates")
@@ -164,6 +173,7 @@ def get_site():
     application = tornado.web.Application([
 #        (r"/posts/(.*)", MessageHandler),
         (r"/p/([A-Z0-9]+)/?", MessageHandler),
+        #(r"/p/([A-Z0-9]+)/ws", MessageWsHandler),
         (r"/u/([0-9a-z_-]+)/?", UserHandler),
         (r"/u/([0-9a-z_-]+)/info/?", UserInfoHandler),
         (r"/u/([0-9a-z_-]+)/pg([0-9]+)/?", UserHandler),
@@ -171,7 +181,11 @@ def get_site():
         (r"/pg([0-9]+)", MainHandler),
     ],**settings)
 
-    site = tornado.twister.TornadoSite(application)
+    ws_application = websocket_site.WebSocketApplication([
+        (r"/p/([A-Z0-9]+)/?", MessageHandler),
+    ])
+    #site = tornado.twister.TornadoSite(application)
+    site = websocket_site.CombinedSite(application,ws_application)
     return site
 
 def main():

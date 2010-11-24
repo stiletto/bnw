@@ -73,13 +73,16 @@ class UnSubscribeCommand(SubscribeCommand): # unsubscription is a special case o
     @defer.inlineCallbacks
     def handleRedeye(self,options,rest,msg):
         starget,stype=self.parseSubscription(options,msg)
-        defer.returnValue((yield bnw_core.post.unsubscribe(msg.user, stype, starget)))
+        rest=yield bnw_core.post.unsubscribe(msg.user, stype, starget)
+        defer.returnValue('Unsubscribed.')
     handleRedeye.arguments=SubscribeCommand.handleRedeye.arguments
     
     @requireAuthSimplified
+    @defer.inlineCallbacks
     def handleSimplified(self,command,msg,parameters):
         starget,stype=self.parseSimplifiedSub(parameters[0],msg)
-        defer.returnValue((yield bnw_core.post.unsubscribe(msg.user, stype, starget)))
+        rest=yield bnw_core.post.unsubscribe(msg.user, stype, starget)
+        defer.returnValue('Unsubscribed.')
 
 class SubscriptionsCommand(BaseCommand):
     redeye_name='subscriptions'

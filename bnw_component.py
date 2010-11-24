@@ -33,6 +33,7 @@ import stupid_handler
 #import command_parsers
 #import commands
 import bnw_xmpp.base
+import bnw_core.bnw_objects as objs
 
 PRESENCE = '/presence' # this is an global xpath query to use in an observer
 MESSAGE  = '/message'  # message xpath 
@@ -118,10 +119,12 @@ class BnwService(component.Service):
         msg.addChild(domish.Element(('http://jabber.org/protocol/chatstates','active')))
         self.xmlstream.send(msg)
 
-    def callbackMessage(self,result,jid,stime,src):
+    def callbackMessage(self,result,jid,stime,src,body):
         etime=time.time()-stime
         println('result:',result)
         self.send_plain(jid,src,str(result))
+        t=objs.Timing({'date': stime, 'time': etime, 'command': unicode(body),'jid': jid})
+        t.save().addCallback(lambda x: None)
         log.msg("%s - PROCESSING TIME (from %s): %f" % (str(time.time()), jid, etime))
         if jid.startswith('stiletto@stiletto.name'):
             self.send_plain(jid,src,'I did it in %f seconds.' % (etime,) )
@@ -158,7 +161,7 @@ class BnwService(component.Service):
         gp=stupid_handler.idiotic(msg)
         #self.send_plain(msg['from'],'processing...')
         #gp=getPage('http://localhost:8080/xmpp_rpc/message', method='POST',postdata=msg.toXml().encode('utf-8','replace'),headers={'Content-Type':'application/octet-stream'})
-        gp.addCallback(self.callbackMessage,jid=msg['from'],stime=stime,src=msg['to'])
+        gp.addCallback(self.callbackMessage,jid=msg['from'],stime=stime,src=msg['to'],body=msg.body)
         gp.addErrback(self.errbackMessage,jid=msg['from'],src=msg['to'])
         
         

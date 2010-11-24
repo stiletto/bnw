@@ -171,7 +171,9 @@ class MongoObject(WrappedDict):
         idi=txmongo.filter.sort(txmongo.filter.ASCENDING("id"))
         _ = yield collection.create_index(idi, unique=True)
         defer.returnValue(None)
-
+    def filter_fields(self):
+        return self.doc.copy()
+    
 class Message(MongoObject):
     """ Сообщение. Просто объект сообщения."""
     collection_name = "messages"
@@ -201,7 +203,13 @@ class Message(MongoObject):
         datei=txmongo.filter.sort(txmongo.filter.DESCENDING("date"))
         _ = yield collection.create_index(datei)
         defer.returnValue(None)
-        
+
+    def filter_fields(self):
+        msg=self.doc.copy()
+        for fld in ('_id','real_user'):
+            if fld in msg:
+                del msg[fld]
+        return msg
 
 class Comment(MongoObject):
     """ Объект комментария."""
@@ -211,7 +219,8 @@ class User(MongoObject):
     """ Няшка-пользователь."""
     collection_name = "users"
     def send_plain(self,message):
-        send_plain(self['jid'],None,message)
+        if self['jid']:
+            send_plain(self['jid'],None,message)
     def send_comment(self,comment):
         targetif=self.get('interface','redeye')
         if targetif=='simplified':
@@ -250,3 +259,8 @@ class Subscription(MongoObject):
 
     def is_remote(self):
         return '@' in self['target']
+
+class Timing(MongoObject):
+    """ Время выполнения."""
+    collection_name = "timings"
+
