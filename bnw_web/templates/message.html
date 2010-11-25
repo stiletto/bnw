@@ -2,9 +2,9 @@
 {% block title %}BnW - {{ msgid }}{% end %}
 {% block extrahead %}
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
-    <script type="text/javascript" src="/web-socket-js/swfobject.js"></script>
-    <script type="text/javascript" src="/web-socket-js/FABridge.js"></script>
-    <script type="text/javascript" src="/web-socket-js/web_socket.js"></script>
+    <script type="text/javascript" src="http://bnw.blasux.ru/web-socket-js/swfobject.js"></script>
+    <script type="text/javascript" src="http://bnw.blasux.ru/web-socket-js/FABridge.js"></script>
+    <script type="text/javascript" src="http://bnw.blasux.ru/web-socket-js/web_socket.js"></script>
     
     <script type="text/javascript">
         // Set URL of your WebSocketMain.swf here:
@@ -14,7 +14,66 @@
     </script>
             
     <script type="text/javascript">
+        jQuery.fn.swapWith = function(to) {
+            return this.each(function() {
+                var copy_to = $(to).clone(true);
+                var copy_from = $(this).clone(true);
+                $(to).replaceWith(copy_from);
+                $(this).replaceWith(copy_to);
+            });            
+        };
+        function get_comment_parent(cmt) {
+            var parent=$("div div a",cmt).eq(2).text();
+            parent=parent.split("/")[1]
+            parent=$("#"+parent);
+            return parent;
+        }
+        var times={};
+        function get_times(cmt) {
+            var parent=get_comment_parent(cmt);
+            if(parent.length==0)
+                return [parseFloat($(".comment_time",cmt).text())]
+            else
+                return get_times(parent).concat([parseFloat($(".comment_time",cmt).text())])
+        }
+        function get_comment_parents_count(cmt) {
+            var parent=get_comment_parent(cmt);
+            if(parent.length==0)
+                return 0;
+            else
+                return 1+get_comment_parents_count(parent);
+        }
+        function sort_comments() {
+            // ем говно, сосу хуи
+            var roc=true;
+            while (roc) {
+                roc=false;
+                $("div.comments div").each(function (i,o) {
+                    var cur=$(o);
+                    var next=cur.next();
+                    if (next.length==0) return;
+                    if (times[cur.attr("id")]>times[next.attr("id")]) {
+                        //$(".msg").append("Exchange "+cur.attr("id")+" ------- "+next.attr("id")+"<br/>");
+                        cur.swapWith(next);
+                        if($("#"+cur.attr("id")).length==0)
+                            alert("Lost cur "+cur.attr("id"));
+                        if($("#"+next.attr("id")).length==0)
+                            alert("Lost next "+next.attr("id"));
+                        roc=true;
+                    }
+                })
+            }
+        }
         $(function(){
+            $("div.comments div").each(function (i,o) { 
+                var c=$(o);
+                var margin=get_comment_parents_count(o);
+                if (margin>15) margin=15;
+                c.css("margin-left",margin+"em")
+                times[c.attr("id")]=get_times(c);
+            });
+            sort_comments();
+            
             var ws = new WebSocket("ws://bnw.blasux.ru:7808"+window.location.pathname);
             ws.onmessage = function (e) {
                 var d=JSON.parse(e.data);
@@ -25,6 +84,7 @@
                 new_comment.append(addinfo);
                 $("div.comments").append($("<div class='outerborder'>").append(new_comment));
             };
+            
         });
     </script>
 {% end %}
@@ -49,11 +109,13 @@
         </div>
     </div>
     <hr/>
-    <div class="comments">
+    <div class="comments rich_comments" style="display: none;"></div> 
+    <div class="comments simple_comments">
     {% for comment in comments %}
-    <div class='outerborder'>
-    <div class='comment' id="{{ comment['id'].split('/')[1] }}">
-        {{ linkify(comment['text']).replace('\n','<br/>') }}
+    <div class='outerborder' id="{{ comment['id'].split('/')[1] }}">
+    <div class='comment'>
+        <span class='comment_body'>{{ linkify(comment['text']).replace('\n','<br/>') }}</span>
+        <span class='comment_time' style='display: none;'>{{ comment['date'] }}</span>
         <div>
             {{ w.msgl(comment['id']) }} / {{ w.userl(comment['user']) }}
             {% if comment['replyto'] %} --> <a href="/p/{{ comment['replyto'].replace('/','#') }}" class="msgid">#{{ comment['replyto']}}</a>{% end %}
