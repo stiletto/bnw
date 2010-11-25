@@ -102,6 +102,7 @@ class MongoObject(WrappedDict):
     Это чтобы опечатки не убивали."""
     # any subclass MUST define "collection_name"
     # 
+    dangerous_fields=('_id',)
     def __init__(self, src=None):
         self.collection=get_db_existing(self.collection_name)
         if type(src)==str:
@@ -172,11 +173,16 @@ class MongoObject(WrappedDict):
         _ = yield collection.create_index(idi, unique=True)
         defer.returnValue(None)
     def filter_fields(self):
-        return self.doc.copy()
+        msg=self.doc.copy()
+        for fld in self.dangerous_fields:
+            if fld in msg:
+                del msg[fld]
+        return msg
     
 class Message(MongoObject):
     """ Сообщение. Просто объект сообщения."""
     collection_name = "messages"
+    dangerous_fields = ('_id','real_user')
     @defer.inlineCallbacks
     def deliver(self):
         recipients=set()
@@ -204,16 +210,10 @@ class Message(MongoObject):
         _ = yield collection.create_index(datei)
         defer.returnValue(None)
 
-    def filter_fields(self):
-        msg=self.doc.copy()
-        for fld in ('_id','real_user'):
-            if fld in msg:
-                del msg[fld]
-        return msg
-
 class Comment(MongoObject):
     """ Объект комментария."""
     collection_name = "comments"
+    dangerous_fields = ('_id','real_user')
 
 class User(MongoObject):
     """ Няшка-пользователь."""

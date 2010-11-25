@@ -156,20 +156,32 @@ def postComment(message_id,comment_id,text,user,anon=False):
     _ = (yield objs.Message.mupdate({'id':message_id},{'$inc': { 'replycount': 1}}))
     
     qn,recipients = yield send_to_subscribers([{'target': message_id, 'type': 'sub_message'}],False,comment)
+    publish('comments-'+message_id,comment.filter_fields()) # ALARM
     defer.returnValue((comment['id'],qn,recipients))
     defer.returnValue('Posted with id %s and delivered to %d users. Total cost: $%d' % (message['id'].upper(),recipients,qn))
 
+listenerscount=0
 def register_listener(etype,name,handler):
     global listeners
+    global listenerscount
+    listenerscount+=1
     if not (etype in listeners):
         listeners[etype]={}
     listeners[etype][name]=handler
 
+def unregister_listener(etype,name):
+    global listeners
+    global listenerscount
+    listenerscount-=1
+    del listeners[etype][name]
+    if not listeners[etype]:
+        del listeners[etype]
+
 def publish(etype,*args,**kwargs):
     global listeners
     for rtype in (etype,None):
-        if etype in listeners:
-            for listener in listeners[etype]:
+        if rtype in listeners:
+            for listener in listeners[rtype].itervalues():
                 listener(*args,**kwargs)
 
         

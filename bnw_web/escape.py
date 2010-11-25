@@ -10,11 +10,17 @@ from tornado.escape import _unicode,xhtml_escape
 #    return value
 
 linkhostings = [
-    (re.compile('http://rghost.ru/([0-9]+)'), lambda h,p,u,m,n: (u'<a class="imglink" href="%s"%s>[%d]</a>'% (h,p,n),u'<a class="imglink" href="%s.view"%s><img class="imgpreview" src="http://rghost.ru/%s/thumb.png"/></a>'% (h,p,m.group(1)))),
-    (re.compile('http://imgur.com/([A-Za-z0-9]+)'), lambda h,p,u,m,n: (
+    (ur'http://rghost.ru/([0-9]+)', lambda h,p,u,m,n: (
         u'<a class="imglink" href="%s"%s>[%d]</a>'% (h,p,n),
-        u'<a class="imglink" href="%s"%s><img class="imgpreview" src="http://i.imgur.com/%ss.png"/></a>'% (h,p,m.group(1))))
+        u'<a class="imglink" href="%s.view"%s><img class="imgpreview" src="http://rghost.ru/%s/thumb.png"/></a>'% (h,p,m.group(1)))),
+    (ur'http://imgur.com/([A-Za-z0-9]+)', lambda h,p,u,m,n: (
+        u'<a class="imglink" href="%s"%s>[%d]</a>'% (h,p,n),
+        u'<a class="imglink" href="%s"%s><img class="imgpreview" src="http://i.imgur.com/%ss.png"/></a>'% (h,p,m.group(1)))),
+    (ur'(http://ompldr.org/v([A-Za-z0-9]+))(/.+)?', lambda h,p,u,m,n: ( 
+        u'<a class="imglink" href="%s"%s>[%d]</a>' % (m.group(1),p,n), 
+        u'<a class="imglink" href="%s"%s><img class="imgpreview" src="http://ompldr.org/t%s"/></a>' % (m.group(1),p,m.group(2)) )),
 ]
+linkhostings=[(re.compile('^'+k+'$'),v,k) for (k,v) in linkhostings]
 #inkhosting=dict((re.compile(k),v) for (k,v) in linkhosting.iteritems())
 
 _URL_RE = re.compile(ur"""\b((?:([\w-]+):(/{1,3})|www[.])(?:(?:(?:[^\s&()]|&amp;|&quot;)*(?:[^!"#$%&'()*+,.:;<=>?@\[\]^`{|}~\s]))|(?:\((?:[^\s&()]|&amp;|&quot;)*\)))+)""")
@@ -45,7 +51,6 @@ def linkify(text, shorten=True, extra_params="",
     lnum={'n':0}
     
     def make_link(m):
-        lnum['n']+=1 # ЕМ ГОВНО, ЕДУ КРЫШЕЙ, НЕ УМЕЮ ДУМАТЬ
         url = m.group(1)
         proto = m.group(2)
         if require_protocol and not proto:
@@ -95,9 +100,10 @@ def linkify(text, shorten=True, extra_params="",
                     # have a status bar, such as Safari by default)
                     params += ' title="%s"' % href
 
-        for (k,h) in linkhostings:
+        for (k,h,r) in linkhostings:
             m=k.match(href)
             if m:
+                lnum['n']+=1 # ЕМ ГОВНО, ЕДУ КРЫШЕЙ, НЕ УМЕЮ ДУМАТЬ
                 ret,app=h(href,params,url,m,lnum['n'])
                 appends.append(app)
                 return ret

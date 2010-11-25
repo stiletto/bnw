@@ -1,5 +1,33 @@
 {% extends "base.html" %}
 {% block title %}BnW - {{ msgid }}{% end %}
+{% block extrahead %}
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+    <script type="text/javascript" src="/web-socket-js/swfobject.js"></script>
+    <script type="text/javascript" src="/web-socket-js/FABridge.js"></script>
+    <script type="text/javascript" src="/web-socket-js/web_socket.js"></script>
+    
+    <script type="text/javascript">
+        // Set URL of your WebSocketMain.swf here:
+            WEB_SOCKET_SWF_LOCATION = "/web-socket-js/WebSocketMain.swf";
+        // Set this to dump debug message from Flash to console.log:
+        //    WEB_SOCKET_DEBUG = true;
+    </script>
+            
+    <script type="text/javascript">
+        $(function(){
+            var ws = new WebSocket("ws://bnw.blasux.ru:7808"+window.location.pathname);
+            ws.onmessage = function (e) {
+                var d=JSON.parse(e.data);
+                var new_comment=$("<div class='comment'>").text(d.text);
+                var addinfo=$("<div>").text("#"+d['id']+" / @"+d['user']);
+                if (d['replyto'])
+                    addinfo.append(' --> '+d['replyto']);
+                new_comment.append(addinfo);
+                $("div.comments").append($("<div class='outerborder'>").append(new_comment));
+            };
+        });
+    </script>
+{% end %}
 {% block body %}
 {% if not msg %}
     <div id="err_outer">
@@ -21,16 +49,18 @@
         </div>
     </div>
     <hr/>
+    <div class="comments">
     {% for comment in comments %}
     <div class='outerborder'>
     <div class='comment' id="{{ comment['id'].split('/')[1] }}">
         {{ linkify(comment['text']).replace('\n','<br/>') }}
         <div>
             {{ w.msgl(comment['id']) }} / {{ w.userl(comment['user']) }}
-            {% if comment['replyto'] %} (in reply to <a href="/p/{{ comment['replyto'].replace('/','#') }}" class="msgid">#{{ comment['replyto']}}</a>){% end %}
+            {% if comment['replyto'] %} --> <a href="/p/{{ comment['replyto'].replace('/','#') }}" class="msgid">#{{ comment['replyto']}}</a>{% end %}
         </div>
     </div>
     </div>
     {% end %}
+    </div>
 {% end %}
 {% end %}

@@ -11,6 +11,10 @@ import websocket
 from datetime import datetime
 
 class RoutedWebSocketHandler(websocket.WebSocketHandler):
+    def __init__(self, application, transport):
+        self.transport = transport
+        self.application = application
+
     def openSocket(self):
         pass        
     def write(self,data):
