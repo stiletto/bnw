@@ -48,6 +48,10 @@ commands.registerCommand('bnw_xmpp.command_post',redeye={'name':'comment','handl
         simplified={'name':'reply','handler':'commentcmd.handleSimplified'})
 commands.registerCommand('bnw_xmpp.command_post',redeye={'name':'c','handler':'commentcmd.handleRedeye'})
 
+commands.registerCommand('bnw_xmpp.command_post',redeye={'name':'recommend','handler':'recommendcmd.handleRedeye'},
+        simplified={'name':'recommend','handler':'recommendcmd.handleSimplified'})
+commands.registerCommand('bnw_xmpp.command_post',redeye={'name':'r','handler':'recommendcmd.handleRedeye'})
+
 commands.registerCommand('bnw_xmpp.command_onoff',redeye={'name':'on','handler':'oncmd.handleRedeye'},
         simplified={'name':'ON','handler':'oncmd.handleSimplified'})
 commands.registerCommand('bnw_xmpp.command_onoff',redeye={'name':'off','handler':'offcmd.handleRedeye'},

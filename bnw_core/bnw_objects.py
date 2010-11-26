@@ -236,12 +236,18 @@ class User(MongoObject):
         else:
             send_plain(self['jid'],None,formatComment(comment))
             
-    def send_post(self,message,recommender=None):
+    def send_post(self,message,recommender=None,recocomment=None):
         targetif=self.get('interface','redeye')
+        recotext=''
+        if recommender:
+            recotext='Recommended by @%s:' % (recommender)
+            if recocomment:
+                recotext+=' '+recocomment
+            recotext+='\n'
         if targetif=='simplified':
-            send_plain(self['jid'],None,formatMessageSimple(message))
+            send_plain(self['jid'],None,recotext+formatMessageSimple(message))
         else:
-            send_plain(self['jid'],None,formatMessage(message))
+            send_plain(self['jid'],None,recotext+formatMessage(message))
 
     @classmethod
     @defer.inlineCallbacks

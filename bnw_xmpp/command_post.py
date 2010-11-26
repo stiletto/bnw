@@ -120,5 +120,47 @@ class CommentCommand(BaseCommand):
         ("a", "anonymous", False, u"Anonymous comment."),
     )
 
+class RecommendCommand(BaseCommand):
+
+    @defer.inlineCallbacks
+    def recommend(self,message_id,rest,msg):
+        post_throttle=yield throttle_check(msg.user['name'])
+        
+        rest = yield bnw_core.post.recommendMessage(msg.user,message_id,rest)
+        if type(rest)==tuple:
+            qn,recepients = rest
+        else:
+            defer.returnValue(rest)
+        _ = yield throttle_update(msg.user['name'],post_throttle)
+        defer.returnValue('Recommended and delivered to %d users.' % 
+            (recepients,))
+
+    @requireAuthSimplified
+    @defer.inlineCallbacks
+    def handleSimplified(self,command,msg,parameters):
+        message_id=parameters[0][0].upper()
+        if parameters[0][1]:
+            comment=parameters[0][1][1:].upper()
+        else:
+            comment=None
+        defer.returnValue((yield self.recommend(message_id,comment,msg)))
+
+    @requireAuthRedeye
+    @defer.inlineCallbacks
+    def handleRedeye(self,options,rest,msg):
+        qn=0
+        message_id=options.get('message',None)
+        if message_id==None:
+            if msg.to.startswith('m-'):
+                message_id=msg.to.split('@')[0][2:]
+            else:
+                raise XmppResponse('You must specify a message to recommend.')
+        defer.returnValue((yield self.recommend(message_id,rest,msg)))
+    handleRedeye.arguments = (
+        ("m", "message", True, u"Message to recommend."),
+    )
+
 postcmd = PostCommand()
 commentcmd = CommentCommand()
+recommendcmd = RecommendCommand()
+

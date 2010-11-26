@@ -61,6 +61,7 @@ class HelpCommand(BaseCommand):
 *tagname Blah-blah-blah - Post a message with tag 'tagname'
 #1234 Blah-blah-blah - Answer to message #1234
 #1234/5 Blah - Answer to reply #1234/5
+! #1234 Look at this idiot - Recommend a message with comment
 
 # - Show last messages from public timeline
 #1234 - Show message

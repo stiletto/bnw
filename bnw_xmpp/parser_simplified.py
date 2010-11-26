@@ -52,6 +52,7 @@ class SimplifiedParser(BaseParser):
     SHOW_TAG_RE=re.compile(r'^\*(\S+)(\+)?$')
     REPLY_RE=re.compile(r'^#([0-9A-Za-z]+)(/[0-9A-Za-z]+)? (.+)$')
     POST_RE=re.compile(r'^(?:(\*\S+)?(?: (\*\S+))?(?: (\*\S+))?(?: (\*\S+))?(?: (\*\S+))? )?(.+)$') # idiot
+    RECO_RE=re.compile(r'^! +#([0-9A-Za-z]+)(?: (.+))?')
     def __init__(self,commands):
         self.commands = commands
 
@@ -75,6 +76,9 @@ class SimplifiedParser(BaseParser):
         replymatch=self.REPLY_RE.match(text)
         if replymatch:
             return ('reply',replymatch.groups())
+        recomatch=self.RECO_RE.match(text)
+        if recomatch:
+            return ('recommend',recomatch.groups())
         showuser=self.SHOW_USER_RE.match(text)
         if showuser:
             return ('show','user',showuser.groups())
