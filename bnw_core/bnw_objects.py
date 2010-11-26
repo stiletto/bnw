@@ -210,6 +210,12 @@ class Message(MongoObject):
         _ = yield collection.create_index(datei)
         defer.returnValue(None)
 
+class FeedElement(MongoObject):
+    """ Элемент ленты. 
+        id: id сообщения
+        user: пользователь-обладатель ленты."""
+    collection_name = "feeds"
+    
 class Comment(MongoObject):
     """ Объект комментария."""
     collection_name = "comments"
@@ -230,7 +236,7 @@ class User(MongoObject):
         else:
             send_plain(self['jid'],None,formatComment(comment))
             
-    def send_post(self,message):
+    def send_post(self,message,recommender=None):
         targetif=self.get('interface','redeye')
         if targetif=='simplified':
             send_plain(self['jid'],None,formatMessageSimple(message))

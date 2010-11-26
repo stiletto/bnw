@@ -47,7 +47,7 @@ def unsubscribe(user,target_type,target,fast=False):
     defer.returnValue(rest)
 
 @defer.inlineCallbacks
-def send_to_subscribers(queries,is_message,message):
+def send_to_subscribers(queries,is_message,message,recommender=None):
     """!Это дерьмо рассылает сообщение или коммент подписчикам.
     @param queries Список запросов, по которым можно найти подписки.
     @param is_message Является ли сообщением. Если нет - коммент.
@@ -66,7 +66,12 @@ def send_to_subscribers(queries,is_message,message):
         if target:
             if not target.get('off',False):
                 if is_message:
-                    target.send_post(message)
+                    feedel_val = {'user': target_name,'message':message['id']}
+                    feedel = yield objs.FeedElement.find_one(feedel_val)
+                    if not feedel:
+                        feedel = objs.FeedElement(feedel_val)
+                        target.send_post(message,recommender)
+                        _ = yield feedel.save()
                 else:
                     target.send_comment(message)
                 log.msg('Sent %s to %s' % (message['id'],target['jid']))
