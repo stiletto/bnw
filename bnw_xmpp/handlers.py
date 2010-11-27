@@ -60,3 +60,6 @@ commands.registerCommand('bnw_xmpp.command_onoff',redeye={'name':'off','handler'
 commands.registerCommand('bnw_xmpp.command_delete',redeye={'name':'delete','handler':'cmd.handleRedeye'},
         simplified={'name':'D','handler':'cmd.handleSimplified'})
 commands.registerCommand('bnw_xmpp.command_delete',redeye={'name':'d','handler':'cmd.handleRedeye'})
+
+commands.registerCommand('bnw_xmpp.command_login',redeye={'name':'login','handler':'cmd.handleRedeye'},
+        simplified={'name':'LOGIN','handler':'cmd.handleSimplified'})

@@ -60,6 +60,8 @@ def send_to_subscribers(queries,is_message,message,recommender=None,recocomment=
     for query in queries:
         qn+=1
         for result in (yield objs.Subscription.find(query,fields=['user'])):
+            if result['user']==message['user']:
+                continue
             recipients.add(result['user'])
     reccount=0
     for target_name in recipients:
@@ -120,7 +122,8 @@ def postMessage(user,tags,clubs,text,anon=False,anoncom=False):
     
     queries=[{'target': tag, 'type': 'sub_tag'} for tag in tags]
     queries+=[{'target': club, 'type': 'sub_club'} for club in clubs]
-    queries+=[{'target': 'anonymous' if anon else user['name'], 'type': 'sub_user'}]
+    if ('@' in clubs) or (len(clubs)==0):
+        queries+=[{'target': 'anonymous' if anon else user['name'], 'type': 'sub_user'}]
     qn,recipients = yield send_to_subscribers(queries,True,message)
     defer.returnValue((message['id'],qn,recipients))
     #defer.returnValue('Posted with id %s and delivered to %d users. Total cost: $%d' % (message['id'].upper(),recipients,qn))
@@ -140,13 +143,13 @@ def postComment(message_id,comment_id,text,user,anon=False):
     if len(text)>2048:
         defer.returnValue('Comment is too long. %d/2048' % (len(text),))
     message=yield objs.Message.find_one({'id': message_id})
-    if comment_id!=None:
+    if comment_id:
         old_comment=yield objs.Comment.find_one({'id': message_id+'/'+comment_id, 'message': message_id})
     else:
         old_comment=None
-    if old_comment==None and comment_id!=None:
+    if (not old_comment) and comment_id:
         defer.returnValue('No such comment.')
-    if message==None:
+    if not message:
         defer.returnValue('No such message.')
     
     comment={ 'user': user['name'],
@@ -220,6 +223,6 @@ def publish(etype,*args,**kwargs):
     for rtype in (etype,None):
         if rtype in listeners:
             for listener in listeners[rtype].itervalues():
-                listener(*args,**kwargs)
+                reactor.callLater(0,listener,*args,**kwargs)
 
         

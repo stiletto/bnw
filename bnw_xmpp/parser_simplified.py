@@ -46,13 +46,13 @@ def formatCommentSimple(msg,short=False):
     return formatstring % args
 
 class SimplifiedParser(BaseParser):
-    SHOW_RE=re.compile(r'^#([0-9A-Za-z]+)(/[0-9A-Za-z]+)?(\+)?$')
-    SHOW_USER_RE=re.compile(r'^@([0-9A-Za-z_-]+)(\+)?$')
+    SHOW_RE=re.compile(ur'^#([0-9A-Za-z]+)(/[0-9A-Za-z]+)?(\+)?$')
+    SHOW_USER_RE=re.compile(ur'^@([0-9A-Za-z_-]+)(\+)?$')
     #TAG_SYMS=u'0-9A-Za-zА-Яа-я_-'
-    SHOW_TAG_RE=re.compile(r'^\*(\S+)(\+)?$')
-    REPLY_RE=re.compile(r'^#([0-9A-Za-z]+)(/[0-9A-Za-z]+)? (.+)$')
-    POST_RE=re.compile(r'^(?:(\*\S+)?(?: (\*\S+))?(?: (\*\S+))?(?: (\*\S+))?(?: (\*\S+))? )?(.+)$') # idiot
-    RECO_RE=re.compile(r'^! +#([0-9A-Za-z]+)(?: (.+))?')
+    SHOW_TAG_RE=re.compile(ur'^\*(\S+)(\+)?$')
+    REPLY_RE=re.compile(ur'\A#([0-9A-Za-z]+)(/[0-9A-Za-z]+)? (.+)\Z',re.MULTILINE|re.DOTALL)
+    POST_RE=re.compile(ur'\A(?:([\*!]\S+)?(?: ([\*!]\S+))?(?: ([\*!]\S+))?(?: ([\*!]\S+))?(?: ([\*!]\S+))? )?(.+)\Z',re.MULTILINE|re.DOTALL) # idiot
+    RECO_RE=re.compile(ur'^! +#([0-9A-Za-z]+)(?: (.+))?')
     def __init__(self,commands):
         self.commands = commands
 

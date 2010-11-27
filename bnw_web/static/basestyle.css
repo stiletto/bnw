@@ -12,6 +12,29 @@
             background-color: #e5e5e5;
             padding: 1em;
         }
+        a:hover {
+            background-color: #0000CD;
+            color: #FFFF00;
+        }
+        .blueinput {
+            font-family: Unifont, Monaco, Consolas, Terminus, monospace;
+            background-color: #00CDCD;
+            color: #000;
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .styledbutton {
+            border: none; 
+            font-family: Unifont, Monaco, Consolas, Terminus, monospace; 
+            margin: 0; 
+            padding: 0;
+        }
+        .styledbutton:hover {
+            background-color: #00CDCD;
+            color: #000;
+        }
         .msg {
             color: #000;
             padding: 1em;

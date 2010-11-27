@@ -2,8 +2,10 @@ import tornado.escape
 class Widgets(object):
     def tag(self,tag):
         return '<a href="#" class="tag">%(u)s</a>' % {'u':tornado.escape.xhtml_escape(tag[:32])}
-    def tags(self,tags):
-        return '<div class="tags">'+' '.join(self.tag(t) for t in tags)+'</div>'
+    def club(self,club):
+        return '<a href="#" class="club">%(u)s</a>' % {'u':tornado.escape.xhtml_escape(club[:32])}
+    def tags(self,tags,clubs):
+        return '<div class="tags"> '+' '.join(self.club(c) for c in clubs)+' '+' '.join(self.tag(t) for t in tags)+' </div>'
     def user_url(self,name):
         return '/u/%(u)s' % {'u':name}
     def userl(self,name):

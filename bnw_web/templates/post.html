@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}BnW - Post{% end %}
+{% block body %}
+<form action='/post' method='post'>
+    <div class='outerborder'>
+        <div class='msg'>
+            <p>Бээнвач думает, что вас зовут {{ auth_user['name'] }}</p>
+            <p>Теги (запятая): &nbsp;<input class='blueinput' name='tags' size='64'></p>
+            <p>Клубы (запятая): <input class='blueinput' name='clubs' size='64'></p>
+            <p>Текст сообщения: <textarea name='text' class='blueinput' cols='64' rows='16'></textarea></p>
+            <input type='submit'/>
+        </div>
+    </div>
+</form>
+{% end %}

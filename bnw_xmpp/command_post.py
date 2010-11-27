@@ -37,9 +37,15 @@ class PostCommand(BaseCommand):
     @defer.inlineCallbacks
     def handleSimplified(self,command,msg,parameters):
         groups=parameters[0]
-        tags=[a[1:] for a in filter(None,groups[0:4])]
+        tags=[]
+        clubs=[]
+        for a in filter(None,groups[0:5]):
+            if a[0]=='!':
+                clubs.append(a[1:])
+            else:
+                tags.append(a[1:])
         text=groups[5]
-        defer.returnValue((yield self.postMessage(msg,tags,[],text)))
+        defer.returnValue((yield self.postMessage(msg,tags,clubs,text)))
 
     @defer.inlineCallbacks
     def postMessage(self,msg,tags,clubs,text,anon=False,anoncom=False):
@@ -142,7 +148,7 @@ class RecommendCommand(BaseCommand):
         if parameters[0][1]:
             comment=parameters[0][1][1:].upper()
         else:
-            comment=None
+            comment=''
         defer.returnValue((yield self.recommend(message_id,comment,msg)))
 
     @requireAuthRedeye

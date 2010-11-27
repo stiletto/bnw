@@ -34,6 +34,7 @@ class RegisterCommand(BaseCommand):
                 
             user={ 'id': uuid4().hex,
                    'name': rest,
+                   'login_key': uuid4().hex,
                    'regdate': int(time.time()),
                    'jid': msg.bare_jid,
                  }

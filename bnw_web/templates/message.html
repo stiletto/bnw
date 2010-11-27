@@ -64,6 +64,18 @@
                 })
             }
         }
+        function comment_reply() {
+            $(".msgid").each(function (i,o) {
+                var cur=$(o);
+                var text=cur.text();
+                var lp = text.split('/');
+                if ((lp[1])&&(lp[0]=="#{{ msgid }}")) {
+                    cur.click(function () {
+                        $("[name=comment]").val($(this).text().split('/')[1]);
+                    });
+                }
+            });
+        }
         $(function(){
             $("div.comments div").each(function (i,o) { 
                 var c=$(o);
@@ -73,6 +85,7 @@
                 times[c.attr("id")]=get_times(c);
             });
             sort_comments();
+            comment_reply();
             
             var ws = new WebSocket("ws://bnw.blasux.ru:7808"+window.location.pathname);
             ws.onmessage = function (e) {
@@ -103,7 +116,7 @@
 {% else %}
     <div class='outerborder'>
         <div class='msg'>
-            {{ w.tags(msg['tags']) }}
+            {{ w.tags(msg['tags'],msg['clubs']) }}
             {{ linkify(msg['text']).replace('\n','<br/>') }}
             <div>{{ w.msgl(msgid) }} / {{ w.userl(msg['user']) }}</div>
         </div>
@@ -124,5 +137,17 @@
     </div>
     {% end %}
     </div>
+    {% if auth_user %}
+    <div class='outerborder'>
+        <div class='msg'>
+            <form action='/comment' method='post'>
+                <input type='hidden' name='msg' value='{{ msgid }}'/>
+                <textarea name='text' style='width: 100%;' cols='3' class='blueinput'></textarea>
+                Id комментария: <input name='comment' class='blueinput' size='4'/>
+                <input type='submit' value='[&lt; Комментировать &gt;]' style='float: right;' class='styledbutton'/>
+            </form>
+        </div>
+    </div>
+    {% end %}
 {% end %}
 {% end %}

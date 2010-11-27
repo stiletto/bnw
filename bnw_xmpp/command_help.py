@@ -76,6 +76,8 @@ S *tag - Subscribe to tag
 U #123 - Unsubscribe from comments
 U @username - Unsubscribe from user's blog
 U *tag - Unsubscribe from tag
+D #123 - Delete message
+D #123/4 - Delete comment
 PING - Pong :)
 INTERFACE redeye - return to redeyed interface"""
 

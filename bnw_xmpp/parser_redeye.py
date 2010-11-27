@@ -16,15 +16,19 @@ def requireAuthRedeye(fun):
 
 
 def formatMessage(msg):
-       return '+++ [%(date)s] %(author)s:\nTags: %(tags)s\nClubs: %(clubs)s\n\n%(text)s\n--- %(id)s (%(rc)d) http://bnw.blasux.ru/p/%(id)s' % \
-            { 'id':    msg['id'].upper(),
-              'author':msg['user'],
-              'tags':  ', '.join(msg['tags']),
-              'clubs': ', '.join(msg['clubs']),
-              'text':  msg['text'],
+    result='+++ [%s] %s:\n' % (
+        datetime.datetime.utcfromtimestamp(msg['date']).strftime('%d.%m.%Y %H:%M:%S'),
+        msg['user'],)
+    if msg['tags']:
+        result+='Tags: %s\n' % (', '.join(msg['tags']),)
+    if msg['clubs']:
+        result+='Clubs: %s\n' % (', '.join(msg['clubs']),)
+    result+='\n%s\n' % (msg['text'],)
+    result+='--- %(id)s (%(rc)d) http://bnw.blasux.ru/p/%(id)s' % { 
+              'id': msg['id'].upper(),
               'rc':    msg['replycount'],
-              'date':  datetime.datetime.utcfromtimestamp(msg['date']).strftime('%d.%m.%Y %H:%M:%S')
             }
+    return result
 
 def formatComment(msg,short=False):
     args={ 'id':    msg['id'].split('/')[1].upper(),

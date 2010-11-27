@@ -42,6 +42,10 @@ webui_enabled = True
 
 webui_port = 7808
 
+## Базовый URL
+
+webui_base = 'http://bnw.blasux.ru/'
+
 ## Fuck
 
 fuck_enabled = True

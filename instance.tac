@@ -19,7 +19,9 @@ from twisted.words.protocols.jabber import component
 
 from twisted.web import resource, server, static, xmlrpc
 
-import bnw_component
+import bnw_component,bnw_core.base
+
+bnw_core.base.config=config
 
 application = service.Application("example-echo")
 
