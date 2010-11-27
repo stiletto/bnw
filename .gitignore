@@ -9,5 +9,6 @@ txWebSocket
 *.log
 *.pid
 *.e4p
+config.py
 passwords.py
 flashshit.py

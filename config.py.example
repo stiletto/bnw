@@ -1,0 +1,51 @@
+# -*- coding: utf-8 -*-
+
+## Адрес сервера, где работает этот трактор с костылями.
+## Для колыбели блекджекошлюхуйка было бы правильно написать:
+# hostname='blasux.ru'
+
+hostname = 'localhost'
+
+## Порт, по которому работает xmpp-сервис bnw. Просто оставь как есть.
+
+srvc_port = 6591
+
+## Так твой бээнвач известен первому встречному.
+## Это имя будет участвовать в названии сервиса, так что добавлять в ростер надо
+## будет bnw.localhost или icanhasnigrapack@bnw.localhost если прыщеклиент не
+## сможет добавить в ростер просто сервис без ника. Empathy, например, не смог.
+
+srvc_name = 'bnw'
+
+## Пароль от сервиса. Указывается не от балды, а из конфига ejabberd-сервера,
+## которого там, кстати говоря, нет. MWAHAHA ENJOY YOUR AIDS! Надо открыть
+## /etc/ejabberd/ejabberd.cfg, отыскать ejabberd_service и где-нибудь около
+## ICQ-транспорта добавить свой сервис:
+## 
+##  %% Blackjack 'n Whores
+##  {6591, ejabberd_service, [
+##                            {ip, {127, 0, 0, 1}},
+##                            {access, all},
+##                            {shaper_rule, fast},
+##                            {host, "bnw.localhost", [{password, "surelythisissecureenough"}]}
+##                            ]},
+
+srvc_pwd = 'surelythisissecureenough'
+
+## Надо ли запускать веб-интерфейс к бнвачу. Это как http://bnw.blasux.ru,
+## только свой собственный. Если брать все значения по умолчанию, то открывать
+## надо http://localhost:7808
+
+webui_enabled = True
+
+## Порт веб-интерфейса
+
+webui_port = 7808
+
+## Fuck
+
+fuck_enabled = True
+
+## Fuck-fuck-fuck
+
+fuck_port = 8081
