@@ -12,6 +12,12 @@
             background-color: #e5e5e5;
             padding: 1em;
         }
+        .headlink {
+            color: #000; background-color: #00CD00; text-decoration: none;
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+            margin-left: 0.5em;
+        }
         a:hover {
             background-color: #0000CD;
             color: #FFFF00;

@@ -29,4 +29,5 @@
                 <a class="redlink" href="/static/">&nbsp;О проекте&nbsp;</a>
                 <a class="redlink" href="/static/interfaces.html">&nbsp;Описание интерфейсов&nbsp;</a>
                 <a class="redlink" href="/static/contacts.html">&nbsp;Контакты&nbsp;</a>
+                <a class="redlink" href="/static/appeal.html">&nbsp;Обращение&nbsp;</a>
             </p>

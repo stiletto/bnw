@@ -76,6 +76,7 @@ class BnwWebHandler(TwistedHandler):
         return {
             'linkify': escape.linkify,
             'ranq': random.choice(ranq),
+            'display_appeal': random.random(),
             'w': widgets,
             'auth_user': None,
         }
