@@ -10,6 +10,10 @@
         }
         .outerborder {
             background-color: #e5e5e5;
+            /*padding-left: 1em;
+            padding-right: 1em;
+            padding-top: 0.5em;
+            padding-bottom: 0.5em;*/
             padding: 1em;
         }
         .headlink {
@@ -43,13 +47,23 @@
         }
         .msg {
             color: #000;
-            padding: 1em;
+
+            padding-left: 1em;
+            padding-right: 1em;
+            padding-top: 0.5em;
+            padding-bottom: 0.5em;
+
             border: thin solid black;
             background-color: #e5e5e5;
         }
         .comment {
             color: #000;
-            padding: 1em;
+
+            padding-left: 1em;
+            padding-right: 1em;
+            padding-top: 0.5em;
+            padding-bottom: 0.5em;
+
             border: thin solid black;
             background-color: #e5e5e5;
         }

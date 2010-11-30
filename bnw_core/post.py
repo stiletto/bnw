@@ -98,10 +98,10 @@ def postMessage(user,tags,clubs,text,anon=False,anoncom=False):
     """
     if len(text)==0:
         defer.returnValue('So where is your post?')
-    if len(text)>2048:
+    if len(text)>4096:
         #defer.returnValue('E_LONG')
         #XmppResponse('Message is too long. %d/2048' % (len(text),))
-        defer.returnValue('Message is too long. %d/2048' % (len(text),))
+        defer.returnValue('Message is too long. %d/4096' % (len(text),))
     message={ 'user': user['name'],
               'tags': tags,
               'clubs': clubs,
@@ -140,8 +140,8 @@ def postComment(message_id,comment_id,text,user,anon=False):
 
     if len(text)==0:
         defer.returnValue('So where is your comment?')
-    if len(text)>2048:
-        defer.returnValue('Comment is too long. %d/2048' % (len(text),))
+    if len(text)>4096:
+        defer.returnValue('Comment is too long. %d/4096' % (len(text),))
     message=yield objs.Message.find_one({'id': message_id})
     if comment_id:
         old_comment=yield objs.Comment.find_one({'id': message_id+'/'+comment_id, 'message': message_id})
