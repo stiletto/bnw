@@ -3,18 +3,9 @@
 
 from base import *
 import random
+import bnw_core.bnw_objects as objs
 
-
-from parser_redeye import requireAuthRedeye
-from parser_simplified import requireAuthSimplified
-
-def _(s,user):
-    return s
-
-
-class HelpCommand(BaseCommand):
-
-    helptext="""
+helptext="""
 1. Постинг сообщений. Делается командой post.
    Можно указать опцию --tags и в параметре перечислить через запятую тэги.
    Пример: post --tags=linux,anime,mplayer ваш ляликс - говно для просмотра аниме!
@@ -56,7 +47,7 @@ class HelpCommand(BaseCommand):
      interface simplified
 
 """
-    helptext_simple="""
+helptext_simple="""
 
 *tagname Blah-blah-blah - Post a message with tag 'tagname'
 #1234 Blah-blah-blah - Answer to message #1234
@@ -81,19 +72,14 @@ D #123/4 - Delete comment
 PING - Pong :)
 INTERFACE redeye - return to redeyed interface"""
 
-    def formatCommand(self,command):
+def formatCommand(command):
         defer.returnValue(command+':\n'+'\n'.join( (("-"+arg[0]).rjust(4)+(' ARG' if arg[2] else '    ') + \
           ("--"+arg[1]).rjust(10)+('=ARG' if arg[2] else '    ') + \
-          ' '+arg[3]) for arg in self.parser.commands[command]))
+          ' '+arg[3]) for arg in elf.parser.commands[command]))
 
-    @defer.inlineCallbacks
-    def handleSimplified(self,command,msg,parameters):
-        defer.returnValue('Help:'+self.helptext_simple)
+def cmd_help_simple(request):
+    return 'Help:'+helptext_simple
 
-    @defer.inlineCallbacks
-    def handleRedeye(self,options,rest,msg):
-        defer.returnValue('Help:'+self.helptext)
+def cmd_help_redeye(request):
+    return 'Help:'+helptext
         #+'\n'.join(self.formatCommand(command) for command in self.parser.commands)
-    handleRedeye.arguments = ()
-
-cmd = HelpCommand()

@@ -5,35 +5,21 @@ from base import *
 import random
 
 import bnw_core.bnw_objects as objs
-from parser_redeye import requireAuthRedeye
-from parser_simplified import requireAuthSimplified
 
-def _(s,user):
-    return s
+@require_auth
+@defer.inlineCallbacks
+def cmd_on(request):
+    msg.user['off']=False
+    _ = yield objs.User.mupdate({'name':msg.user['name']},msg.user)
+    defer.returnValue(
+        dict(ok=True,desc='Welcome back!')
+    )
 
-class OnCommand(BaseCommand):
-    @requireAuthRedeye
-    @defer.inlineCallbacks
-    def handleRedeye(self,options,rest,msg):
-        msg.user['off']=False
-        _ = yield objs.User.mupdate({'name':msg.user['name']},msg.user)
-        defer.returnValue('Welcome back!')
-    handleRedeye.arguments= ()
-
-    @requireAuthSimplified
-    @defer.inlineCallbacks
-    def handleSimplified(self,command,msg,parameters):
-        defer.returnValue((yield self.handleRedeye({},' '.join(parameters),msg)))
-
-
-class OffCommand(OnCommand):
-    @requireAuthRedeye
-    @defer.inlineCallbacks
-    def handleRedeye(self,options,rest,msg):
-        msg.user['off']=True
-        _ = yield objs.User.mupdate({'name':msg.user['name']},msg.user)
-        defer.returnValue('C u l8r!')
-    handleRedeye.arguments= ()
-
-oncmd = OnCommand()
-offcmd = OffCommand()
+@require_auth
+@defer.inlineCallbacks
+def cmd_off(request):
+    msg.user['off']=True
+    _ = yield objs.User.mupdate({'name':msg.user['name']},msg.user)
+    defer.returnValue(
+        dict(ok=True,desc='C u l8r!')
+    )

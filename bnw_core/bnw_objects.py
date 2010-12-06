@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from base import get_db,get_db_existing
 from bnw_xmpp.base import send_plain
+from bnw_xmpp import deliver_formatters
 from twisted.internet import interfaces, defer, reactor
-from bnw_xmpp.parser_redeye import requireAuthRedeye, formatMessage, formatComment
-from bnw_xmpp.parser_simplified import requireAuthSimplified, formatMessageSimple, formatCommentSimple
+#from bnw_xmpp.parser_redeye import requireAuthRedeye, formatMessage, formatComment
+#from bnw_xmpp.parser_simplified import requireAuthSimplified, formatMessageSimple, formatCommentSimple
 import txmongo
 from twisted.python import log
 # TODO: suck cocks
@@ -178,27 +179,36 @@ class MongoObject(WrappedDict):
             if fld in msg:
                 del msg[fld]
         return msg
-    
+
 class Message(MongoObject):
     """ Сообщение. Просто объект сообщения."""
     collection_name = "messages"
     dangerous_fields = ('_id','real_user')
+
     @defer.inlineCallbacks
-    def deliver(self):
-        recipients=set()
-        queries=[{'target': tag, 'type': 'sub_tag'} for tag in self['tags']]
-        queries+=[{'target': club, 'type': 'sub_club'} for club in self['clubs']]
-        queries+=[{'target': 'anonymous' if anon else msg.user['name'], 'type': 'sub_user'}]
-        for query in queries: # fuuuuuuuuuuck this will be damn slow fix it someone plz
-            qn+=1
-            for result in (yield get_db()).subscriptions.find(query):
-                recipients.add(result['user'])
-        for target_name in recipients:
-            target=(yield objs.User.find_one({'name': target_name}))
-            qn+=1
-            if target:
-                if not target.get('off',False):
-                    target.send_post(message)
+    def deliver(self,target,recommender=None,recocomment=None,sfrom=None):
+        feedel_val = dict(user=target['name'],message=self['id'])
+        feedel = yield FeedElement.find_one(feedel_val)
+        print feedel
+        if not feedel:
+            feedel_val.update(dict(recommender=recommender,
+                                   recocomment=recocomment))
+            feedel = FeedElement(feedel_val)
+            if recommender:
+                formatter = deliver_formatters.parsers[target['interface']]['recommendation']
+                         
+            else:
+                formatter = deliver_formatters.parsers[target['interface']]['message']
+            formatted = formatter(None,
+                dict(message=self,
+                     recommender=recommender,
+                     recocomment=recocomment)
+            )
+            target.send_plain(formatted,sfrom)
+            _ = yield feedel.save()
+            defer.returnValue(1)
+        else:
+            defer.returnValue(0)
 
     @classmethod
     @defer.inlineCallbacks
@@ -221,34 +231,21 @@ class Comment(MongoObject):
     collection_name = "comments"
     dangerous_fields = ('_id','real_user')
 
+    def deliver(self,target,recommender=None,recocomment=None,sfrom=None):
+        formatter = deliver_formatters.parsers[target['interface']]['comment']
+        formatted = formatter(None,
+            dict(comment=self)
+        )
+        target.send_plain(formatted,sfrom)
+        return 1 #defer.returnValue(1)
+
 class User(MongoObject):
     """ Няшка-пользователь."""
     collection_name = "users"
     dangerous_fields=('_id','login_key')
-    def send_plain(self,message):
+    def send_plain(self,message,sfrom=None):
         if self['jid']:
-            send_plain(self['jid'],None,message)
-    def send_comment(self,comment):
-        targetif=self.get('interface','redeye')
-        if targetif=='simplified':
-            send_plain(self['jid'],None,formatCommentSimple(comment))
-        elif targetif=='service':
-            pass
-        else:
-            send_plain(self['jid'],None,formatComment(comment))
-            
-    def send_post(self,message,recommender=None,recocomment=None):
-        targetif=self.get('interface','redeye')
-        recotext=''
-        if recommender:
-            recotext='Recommended by @%s:' % (recommender)
-            if recocomment:
-                recotext+=' '+recocomment
-            recotext+='\n'
-        if targetif=='simplified':
-            send_plain(self['jid'],None,recotext+formatMessageSimple(message))
-        else:
-            send_plain(self['jid'],None,recotext+formatMessage(message))
+            send_plain(self['jid'],sfrom,message)
 
     @classmethod
     @defer.inlineCallbacks
@@ -276,4 +273,8 @@ class Subscription(MongoObject):
 class Timing(MongoObject):
     """ Время выполнения."""
     collection_name = "timings"
+
+class Throttle(MongoObject):
+    """ Троттлинг."""
+    collection_name = "post_throttle"
 

@@ -125,13 +125,13 @@ class PostHandler(BnwWebHandler,AuthMixin):
         clubs=[i[:128] for i in self.get_argument("clubs","").split(",",5)[:5]]
         text=self.get_argument("text","")
         user = yield self.get_auth_user()
-        result = yield post.postMessage(user,tags,clubs,text)
-        if isinstance(result,tuple):
+        ok,result = yield post.postMessage(user,tags,clubs,text)
+        if ok:
             (msg_id,qn,recs) = result
             self.redirect('/p/'+msg_id)
             defer.returnValue('')
         else:
-            defer.returnValue(result)
+            defer.returnValue(result.get('desc','Error'))
     @requires_auth
     @defer.inlineCallbacks
     def respond(self):
@@ -149,8 +149,8 @@ class CommentHandler(BnwWebHandler,AuthMixin):
         text=self.get_argument("text","")
         noredir=self.get_argument("noredir","")
         user = yield self.get_auth_user()
-        result = yield post.postComment(msg,comment,text,user)
-        if isinstance(result,tuple):
+        ok,result = yield post.postComment(msg,comment,text,user)
+        if ok:
             (msg_id,qn,recs) = result
             if noredir:
                 defer.returnValue('Posted with '+msg_id)
@@ -161,7 +161,7 @@ class CommentHandler(BnwWebHandler,AuthMixin):
                 self.redirect(str(redirtarget))
                 defer.returnValue('')
         else:
-            defer.returnValue(result)
+            defer.returnValue(result.get('desc','Error'))
 
 def get_site():
     settings={

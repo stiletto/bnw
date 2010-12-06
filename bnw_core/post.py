@@ -9,6 +9,7 @@ from twisted.python import log
 
 listeners={}
 
+
 @defer.inlineCallbacks
 def subscribe(user,target_type,target,fast=False,sfrom=None):
     """!Подписка пользователя на что-нибудь.
@@ -25,15 +26,15 @@ def subscribe(user,target_type,target,fast=False,sfrom=None):
         if target_type=='sub_user':
             tuser=yield objs.User.find_one({'name':target})
             if not tuser:
-                defer.returnValue('No such user.')
+                defer.returnValue((False,'No such user.'))
             _ = yield tuser.send_plain('@%s subscribed to your blog. http://bnw.blasux.ru/u/%s' % (user['name'],user['name']))
             pass
         if (yield sub.save()):
-            defer.returnValue('Subscribed.')
+            defer.returnValue((True,'Subscribed.'))
         else:
-            defer.returnValue('Error while saving.')
+            defer.returnValue((False,'Error while saving.'))
     else:
-        defer.returnValue('Already subscribed.')
+        defer.returnValue((False,'Already subscribed.'))
 
 @defer.inlineCallbacks
 def unsubscribe(user,target_type,target,fast=False):
@@ -44,10 +45,10 @@ def unsubscribe(user,target_type,target,fast=False):
     @param fast Игнорируется."""
     sub_rec={ 'user': user['name'], 'target': target, 'type': target_type }
     rest = yield objs.Subscription.remove(sub_rec)
-    defer.returnValue(rest)
+    defer.returnValue((True,'Unsubscribed.'))
 
 @defer.inlineCallbacks
-def send_to_subscribers(queries,is_message,message,recommender=None,recocomment=None):
+def send_to_subscribers(queries,message,recommender=None,recocomment=None):
     """!Это дерьмо рассылает сообщение или коммент подписчикам.
     @param queries Список запросов, по которым можно найти подписки.
     @param is_message Является ли сообщением. Если нет - коммент.
@@ -55,39 +56,26 @@ def send_to_subscribers(queries,is_message,message,recommender=None,recocomment=
     @todo Что-то как-то уныло и негибко.
     @todo Эта функция давно плачет ночами о хоть одной сучилище, которая её бы отрефакторила
     """
-    recipients=set()
+    recipients={}
     qn=0
     for query in queries:
         qn+=1
         for result in (yield objs.Subscription.find(query,fields=['user'])):
             if result['user']==message['user']:
                 continue
-            recipients.add(result['user'])
+            recipients[result['user']]=result
     reccount=0
-    for target_name in recipients:
-        target=yield objs.User.find_one({'name': target_name},fields=['jid','off','interface'])
+    for target_name,subscription in recipients.iteritems():
+        target=yield objs.User.find_one({'name': target_name})
         qn+=1
         if target:
             if not target.get('off',False):
-                if is_message:
-                    feedel_val = dict(user=target_name,message=message['id'])
-                    feedel = yield objs.FeedElement.find_one(feedel_val)
-                    qn+=1
-                    if not feedel:
-                        feedel_val.update(dict(recommender=recommender,
-                                        recocomment=recocomment))
-                        feedel = objs.FeedElement(feedel_val)
-                        reccount+=1
-                        target.send_post(message,recommender,recocomment)
-                        _ = yield feedel.save()
-                else:
-                    reccount+=1
-                    target.send_comment(message)
+                reccount += yield message.deliver(target,recommender,recocomment,sfrom=subscription.get('from',None))
                 log.msg('Sent %s to %s' % (message['id'],target['jid']))
     defer.returnValue((qn,reccount))
 
 @defer.inlineCallbacks
-def postMessage(user,tags,clubs,text,anon=False,anoncom=False):
+def postMessage(user,tags,clubs,text,anon=False,anoncom=False,sfrom=None):
     """!Это дерьмо создает новое сообщение и рассылает его.
     @param user Объект-пользователь.
     @param tags Список тегов.
@@ -97,11 +85,9 @@ def postMessage(user,tags,clubs,text,anon=False,anoncom=False):
     @param anoncom Все комментарии принудительно анонимны.
     """
     if len(text)==0:
-        defer.returnValue('So where is your post?')
+        defer.returnValue((False,'So where is your post?'))
     if len(text)>4096:
-        #defer.returnValue('E_LONG')
-        #XmppResponse('Message is too long. %d/2048' % (len(text),))
-        defer.returnValue('Message is too long. %d/4096' % (len(text),))
+        defer.returnValue((False,'Message is too long. %d/4096' % (len(text),)))
     message={ 'user': user['name'],
               'tags': tags,
               'clubs': clubs,
@@ -118,18 +104,17 @@ def postMessage(user,tags,clubs,text,anon=False,anoncom=False):
     stored_message = objs.Message(message)
     stored_message_id = yield stored_message.save()
     
-    sub_result = yield subscribe(user,'sub_message',message['id'],True)
+    sub_result = yield subscribe(user,'sub_message',message['id'],True,sfrom)
     
     queries=[{'target': tag, 'type': 'sub_tag'} for tag in tags]
     queries+=[{'target': club, 'type': 'sub_club'} for club in clubs]
     if ('@' in clubs) or (len(clubs)==0):
         queries+=[{'target': 'anonymous' if anon else user['name'], 'type': 'sub_user'}]
-    qn,recipients = yield send_to_subscribers(queries,True,message)
-    defer.returnValue((message['id'],qn,recipients))
-    #defer.returnValue('Posted with id %s and delivered to %d users. Total cost: $%d' % (message['id'].upper(),recipients,qn))
+    qn,recipients = yield send_to_subscribers(queries,stored_message)
+    defer.returnValue((True,(message['id'],qn,recipients)))
 
 @defer.inlineCallbacks
-def postComment(message_id,comment_id,text,user,anon=False):
+def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
     """!Это дерьмо постит комментарий.
     @param message_id Id сообщения к которому комментарий.
     @param comment_id Если ответ - id комментария, на который отвечаем.
@@ -139,18 +124,18 @@ def postComment(message_id,comment_id,text,user,anon=False):
     """
 
     if len(text)==0:
-        defer.returnValue('So where is your comment?')
+        defer.returnValue((False,'So where is your comment?'))
     if len(text)>4096:
-        defer.returnValue('Comment is too long. %d/4096' % (len(text),))
+        defer.returnValue((False,'Comment is too long. %d/4096' % (len(text),)))
     message=yield objs.Message.find_one({'id': message_id})
     if comment_id:
-        old_comment=yield objs.Comment.find_one({'id': message_id+'/'+comment_id, 'message': message_id})
+        old_comment=yield objs.Comment.find_one({'id': comment_id, 'message': message_id})
     else:
         old_comment=None
     if (not old_comment) and comment_id:
-        defer.returnValue('No such comment.')
+        defer.returnValue((False,'No such comment.'))
     if not message:
-        defer.returnValue('No such message.')
+        defer.returnValue((False,'No such message.'))
     
     comment={ 'user': user['name'],
               'id': message_id+'/'+genid(3),
@@ -167,16 +152,15 @@ def postComment(message_id,comment_id,text,user,anon=False):
         comment['user']='anonymous'
     comment = objs.Comment(comment)
     comment_id = yield comment.save()
-    sub_result = yield subscribe(user,'sub_message',message_id)
+    sub_result = yield subscribe(user,'sub_message',message_id,False,sfrom)
     _ = (yield objs.Message.mupdate({'id':message_id},{'$inc': { 'replycount': 1}}))
     
-    qn,recipients = yield send_to_subscribers([{'target': message_id, 'type': 'sub_message'}],False,comment)
+    qn,recipients = yield send_to_subscribers([{'target': message_id, 'type': 'sub_message'}],comment)
     publish('comments-'+message_id,comment.filter_fields()) # ALARM
-    defer.returnValue((comment['id'],qn,recipients))
-    defer.returnValue('Posted with id %s and delivered to %d users. Total cost: $%d' % (message['id'].upper(),recipients,qn))
+    defer.returnValue((True,(comment['id'],comment['num'],qn,recipients)))
 
 @defer.inlineCallbacks
-def recommendMessage(user,message_id,comment):
+def recommendMessage(user,message_id,comment,sfrom=None):
     """!Это дерьмо рекоммендует сообщение и рассылает его.
     @param user Объект-пользователь.
     @param message id сообщения.
@@ -185,20 +169,18 @@ def recommendMessage(user,message_id,comment):
 
     message=yield objs.Message.find_one({'id': message_id})
     if message==None:
-        defer.returnValue('No such message.')
+        defer.returnValue((False,'No such message.'))
     if len(comment)>256:
-        #defer.returnValue('E_LONG')
-        #XmppResponse('Message is too long. %d/2048' % (len(text),))
-        defer.returnValue('Recommendation is too long. %d/256' % (len(comment),))
+        defer.returnValue((False,'Recommendation is too long. %d/256' % (len(comment),)))
 
     tuser=yield objs.User.find_one({'name':message['user']})
     _ = yield tuser.send_plain('@%s recommended your message #%s. http://bnw.blasux.ru/p/%s' % (user['name'],message_id,message_id))
+
+    sub_result = yield subscribe(user,'sub_message',message_id,False,sfrom)
     
     queries=[{'target': user['name'], 'type': 'sub_user'}]
-    qn,recipients = yield send_to_subscribers(queries,True,message,user['name'],comment)
-    defer.returnValue((qn,recipients))
-    #defer.returnValue('Posted with id %s and delivered to %d users. Total cost: $%d' % (message['id'].upper(),recipients,qn))
-
+    qn,recipients = yield send_to_subscribers(queries,message,user['name'],comment)
+    defer.returnValue((True,(qn,recipients)))
 
 
 listenerscount=0
