@@ -29,7 +29,7 @@
         {{ w.tags(msg['tags'],msg['clubs']) }}
         {{ linkify(msg['text']).replace('\n','<br/>') }}
         <div>
-            {{ w.msgl(msg['id']) }} ({{ int(msg['replycount']) }}) / {{ w.userl(msg['user']) }}</a>
+            {{ w.msgl(msg['id']) }} ({{ int(msg['replycount']) }}) / {{ w.userl(msg['user']) }} / {{ w.time(msg['date']) }}
         </div>
     </div>
     </div>

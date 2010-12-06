@@ -50,7 +50,7 @@ def requires_auth(fun):
     def newfun(self,*args,**kwargs):
         user=yield self.get_auth_user()
         if not user:
-            defer.returnValue('Requires a valid login key.')
+            defer.returnValue('Requires a valid login key. Go get it in the jabber interface.')
         else:
             defer.returnValue((yield fun(self,*args,**kwargs)))
     return newfun

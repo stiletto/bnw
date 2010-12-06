@@ -190,7 +190,7 @@ class BnwService(component.Service):
         Act on the presence stanza that has just been received.
 
         """
-        prs_type = prs["type"] or ""
+        prs_type = prs.getAttribute("type","")
         send_status = False
         #print prs_type
         if prs_type=="subscribe":

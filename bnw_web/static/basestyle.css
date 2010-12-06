@@ -10,7 +10,17 @@
         }
         .outerborder {
             background-color: #e5e5e5;
+            /*padding-left: 1em;
+            padding-right: 1em;
+            padding-top: 0.5em;
+            padding-bottom: 0.5em;*/
             padding: 1em;
+        }
+        .headlink {
+            color: #000; background-color: #00CD00; text-decoration: none;
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+            margin-left: 0.5em;
         }
         a:hover {
             background-color: #0000CD;
@@ -37,13 +47,23 @@
         }
         .msg {
             color: #000;
-            padding: 1em;
+
+            padding-left: 1em;
+            padding-right: 1em;
+            padding-top: 0.5em;
+            padding-bottom: 0.5em;
+
             border: thin solid black;
             background-color: #e5e5e5;
         }
         .comment {
             color: #000;
-            padding: 1em;
+
+            padding-left: 1em;
+            padding-right: 1em;
+            padding-top: 0.5em;
+            padding-bottom: 0.5em;
+
             border: thin solid black;
             background-color: #e5e5e5;
         }

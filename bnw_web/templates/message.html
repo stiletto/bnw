@@ -22,19 +22,34 @@
                 $(this).replaceWith(copy_to);
             });            
         };
+        
+        var comment_parents={};
         function get_comment_parent(cmt) {
-            var parent=$("div div a",cmt).eq(2).text();
-            parent=parent.split("/")[1]
+            var cmt_id = $(cmt).attr("id");
+            var parent;
+            if (comment_parents[cmt_id]) {
+                parent=comment_parents[cmt_id];
+            } else {
+                parent=$("div div a",cmt).eq(2).text();
+                parent=parent.split("/")[1]
+                comment_parents[cmt.id]=parent;
+            }
             parent=$("#"+parent);
             return parent;
         }
         var times={};
         function get_times(cmt) {
+            var cmt_id = cmt.attr("id");
+            if(times[cmt_id]&&cmt_id)
+                return times[cmt_id];
             var parent=get_comment_parent(cmt);
+            var val;
             if(parent.length==0)
-                return [parseFloat($(".comment_time",cmt).text())]
+                val=[parseFloat($(".comment_time",cmt).text())];
             else
-                return get_times(parent).concat([parseFloat($(".comment_time",cmt).text())])
+                val=get_times(parent).concat([parseFloat($(".comment_time",cmt).text())]);
+            times[cmt_id]=val;
+            return val;
         }
         function get_comment_parents_count(cmt) {
             var parent=get_comment_parent(cmt);
@@ -118,7 +133,7 @@
         <div class='msg'>
             {{ w.tags(msg['tags'],msg['clubs']) }}
             {{ linkify(msg['text']).replace('\n','<br/>') }}
-            <div>{{ w.msgl(msgid) }} / {{ w.userl(msg['user']) }}</div>
+            <div>{{ w.msgl(msgid) }} / {{ w.userl(msg['user']) }} / {{ w.time(msg['date']) }}</div>
         </div>
     </div>
     <hr/>
@@ -132,6 +147,7 @@
         <div>
             {{ w.msgl(comment['id']) }} / {{ w.userl(comment['user']) }}
             {% if comment['replyto'] %} --> <a href="/p/{{ comment['replyto'].replace('/','#') }}" class="msgid">#{{ comment['replyto']}}</a>{% end %}
+             / {{ w.time(comment['date']) }}
         </div>
     </div>
     </div>
