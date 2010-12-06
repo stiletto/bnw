@@ -94,7 +94,7 @@ redeye_formatters = {
 }
 
 simple_handlers = (
-        (ur'(?:ping|PING|зштп|пинг|ПИНГ)', 'ping'),
+        (ur'(?:ping|PING|зштп|пинг|ПИНГ)', command_ping.cmd_ping),
         (ur'REGISTER (?P<name>\S+)',command_register.cmd_register),
         (ur'(?:INTERFACE|interface) (?P<iface>\S+)',command_interface.cmd_interface),
         (ur'[DdвВ] #(?P<message>.+)',command_delete.cmd_delete),
@@ -128,7 +128,7 @@ simple_handlers = (
         (ur'#(?P<message>[0-9A-Za-z]+/[0-9A-Za-z]+) (?P<text>.+)',command_post.cmd_comment),
         (ur'! +#(?P<message>[0-9A-Za-z]+)(?: (?P<comment>.+))?',command_post.cmd_recommend),
         (ur'(?:(?P<tag1>[\*!]\S+)?(?: (?P<tag2>[\*!]\S+))?(?: (?P<tag3>[\*!]\S+))?(?: (?P<tag4>[\*!]\S+))?(?: (?P<tag5>[\*!]\S+))? )?(?P<text>.+)',
-            command_post.cmd_post),
+            command_post.cmd_post_simple),
     )
 
 simple_formatters = {
