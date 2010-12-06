@@ -64,7 +64,7 @@ def cmd_post_simple(request,text,tag1=None,tag2=None,tag3=None,tag4=None,tag5=No
     clubs=','.join([x[1:] for x in raw_tags if x.startswith('!')])
     tags=','.join([x[1:] for x in raw_tags if x.startswith('*')])
     #print '\n\n\n\nDAFWEASFDASDFASDFFASDASDFASFSFAASFDASFDDDDDDDDDDDDDDDDDD\n\n\n\n'
-    defer.returnValue((yield cmd_post(request,tags=tags,clubs=clugs,text=text)))
+    defer.returnValue((yield cmd_post(request,tags=tags,clubs=clubs,text=text)))
 
 @require_auth
 @check_arg(message=MESSAGE_RE+'(?:/'+MESSAGE_RE+')?')
