@@ -37,6 +37,8 @@ class RegexParser(parser_basexmpp.BaseXmppParser):
         handler,kwargs = self.resolve(msg)
         if not handler:
             defer.returnValue('ERROR. Parser has no idea on how to handle this.')
+        # deunicodify args:
+        kwargs=dict((str(k),v) for k,v in kwargs.iteritems())
         result=yield handler(msg,**kwargs)
         defer.returnValue(self.formatResult(msg,result))
             
