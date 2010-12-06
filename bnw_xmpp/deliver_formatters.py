@@ -12,3 +12,5 @@ redeye_formatters = {
 
 parsers={}
 parsers['redeye']=redeye_formatters
+parsers['simplified']=redeye_formatters
+
