@@ -55,8 +55,19 @@ def cmd_post(request,tags="",clubs="",anonymous="",text=""):
         defer.returnValue(
             (yield postMessage(request,tags,clubs,text,anonymous,False)))
 
+
+@defer.inlineCallbacks
+def cmd_post_simple(request,text,tag1=None,tag2=None,tag3=None,tag4=None,tag5=None):
+#        (ur'(?:(?P<tag1>[\*!]\S+)?(?: (?P<tag2>[\*!]\S+))?(?: (?P<tag3>[\*!]\S+))?(?: (?P<tag4>[\*!]\S+))?(?: (?P<tag5>[\*!]\S+))? )?(?P<text>.+)',
+#            command_post.cmd_post_simple),
+    raw_tags=[t for t in (tag1,tag2,tag3,tag4,tag5) if t]
+    clubs=','.join([x[1:] for x in raw_tags if x.startswith('!')])
+    tags=','.join([x[1:] for x in raw_tags if x.startswith('*')])
+    #print '\n\n\n\nDAFWEASFDASDFASDFFASDASDFASFSFAASFDASFDDDDDDDDDDDDDDDDDD\n\n\n\n'
+    defer.returnValue((yield cmd_post(request,tags=tags,clubs=clugs,text=text)))
+
 @require_auth
-@check_arg(message=MESSAGE_RE+'/'+MESSAGE_RE)
+@check_arg(message=MESSAGE_RE+'(?:/'+MESSAGE_RE+')?')
 @defer.inlineCallbacks
 def cmd_comment(request,message="",anonymous="",text=""):
         message=message.upper()
