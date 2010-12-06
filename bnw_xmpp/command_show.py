@@ -50,7 +50,7 @@ class ShowCommand(BaseCommand):
                 defer.returnValue('No such message.')
             if parameters[1][1]:
                 comment_id=parameters[1][1][1:].upper()
-                reply=FUCK.comments.find_one({'message':msg_id,'id':comment_id})
+                reply=yield objs.Comment.find_one({'message':msg_id,'id':msg_id+'/'+comment_id})
                 if not reply:
                     defer.returnValue('No such reply.')
                 defer.returnValue(formatCommentSimple(reply,short=False))
