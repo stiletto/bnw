@@ -1,6 +1,6 @@
 # coding: utf-8
 import bnw_xmpp
-from bnw_xmpp.base import CommandParserException, XmppMessage, get_db
+from bnw_xmpp.base import CommandParserException, XmppMessage
 import bnw_core.bnw_objects as objs
 import pymongo
 import traceback
@@ -33,7 +33,7 @@ def idiotic(msg):
             if message_user:
                 if 'interface' in message_user:
                     iparser=message_user['interface']
-            defer.returnValue((yield bnw_xmpp.handlers.parsers[iparser].handleCommand(xmsg)))
+            defer.returnValue((yield bnw_xmpp.handlers.parsers[iparser].handle(xmsg)))
         except CommandParserException, exc:
             defer.returnValue((yield exc.args[0]))
         #except pymongo.errors.AutoReconnect:

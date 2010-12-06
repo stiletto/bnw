@@ -5,8 +5,6 @@ from base import *
 import random
 import bnw_core.bnw_objects as objs
 
-from parser_redeye import requireAuthRedeye, formatMessage, formatComment
-from parser_simplified import requireAuthSimplified, formatMessageSimple, formatCommentSimple
 from twisted.python import log
 import bnw_core.post
 
@@ -15,158 +13,88 @@ def _(s,user):
 
 @defer.inlineCallbacks
 def throttle_check(user):
-    post_throttle=yield (yield get_db())['post_throttle'].find_one({'user':user})
+    post_throttle=yield objs.Throttle.find_one({'user':user})
     if post_throttle and post_throttle['time']>=(time.time()-5):
         raise XmppResponse('You are sending messages too fast!')
     defer.returnValue(post_throttle)
     
 @defer.inlineCallbacks
 def throttle_update(user,post_throttle):
-        db=yield get_db()
         throttledoc={'user':user,'time':time.time()}
         if post_throttle:
-            _ = yield db['post_throttle'].update({'user':user},throttledoc)
+            _ = yield objs.Throttle.mupdate({'user':user},throttledoc)
         else:
-            _ = yield db['post_throttle'].insert(throttledoc)
+            throttle=objs.Throttle(throttledoc)
+            _ = yield throttle.save()
         defer.returnValue(None)
 
-class PostCommand(BaseCommand):
-    redeye_name='post'
-
-    @requireAuthSimplified
-    @defer.inlineCallbacks
-    def handleSimplified(self,command,msg,parameters):
-        groups=parameters[0]
-        tags=[]
-        clubs=[]
-        for a in filter(None,groups[0:5]):
-            if a[0]=='!':
-                clubs.append(a[1:])
-            else:
-                tags.append(a[1:])
-        text=groups[5]
-        defer.returnValue((yield self.postMessage(msg,tags,clubs,text)))
-
-    @defer.inlineCallbacks
-    def postMessage(self,msg,tags,clubs,text,anon=False,anoncom=False):
-        post_throttle=yield throttle_check(msg.user['name'])
-        rest = yield bnw_core.post.postMessage(msg.user,tags,clubs,text,anon,anoncom)
-        if type(rest)==tuple:
+@defer.inlineCallbacks
+def postMessage(request,tags,clubs,text,anon=False,anoncom=False):
+        post_throttle=yield throttle_check(request.user['name'])
+        ok,rest = yield bnw_core.post.postMessage(request.user,tags,clubs,text,anon,anoncom,sfrom=request.to)
+        _ = yield throttle_update(request.user['name'],post_throttle)
+        if ok:
             msgid,qn,recepients = rest
+            defer.returnValue(
+                dict(ok=True,
+                     desc='Message #%s has been delivered to %d users. $%d. http://bnw.blasux.ru/p/%s' % (msgid,recepients,qn,msgid),
+                     id=msgid)
+            )
         else:
-            defer.returnValue(rest)
-        _ = yield throttle_update(msg.user['name'],post_throttle)
-        defer.returnValue('Posted with id %s. Delivered to %d users. Total cost: $%d. http://bnw.blasux.ru/p/%s' % (msgid,recepients,qn,msgid))
+            defer.returnValue(
+                dict(ok=False,desc=rest)
+            )
 
-    @requireAuthRedeye
-    @defer.inlineCallbacks
-    def handleRedeye(self,options,rest,msg):
-        tags=options['tags'].split(',')[:5] if 'tags' in options else []
-        clubs=options['clubs'].split(',')[:5] if 'clubs' in options else []
-        tags=map(lambda x: x.replace('\n',' '),map(unicode.lower,tags))
-        clubs=map(lambda x: x.replace('\n',' '),map(unicode.lower,clubs))
-        defer.returnValue((yield self.postMessage(msg,tags,clubs,rest,options.get('anonymous',False),options.get('anonymous-comments',False))))
-    handleRedeye.arguments = (
-        ("s", "notop", False, u"Post cannot be bumped to top."), # no-op
-        ("t", "tags", True, u"Mark post with this tag(s) (comma-separated)."),
-        ("c", "clubs", True, u"Post to this club(s) (comma-separated)."),
-        ("a", "anonymous", False, u"Anonymous post."),
-        ("q", "anonymous-comments", False, u"Make all comments to this post anonymous (doesn''t work at all yet)."),
-    )
+@require_auth
+@defer.inlineCallbacks
+def cmd_post(request,tags="",clubs="",anonymous="",text=""):
+        tags=tags.split(',')[:5]
+        clubs=clubs.split(',')[:5]
+        tags=list(set([x.lower().replace('\n',' ') for x in tags]))
+        clubs=list(set([x.lower().replace('\n',' ') for x in clubs]))
+        defer.returnValue(
+            (yield postMessage(request,tags,clubs,text,anonymous,False)))
 
-class CommentCommand(BaseCommand):
-    redeye_name='post'
-
-    @defer.inlineCallbacks
-    def postComment(self,message_id,comment_id,rest,msg,anon=False):
-        post_throttle=yield throttle_check(msg.user['name'])
-        
-        rest = yield bnw_core.post.postComment(message_id,comment_id,rest,msg.user,anon)
-        if type(rest)==tuple:
-            msgid,qn,recepients = rest
+@require_auth
+@check_arg(message=MESSAGE_RE+'/'+MESSAGE_RE)
+@defer.inlineCallbacks
+def cmd_comment(request,message="",anonymous="",text=""):
+        message=message.upper()
+        message_id=message.split('/')[0]
+        comment_id=message if '/' in message else None
+        post_throttle=yield throttle_check(request.user['name'])
+        ok,rest = yield bnw_core.post.postComment(message_id,comment_id,text,request.user,anonymous,sfrom=request.to)
+        _ = yield throttle_update(request.user['name'],post_throttle)
+        if ok:
+            msgid,num,qn,recepients = rest
+            defer.returnValue(
+                dict(ok=True,
+                    desc='Comment #%s (%d) has been delivered to %d users. $%d. http://bnw.blasux.ru/p/%s' % 
+                        (msgid,num,recepients,qn,msgid.replace('/','#')),
+                    id=msgid,
+                    num=num,)
+            )
         else:
-            defer.returnValue(rest)
-        _ = yield throttle_update(msg.user['name'],post_throttle)
+            defer.returnValue(
+                dict(ok=False,desc=rest)
+            )
         #log.debug
-        defer.returnValue('Posted with id %s. Delivered to %d users. Total cost: $%d. http://bnw.blasux.ru/p/%s' % 
-            (msgid,recepients,qn,msgid.replace('/','#')))
 
-    @requireAuthSimplified
-    @defer.inlineCallbacks
-    def handleSimplified(self,command,msg,parameters):
-        message_id=parameters[0][0].upper()
-        if parameters[0][1]:
-            #raise Exception(parameters[0][1])
-            comment_id=parameters[0][1][1:].upper()
-        else:
-            comment_id=None
-        defer.returnValue((yield self.postComment(message_id,comment_id,parameters[0][2],msg)))
-
-    @requireAuthRedeye
-    @defer.inlineCallbacks
-    def handleRedeye(self,options,rest,msg):
-        qn=0
-        message_id=options.get('message',None)
-        if message_id==None:
-            if msg.to.startswith('m-'):
-                message_id=msg.to.split('@')[0][2:]
-            else:
-                raise XmppResponse('You must specify a message to comment.')
-            
-        msplit=message_id.upper().split('/',1)
-        message_id=msplit[0]
-        if len(msplit)>1:
-            comment_id=msplit[1]
-        else:
-            comment_id=None
-            
-        defer.returnValue((yield self.postComment(message_id,comment_id,rest,msg,options.get('anonymous',False))))
-    handleRedeye.arguments = (
-        ("m", "message", True, u"Message to comment."),
-        ("a", "anonymous", False, u"Anonymous comment."),
-    )
-
-class RecommendCommand(BaseCommand):
-
-    @defer.inlineCallbacks
-    def recommend(self,message_id,rest,msg):
-        post_throttle=yield throttle_check(msg.user['name'])
-        
-        rest = yield bnw_core.post.recommendMessage(msg.user,message_id,rest)
-        if type(rest)==tuple:
+@require_auth
+@check_arg(message=MESSAGE_RE)
+@defer.inlineCallbacks
+def cmd_recommend(request,message="",comment=""):
+        post_throttle=yield throttle_check(request.user['name'])
+        ok,rest = yield bnw_core.post.recommendMessage(request.user,message,comment)
+        _ = yield throttle_update(request.user['name'],post_throttle)
+        if ok:
             qn,recepients = rest
+            defer.returnValue(
+                dict(ok=True,
+                     desc='Recommended and delivered to %d users.' % (recepients,))
+            )
         else:
-            defer.returnValue(rest)
-        _ = yield throttle_update(msg.user['name'],post_throttle)
-        defer.returnValue('Recommended and delivered to %d users.' % 
-            (recepients,))
-
-    @requireAuthSimplified
-    @defer.inlineCallbacks
-    def handleSimplified(self,command,msg,parameters):
-        message_id=parameters[0][0].upper()
-        if parameters[0][1]:
-            comment=parameters[0][1][1:].upper()
-        else:
-            comment=''
-        defer.returnValue((yield self.recommend(message_id,comment,msg)))
-
-    @requireAuthRedeye
-    @defer.inlineCallbacks
-    def handleRedeye(self,options,rest,msg):
-        qn=0
-        message_id=options.get('message',None)
-        if message_id==None:
-            if msg.to.startswith('m-'):
-                message_id=msg.to.split('@')[0][2:]
-            else:
-                raise XmppResponse('You must specify a message to recommend.')
-        defer.returnValue((yield self.recommend(message_id,rest,msg)))
-    handleRedeye.arguments = (
-        ("m", "message", True, u"Message to recommend."),
-    )
-
-postcmd = PostCommand()
-commentcmd = CommentCommand()
-recommendcmd = RecommendCommand()
-
+            defer.returnValue(
+                dict(ok=True,
+                     desc=comment)
+            )

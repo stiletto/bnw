@@ -47,6 +47,16 @@ def create_reply(elem):
     elem['to']   = frm
     return elem
 
+def create_presence(frm,to,childs=[],**kwargs):
+    msg = domish.Element((None, "presence"))
+    msg["from"] = frm
+    msg["to"] = to
+    for k,v in kwargs.iteritems():
+        if k.startswith('_'):
+            k = k[1:]
+        msg[k] = v
+    return msg
+
 class LogService(component.Service):
     """
     A service to log incoming and outgoing xml to and from our XMPP component.
@@ -180,8 +190,22 @@ class BnwService(component.Service):
         Act on the presence stanza that has just been received.
 
         """
-        prs = create_reply(prs)
-        self.xmlstream.send(prs)
+        prs_type = prs["type"] or ""
+        send_status = False
+        #print prs_type
+        if prs_type=="subscribe":
+            self.xmlstream.send(create_presence(prs["to"],prs["from"],_type="subscribed"))
+            send_status = True
+        elif prs_type=="unsubscribe":
+            self.xmlstream.send(create_presence(prs["to"],prs["from"],_type="unsubscribed"))
+        elif prs_type=="error":
+            return
+        if prs_type=="probe" or send_status:
+            msg = create_presence(prs["to"],prs["from"])
+            tm = time.gmtime()
+            termctrl = "9600 0010 1110 0000 %02d %02d %02d" % (tm.tm_hour,tm.tm_min,tm.tm_sec)
+            msg.addElement("status", content=termctrl)
+            self.xmlstream.send(msg)
 
     def getResource(self):
         r = resource.Resource()

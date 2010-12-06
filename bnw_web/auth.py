@@ -31,7 +31,7 @@ class LoginHandler(TwistedHandler):
         key = self.get_argument("key","")
         user=(yield objs.User.find_one({'login_key':key}))
         if user:
-            self.set_cookie('bnw_loginkey',key)
+            self.set_cookie('bnw_loginkey',key,expires_days=30)
             self.redirect('/')
             defer.returnValue('')
         else:
