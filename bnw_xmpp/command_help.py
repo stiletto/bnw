@@ -78,8 +78,8 @@ def formatCommand(command):
           ' '+arg[3]) for arg in elf.parser.commands[command]))
 
 def cmd_help_simple(request):
-    return 'Help:'+helptext_simple
+    return dict(ok=True,desc='Help:'+helptext_simple)
 
 def cmd_help_redeye(request):
-    return 'Help:'+helptext
+    return dict(ok=True,desc='Help:'+helptext)
         #+'\n'.join(self.formatCommand(command) for command in self.parser.commands)
