@@ -195,10 +195,10 @@ class Message(MongoObject):
                                    recocomment=recocomment))
             feedel = FeedElement(feedel_val)
             if recommender:
-                formatter = deliver_formatters.parsers[target['interface']]['recommendation']
+                formatter = deliver_formatters.parsers[target.get('interface','redeye')]['recommendation']
                          
             else:
-                formatter = deliver_formatters.parsers[target['interface']]['message']
+                formatter = deliver_formatters.parsers[target.get('interface','redeye')]['message']
             formatted = formatter(None,
                 dict(message=self,
                      recommender=recommender,
@@ -232,7 +232,7 @@ class Comment(MongoObject):
     dangerous_fields = ('_id','real_user')
 
     def deliver(self,target,recommender=None,recocomment=None,sfrom=None):
-        formatter = deliver_formatters.parsers[target['interface']]['comment']
+        formatter = deliver_formatters.parsers[target.get('interface','redeye')]['comment']
         formatted = formatter(None,
             dict(comment=self)
         )
