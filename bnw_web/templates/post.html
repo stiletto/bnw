@@ -4,6 +4,7 @@
 <form action='/post' method='post'>
     <div class='outerborder'>
         <div class='msg'>
+            {{ xsrf_form_html() }}
             <p>Бээнвач думает, что вас зовут {{ auth_user['name'] }}</p>
             <p>Теги (запятая): &nbsp;<input class='blueinput' name='tags' size='64'></p>
             <p>Клубы (запятая): <input class='blueinput' name='clubs' size='64'></p>

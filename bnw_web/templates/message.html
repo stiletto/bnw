@@ -157,6 +157,7 @@
     <div class='outerborder'>
         <div class='msg'>
             <form action='/comment' method='post'>
+                {{ xsrf_form_html() }}
                 <input type='hidden' name='msg' value='{{ msgid }}'/>
                 <textarea name='text' style='width: 100%;' cols='3' class='blueinput'></textarea>
                 Id комментария: <input name='comment' class='blueinput' size='4'/>

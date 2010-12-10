@@ -3,7 +3,6 @@
 
 from base import *
 import bnw_core.base
-import random
 from twisted.internet import defer
 
 @require_auth

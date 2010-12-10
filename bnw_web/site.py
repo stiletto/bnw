@@ -24,8 +24,11 @@ from tornado.options import define, options
 
 import bnw_core.bnw_objects as objs
 import bnw_core.post as post
+import bnw_core.base
 from bnw_core.base import get_db
-from base import BnwWebHandler, TwistedHandler
+from bnw_xmpp.command_show import cmd_feed
+
+from base import BnwWebHandler, TwistedHandler, BnwWebRequest
 from auth import LoginHandler, requires_auth, AuthMixin
 define("port", default=8888, help="run on the given port", type=int)
 
@@ -67,9 +70,14 @@ class UserHandler(BnwWebHandler):
         
         format=self.get_argument("format","")
         if format=='rss':
-            rss_items=[PyRSS2Gen.RSSItem(author=username,description=msg['text']) for msg in messages]
+            rss_items=[PyRSS2Gen.RSSItem(author=username,
+                    link=widgets.post_url(msg['id']),
+                    guid=widgets.post_url(msg['id']),
+                    pubDate=datetime.utcfromtimestamp(msg['date']),
+                    categories=set(msg['tags'])|set(msg['clubs']),
+                    description=msg['text']) for msg in messages]
             rss_feed=PyRSS2Gen.RSS2(title='Поток сознания @%s' % username,
-                        link='http://bnw.blasux.ru'+widgets.user_url(username),
+                        link=widgets.user_url(username),
                         description=None,
                         docs=None,
                         items=rss_items)
@@ -110,11 +118,48 @@ class MainHandler(BnwWebHandler):
         page=int(page)
         messages=(yield objs.Message.find({},filter=f,limit=20,skip=20*page))
         uc=(yield objs.User.count())
+        format=self.get_argument("format","")
+        if format=='rss':
+            rss_items=[PyRSS2Gen.RSSItem(
+                    author=msg['user'],
+                    link=widgets.post_url(msg['id']),
+                    guid=widgets.post_url(msg['id']),
+                    pubDate=datetime.utcfromtimestamp(msg['date']),
+                    categories=set(msg['tags'])|set(msg['clubs']),
+                    description=msg['text']) for msg in messages]
+            rss_feed=PyRSS2Gen.RSS2(title='Последние сообщения BnW',
+                        link=bnw_core.base.config.webui_base,
+                        description=None,
+                        docs=None,
+                        items=rss_items)
+            defer.returnValue(rss_feed.to_xml(encoding='utf-8'))
+        elif format=='json':
+            json_messages=[message.filter_fields() for message in messages]
+            defer.returnValue(json.dumps(json_messages,ensure_ascii=False))
+        else:
+            defer.returnValue({
+                'messages': messages,
+                'users_count':int(uc),
+                'page': page,
+            })
+
+class FeedHandler(BnwWebHandler,AuthMixin):
+    templatename='feed.html'
+    @requires_auth
+    @defer.inlineCallbacks
+    def respond(self,page=0):
+        req=BnwWebRequest((yield self.get_auth_user()))
+        result = yield cmd_feed(req)
         defer.returnValue({
-            'messages': messages,
-            'users_count':int(uc),
-            'page': page,
+            'result': result,
         })
+
+class BlogHandler(BnwWebHandler,AuthMixin):
+    @requires_auth
+    @defer.inlineCallbacks
+    def respond(self,page=0):
+        user=yield self.get_auth_user()
+        self.redirect(str('/u/'+user['name']))
 
 class PostHandler(BnwWebHandler,AuthMixin):
     templatename='post.html'
@@ -146,12 +191,14 @@ class CommentHandler(BnwWebHandler,AuthMixin):
     def respond_post(self):
         msg=self.get_argument("msg","")
         comment=self.get_argument("comment","")
+        if comment:
+            comment=msg+"/"+comment
         text=self.get_argument("text","")
         noredir=self.get_argument("noredir","")
         user = yield self.get_auth_user()
         ok,result = yield post.postComment(msg,comment,text,user)
         if ok:
-            (msg_id,qn,recs) = result
+            (msg_id,num,qn,recs) = result
             if noredir:
                 defer.returnValue('Posted with '+msg_id)
             else:
@@ -161,11 +208,12 @@ class CommentHandler(BnwWebHandler,AuthMixin):
                 self.redirect(str(redirtarget))
                 defer.returnValue('')
         else:
-            defer.returnValue(result.get('desc','Error'))
+            defer.returnValue(result)
 
 def get_site():
     settings={
-        'template_path':os.path.join(os.path.dirname(__file__), "templates")
+        "template_path":os.path.join(os.path.dirname(__file__), "templates"),
+        "xsrf_cookies": True,
     }
     application = tornado.web.Application([
 #        (r"/posts/(.*)", MessageHandler),
@@ -178,6 +226,8 @@ def get_site():
         (r"/pg([0-9]+)", MainHandler),
         (r"/login", LoginHandler),
         (r"/post", PostHandler),
+        (r"/feed", FeedHandler),
+        (r"/blog", BlogHandler),
         (r"/comment", CommentHandler),
     ],**settings)
 

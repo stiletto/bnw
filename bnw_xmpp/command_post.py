@@ -2,7 +2,7 @@
 #from twisted.words.xish import domish
 
 from base import *
-import random
+import random,time
 import bnw_core.bnw_objects as objs
 
 from twisted.python import log
@@ -50,8 +50,8 @@ def postMessage(request,tags,clubs,text,anon=False,anoncom=False):
 def cmd_post(request,tags="",clubs="",anonymous="",text=""):
         tags=tags.split(',')[:5]
         clubs=clubs.split(',')[:5]
-        tags=list(set([x.lower().replace('\n',' ') for x in tags]))
-        clubs=list(set([x.lower().replace('\n',' ') for x in clubs]))
+        tags=filter(None,set([x.lower().strip().replace('\n',' ') for x in tags]))
+        clubs=filter(None,set([x.lower().strip().replace('\n',' ') for x in clubs]))
         defer.returnValue(
             (yield postMessage(request,tags,clubs,text,anonymous,False)))
 
@@ -63,7 +63,6 @@ def cmd_post_simple(request,text,tag1=None,tag2=None,tag3=None,tag4=None,tag5=No
     raw_tags=[t for t in (tag1,tag2,tag3,tag4,tag5) if t]
     clubs=','.join([x[1:] for x in raw_tags if x.startswith('!')])
     tags=','.join([x[1:] for x in raw_tags if x.startswith('*')])
-    #print '\n\n\n\nDAFWEASFDASDFASDFFASDASDFASFSFAASFDASFDDDDDDDDDDDDDDDDDD\n\n\n\n'
     defer.returnValue((yield cmd_post(request,tags=tags,clubs=clubs,text=text)))
 
 @require_auth

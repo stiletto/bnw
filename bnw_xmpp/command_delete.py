@@ -4,7 +4,6 @@
 from base import *
 import bnw_core.bnw_objects as objs
 from twisted.internet import defer
-import random
 
 
 def _(s,user):

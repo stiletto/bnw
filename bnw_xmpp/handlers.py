@@ -12,11 +12,13 @@ import command_interface
 import command_login
 import command_onoff
 import command_ping
+import command_pm
 import command_post
 import command_register
 import command_show
 import command_subscription
 import formatters_redeye
+import formatters_simple
 
 subscribe_args = (
                 ("m", "message", True, u"Subscribe to message."),
@@ -69,6 +71,8 @@ redeye_handlers = (
         ("subscriptions", (), command_subscription.cmd_subscriptions, ),
         ("lsub", (), command_subscription.cmd_subscriptions, ),
         ("help", (), command_help.cmd_help_redeye, ),
+        ("feed", show_args, command_show.cmd_feed, ),
+        ("f", show_args, command_show.cmd_feed, ),
         ("show", show_args, command_show.cmd_show, ),
         ("s", show_args, command_show.cmd_show, ),
         ("post", post_args, command_post.cmd_post, "text", ),
@@ -82,6 +86,13 @@ redeye_handlers = (
         ("delete", delete_args, command_delete.cmd_delete, ),
         ("d", delete_args, command_delete.cmd_delete, ),
         ("login", (), command_login.cmd_login, ),
+        ("pm",
+            (
+                ("u", "user", True, u"Target user."),
+            ),
+            command_pm.cmd_pm,
+            "text",
+        ),
 )
 
 redeye_formatters = {
@@ -100,9 +111,11 @@ simple_handlers = (
         (ur'[DdвВ] #(?P<message>.+)',command_delete.cmd_delete),
         (ur'[DdвВ] L',command_delete.cmd_delete,{'last':True}),
         (ur'[SsыЫ]',command_subscription.cmd_subscriptions),
+        (ur'[SsыЫ] #(?P<message>.+)',command_subscription.cmd_subscribe),
         (ur'[SsыЫ] @(?P<user>\S+)',command_subscription.cmd_subscribe),
         (ur'[SsыЫ] \*(?P<tag>\S+)',command_subscription.cmd_subscribe),
         (ur'[SsыЫ] !(?P<club>\S+)',command_subscription.cmd_subscribe),
+        (ur'[UuгГ] #(?P<message>.+)',command_subscription.cmd_unsubscribe),
         (ur'[UuгГ] @(?P<user>\S+)',command_subscription.cmd_unsubscribe),
         (ur'[UuгГ] \*(?P<tag>\S+)',command_subscription.cmd_unsubscribe),
         (ur'[UuгГ] !(?P<club>\S+)',command_subscription.cmd_unsubscribe),
@@ -111,11 +124,11 @@ simple_handlers = (
         (ur'(?:LOGIN|login)',command_login.cmd_login),
         (ur'(?:ON|on)',command_onoff.cmd_on),
         (ur'(?:OFF|off)',command_onoff.cmd_off),
-#        (r'PM +@(?P<user>\S+) +(?P<text>.+)',command_pm.cmd_pm),
+        (ur'PM +@(?P<user>\S+) +(?P<text>.+)',command_pm.cmd_pm),
         (ur'BL','not_implemented'),
         (ur'BL .+','not_implemented'),
         (ur'\? .+','not_implemented'),
-        (ur'[#№]','feed'),
+        (ur'[#№]',command_show.cmd_feed),
         (ur'[#№]\+',command_show.cmd_show),
         (ur'@(?P<user>\S+)',command_show.cmd_show),
         (ur'@(?P<user>\S+)',command_show.cmd_show),
@@ -127,17 +140,17 @@ simple_handlers = (
         (ur'#(?P<message>[0-9A-Za-z]+) (?P<text>.+)',command_post.cmd_comment),
         (ur'#(?P<message>[0-9A-Za-z]+/[0-9A-Za-z]+) (?P<text>.+)',command_post.cmd_comment),
         (ur'! +#(?P<message>[0-9A-Za-z]+)(?: (?P<comment>.+))?',command_post.cmd_recommend),
-        (ur'(?:(?P<tag1>[\*!]\S+)?(?: (?P<tag2>[\*!]\S+))?(?: (?P<tag3>[\*!]\S+))?(?: (?P<tag4>[\*!]\S+))?(?: (?P<tag5>[\*!]\S+))? )?(?P<text>.+)',
+        (ur'(?:(?P<tag1>[\*!]\S+)?(?:\s+(?P<tag2>[\*!]\S+))?(?:\s+(?P<tag3>[\*!]\S+))?(?:\s+(?P<tag4>[\*!]\S+))?(?:\s+(?P<tag5>[\*!]\S+))?\s+)?(?P<text>.+)',
             command_post.cmd_post_simple),
     )
 
 simple_formatters = {
-    'comment': formatters_redeye.formatter_comment,
-    'message': formatters_redeye.formatter_message,
-    'recommendation': formatters_redeye.formatter_recommendation,
-    'message_with_replies': formatters_redeye.formatter_message_with_replies,
-    'messages': formatters_redeye.formatter_messages,
-    'subscriptions': formatters_redeye.formatter_subscriptions,
+    'comment': formatters_simple.formatter_comment,
+    'message': formatters_simple.formatter_message,
+    'recommendation': formatters_simple.formatter_recommendation,
+    'message_with_replies': formatters_simple.formatter_message_with_replies,
+    'messages': formatters_simple.formatter_messages,
+    'subscriptions': formatters_simple.formatter_subscriptions,
 }
 
 parsers={}

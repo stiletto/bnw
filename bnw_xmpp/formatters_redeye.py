@@ -57,7 +57,9 @@ def formatter_message_with_replies(request,result):
             '\n'.join((format_comment(c,True) for c in result['replies']))
 
 def formatter_subscriptions(request,result):
-    return 'Your subscriptions:\n'+'\n'.join((s['type'][4:].ljust(5)+s['target'] for s in result['subscriptions']))
+    return 'Your subscriptions:\n'+'\n'.join(
+        (s['type'][4:].ljust(5)+s['target'].rjust(10)+' '+s.get('from','')
+         for s in result['subscriptions']))
 
 def formatter_message(request,result):
     return format_message(result['message'])

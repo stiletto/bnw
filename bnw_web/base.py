@@ -19,10 +19,20 @@ from widgets import widgets
 import PyRSS2Gen
 import websocket_site
 from datetime import datetime
+import traceback
 
 import bnw_core.bnw_objects as objs
 import bnw_core.post as post
 from bnw_core.base import get_db
+
+class BnwWebRequest(object):
+    def __init__(self,user=None):
+        self.body=None
+        self.to=None
+        self.jid=user['jid']
+        self.bare_jid=self.jid
+        self.user=user
+
 
 class TwistedHandler(tornado.web.RequestHandler):
     def writeandfinish(self,text):
@@ -72,14 +82,16 @@ ranq=(
 )
 
 class BnwWebHandler(TwistedHandler):
+    errortemplate='500.html'
     def get_defargs(self):
         return {
             'linkify': escape.linkify,
             'ranq': random.choice(ranq),
             'display_appeal': random.random(),
             'w': widgets,
-            'auth_user': None,
+            'auth_user': getattr(self,'user',None),
         }
+
     def render(self,templatename,**kwargs):
         global ranq
         defargs=self.get_defargs()
@@ -88,7 +100,15 @@ class BnwWebHandler(TwistedHandler):
 
     def writeandfinish(self,text):
         if isinstance(text,dict):
-            self.render(self.templatename,**text)
+            try:
+                self.render(self.templatename,**text)
+            except Exception, e:
+                self.render(self.errortemplate,text=traceback.format_exc())
         else:
             super(BnwWebHandler,self).writeandfinish(text)
 
+    def errorfinish(self,text):
+        #tb=text.getTracebackObject()
+        #if tb:
+        text=text.getTraceback()
+        self.render(self.errortemplate,text=text)

@@ -3,7 +3,7 @@
 """
 import bnw_objects as objs
 from base import genid,cropstring
-from twisted.internet import interfaces, defer, reactor
+from twisted.internet import defer, reactor
 import time
 from twisted.python import log
 
@@ -60,18 +60,18 @@ def send_to_subscribers(queries,message,recommender=None,recocomment=None):
     qn=0
     for query in queries:
         qn+=1
-        for result in (yield objs.Subscription.find(query,fields=['user'])):
+        for result in (yield objs.Subscription.find(query,fields=['user','from'])):
             if result['user']==message['user']:
                 continue
             recipients[result['user']]=result
     reccount=0
+    print recipients
     for target_name,subscription in recipients.iteritems():
         target=yield objs.User.find_one({'name': target_name})
         qn+=1
         if target:
-            if not target.get('off',False):
-                reccount += yield message.deliver(target,recommender,recocomment,sfrom=subscription.get('from',None))
-                log.msg('Sent %s to %s' % (message['id'],target['jid']))
+            reccount += yield message.deliver(target,recommender,recocomment,sfrom=subscription.get('from',None))
+            log.msg('Sent %s to %s' % (message['id'],target['jid']))
     defer.returnValue((qn,reccount))
 
 @defer.inlineCallbacks
@@ -160,7 +160,7 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
     defer.returnValue((True,(comment['id'],comment['num'],qn,recipients)))
 
 @defer.inlineCallbacks
-def recommendMessage(user,message_id,comment,sfrom=None):
+def recommendMessage(user,message_id,comment="",sfrom=None):
     """!Это дерьмо рекоммендует сообщение и рассылает его.
     @param user Объект-пользователь.
     @param message id сообщения.
@@ -170,6 +170,8 @@ def recommendMessage(user,message_id,comment,sfrom=None):
     message=yield objs.Message.find_one({'id': message_id})
     if message==None:
         defer.returnValue((False,'No such message.'))
+    if not comment:
+        comment=""
     if len(comment)>256:
         defer.returnValue((False,'Recommendation is too long. %d/256' % (len(comment),)))
 

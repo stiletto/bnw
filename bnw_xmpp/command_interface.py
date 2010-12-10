@@ -2,7 +2,6 @@
 #from twisted.words.xish import domish
 
 from base import *
-import random
 
 import bnw_core.bnw_objects as objs
 

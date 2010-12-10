@@ -1,9 +1,13 @@
 {% extends "base.html" %}
 {% block title %}BnW - Гланге{% end %}
+{% block extrahead %}
+    <link rel="alternate" type="application/rss+xml" title="Последние сообщения BnW" href="/?format=rss" />
+{% end %}
 {% block body %}
     <div class='outerborder'>
         <div class='msg'>
             TbI - HRWKA! {{ users_count }}.0238 пользователей не могут ошибаться!
+            Я не знаю как так вышло, но на главной тоже появилась <a href="/?format=rss">RSS</a>.
             {% if display_appeal>0.9 %}
             <div id="JA1banner3" style='width: 100%; background-image: url(http://hermes.blasux.ru/jimmy.jpg); background-position: right top; background-repeat: no-repeat; overflow: hidden; height: 172px;'>
             <a class="variable_lp cn-full-banner-click" href="/static/appeal.html" style='text-decoration: none; color: #333;'>
@@ -13,7 +17,7 @@
             </a>
             </div>
             {% end %}
-               
+
         </div>
     </div>
     <hr/>

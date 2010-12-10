@@ -2,11 +2,10 @@
 from base import get_db,get_db_existing
 from bnw_xmpp.base import send_plain
 from bnw_xmpp import deliver_formatters
-from twisted.internet import interfaces, defer, reactor
+from twisted.internet import interfaces, defer
 #from bnw_xmpp.parser_redeye import requireAuthRedeye, formatMessage, formatComment
 #from bnw_xmpp.parser_simplified import requireAuthSimplified, formatMessageSimple, formatCommentSimple
-import txmongo
-from twisted.python import log
+import txmongo,time
 # TODO: suck cocks
 class LazyRelated(object):
     """
@@ -189,10 +188,10 @@ class Message(MongoObject):
     def deliver(self,target,recommender=None,recocomment=None,sfrom=None):
         feedel_val = dict(user=target['name'],message=self['id'])
         feedel = yield FeedElement.find_one(feedel_val)
-        print feedel
         if not feedel:
             feedel_val.update(dict(recommender=recommender,
-                                   recocomment=recocomment))
+                                   recocomment=recocomment,
+                                   date=time.time()))
             feedel = FeedElement(feedel_val)
             if recommender:
                 formatter = deliver_formatters.parsers[target.get('interface','redeye')]['recommendation']
@@ -204,9 +203,11 @@ class Message(MongoObject):
                      recommender=recommender,
                      recocomment=recocomment)
             )
-            target.send_plain(formatted,sfrom)
             _ = yield feedel.save()
-            defer.returnValue(1)
+            if not target.get('off',False):
+                target.send_plain(formatted,sfrom)
+                defer.returnValue(1)
+            defer.returnValue(0)
         else:
             defer.returnValue(0)
 
@@ -232,12 +233,15 @@ class Comment(MongoObject):
     dangerous_fields = ('_id','real_user')
 
     def deliver(self,target,recommender=None,recocomment=None,sfrom=None):
-        formatter = deliver_formatters.parsers[target.get('interface','redeye')]['comment']
-        formatted = formatter(None,
-            dict(comment=self)
-        )
-        target.send_plain(formatted,sfrom)
-        return 1 #defer.returnValue(1)
+        if not target.get('off',False):
+            formatter = deliver_formatters.parsers[target.get('interface','redeye')]['comment']
+            formatted = formatter(None,
+                dict(comment=self)
+            )
+            target.send_plain(formatted,sfrom)
+            return 1 #defer.returnValue(1)
+        else:
+            return 0
 
 class User(MongoObject):
     """ Няшка-пользователь."""

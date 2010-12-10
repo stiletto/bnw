@@ -3,7 +3,6 @@
 
 from base import *
 import bnw_core.bnw_objects as objs
-import random
 
 import pymongo
 
@@ -58,3 +57,18 @@ def cmd_show(request,message="",user="",tag="",club="",page="0",replies=None):
                      ('id', message.upper()) )
         parameters = dict((p[0],p[1]) for p in parameters if p[1])
         defer.returnValue((yield showSearch(parameters,int(page))))
+
+@require_auth
+@defer.inlineCallbacks
+def cmd_feed(request):
+    feed = yield objs.FeedElement.find_sort({'user':request.user['name']},
+                                [('_id',pymongo.DESCENDING)],limit=20)
+    messages = list((yield objs.Message.find_sort({'id': { '$in': 
+            [f['message'] for f in feed]
+        }},[('date',pymongo.ASCENDING)])))
+    defer.returnValue(
+        dict(ok=True,format="messages",
+             messages=messages,
+             desc='Your feed')
+    )
+    

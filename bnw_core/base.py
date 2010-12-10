@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import random,time
-from twisted.internet import interfaces, defer, reactor
+import random
+from twisted.internet import defer
 
 idchars='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     

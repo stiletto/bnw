@@ -9,8 +9,8 @@ import bnw_core.bnw_objects as objs
 @require_auth
 @defer.inlineCallbacks
 def cmd_on(request):
-    msg.user['off']=False
-    _ = yield objs.User.mupdate({'name':msg.user['name']},msg.user)
+    request.user['off']=False
+    _ = yield objs.User.mupdate({'name':request.user['name']},request.user)
     defer.returnValue(
         dict(ok=True,desc='Welcome back!')
     )
@@ -18,8 +18,8 @@ def cmd_on(request):
 @require_auth
 @defer.inlineCallbacks
 def cmd_off(request):
-    msg.user['off']=True
-    _ = yield objs.User.mupdate({'name':msg.user['name']},msg.user)
+    request.user['off']=True
+    _ = yield objs.User.mupdate({'name':request.user['name']},request.user)
     defer.returnValue(
         dict(ok=True,desc='C u l8r!')
     )

@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-import sys
-import traceback
-import datetime
 
-from base import XmppResponse, CommandParserException, BaseParser
+from base import XmppResponse, CommandParserException
 from twisted.internet import defer
 import parser_basexmpp
 
@@ -85,8 +82,8 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
                 dict(ok=False,desc='ERROR. Command not found: %s' % (restname,))
             )
         try:
-            if 'help' in options:
-                defer.returnValue((yield self.formatCommandHelp(command.lower())))
+            #if 'help' in options:
+            #    defer.returnValue((yield self.formatCommandHelp(command.lower())))
             if restname:
                 options[restname] = rest
             result=yield handler(msg,**options)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import random,time,re
-from twisted.internet import interfaces, defer, reactor
+import re
+from twisted.internet import defer, reactor
 
 USER_RE=ur'[0-9A-Za-z_-]+'
 MESSAGE_RE=ur'[0-9A-Za-z]+'
@@ -54,7 +54,6 @@ def require_auth(fun):
 
 def check_arg(**kwargs): #fun,name,rex):
     rexs={}
-    #print kwargs
     for name,value in kwargs.iteritems():
         rexc = re.compile(r'\A'+value+r'\Z',re.DOTALL|re.UNICODE|re.MULTILINE)
         rexs[name] = (value,rexc)

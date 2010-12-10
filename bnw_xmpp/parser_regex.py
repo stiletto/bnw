@@ -12,7 +12,6 @@ formatters = {
 from twisted.internet import defer
 
 import re
-import base
 import parser_basexmpp
 
 class RegexParser(parser_basexmpp.BaseXmppParser):
