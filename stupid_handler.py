@@ -5,6 +5,7 @@ import bnw_core.bnw_objects as objs
 import pymongo
 import traceback
 import bnw_xmpp.handlers
+import bnw_xmpp.iq_handlers
 from twisted.internet import defer
 from twisted.internet.defer import _DefGen_Return
 
@@ -46,4 +47,25 @@ def idiotic(msg):
             defer.returnValue("BACKEND (CATCHED) ERROR! IMMEDIATELY REPORT THIS SHIT TO MY STUPID AUTHOR!!!\n\n"+\
                 traceback.format_exc()+"\n"+\
                 "Command which caused this exception: "+message_body)
+
+@defer.inlineCallbacks
+def iq(msg):
+        """Suck some cocks."""
+                                                                                                    
+        try:
+            iq_bare_from=msg['from'].split('/',1)[0]
+            iq_user=(yield objs.User.find_one({'jid':iq_bare_from.lower()}))
+            for handler in bnw_xmpp.iq_handlers.handlers:
+                if (yield handler(msg,iq_user)):
+                    defer.returnValue(True)
+            else:
+                defer.returnValue(False)
+        #except pymongo.errors.AutoReconnect:
+        #    defer.returnValue((yield 'Sorry, our database is down.'))
+        except Exception:
+            raise
+            print ("Error while processing iq:\n\n"+\
+                traceback.format_exc()+"\n"+\
+                "Command which caused this exception: "+iq)
+
 

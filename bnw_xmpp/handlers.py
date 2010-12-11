@@ -17,6 +17,7 @@ import command_post
 import command_register
 import command_show
 import command_subscription
+import command_vcard
 import formatters_redeye
 import formatters_simple
 
@@ -86,6 +87,7 @@ redeye_handlers = (
         ("delete", delete_args, command_delete.cmd_delete, ),
         ("d", delete_args, command_delete.cmd_delete, ),
         ("login", (), command_login.cmd_login, ),
+        ("vcard", (), command_vcard.cmd_vcard, ),
         ("pm",
             (
                 ("u", "user", True, u"Target user."),
@@ -108,6 +110,7 @@ simple_handlers = (
         (ur'(?:ping|PING|зштп|пинг|ПИНГ)', command_ping.cmd_ping),
         (ur'REGISTER (?P<name>\S+)',command_register.cmd_register),
         (ur'(?:INTERFACE|interface) (?P<iface>\S+)',command_interface.cmd_interface),
+        (ur'(?:vcard|VCARD)', command_vcard.cmd_vcard),
         (ur'[DdвВ] #(?P<message>.+)',command_delete.cmd_delete),
         (ur'[DdвВ] L',command_delete.cmd_delete,{'last':True}),
         (ur'[SsыЫ]',command_subscription.cmd_subscriptions),

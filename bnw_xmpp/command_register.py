@@ -7,6 +7,7 @@ import bnw_core.bnw_objects as objs
 
 def _(s,user):
     return s
+
 from uuid import uuid4
 import re
 
@@ -17,7 +18,7 @@ def cmd_register(request,name=""):
         if request.user:
             defer.returnValue(
                 dict(ok=False,
-                     desc=_(u'You are already registered as %s',request) % (request.user['name'],)
+                     desc=u'You are already registered as %s' % (request.user['name'],),
                 )
             )
         else:

@@ -14,7 +14,7 @@ formatters = {
 }
 
 def format_message(msg,short=False):
-    result=('@%(author)s: %(tags)s %(clubs)s\n%(text)s\n'+('\n' if short else '')+'#%(id)s http://bnw.blasux.ru/p/%(id)s') % \
+    result=('@%(author)s: %(tags)s %(clubs)s\n%(text)s\n'+('\n' if not short else '')+'#%(id)s http://bnw.blasux.ru/p/%(id)s') % \
            { 'id':    msg['id'].upper(),
              'author':msg['user'],
              'tags':  ' '.join('*'+tag for tag in msg['tags']),

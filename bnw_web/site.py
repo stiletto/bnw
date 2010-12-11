@@ -16,7 +16,8 @@ import txmongo
 import os,random,time
 import escape
 from widgets import widgets
-import PyRSS2Gen
+import rss
+import base64
 import websocket_site
 from datetime import datetime
 
@@ -25,7 +26,7 @@ from tornado.options import define, options
 import bnw_core.bnw_objects as objs
 import bnw_core.post as post
 import bnw_core.base
-from bnw_core.base import get_db
+from bnw_core.base import get_db,get_fs
 from bnw_xmpp.command_show import cmd_feed
 
 from base import BnwWebHandler, TwistedHandler, BnwWebRequest
@@ -70,18 +71,10 @@ class UserHandler(BnwWebHandler):
         
         format=self.get_argument("format","")
         if format=='rss':
-            rss_items=[PyRSS2Gen.RSSItem(author=username,
-                    link=widgets.post_url(msg['id']),
-                    guid=widgets.post_url(msg['id']),
-                    pubDate=datetime.utcfromtimestamp(msg['date']),
-                    categories=set(msg['tags'])|set(msg['clubs']),
-                    description=msg['text']) for msg in messages]
-            rss_feed=PyRSS2Gen.RSS2(title='Поток сознания @%s' % username,
+            self.set_header("Content-Type", 'application/rss+xml; charset=UTF-8')
+            defer.returnValue(rss.message_feed(messages,
                         link=widgets.user_url(username),
-                        description=None,
-                        docs=None,
-                        items=rss_items)
-            defer.returnValue(rss_feed.to_xml(encoding='utf-8'))
+                        title='Поток сознания @%s' % username))
         elif format=='json':
             json_messages=[message.filter_fields() for message in messages]
             defer.returnValue(json.dumps(json_messages,ensure_ascii=False))
@@ -120,19 +113,10 @@ class MainHandler(BnwWebHandler):
         uc=(yield objs.User.count())
         format=self.get_argument("format","")
         if format=='rss':
-            rss_items=[PyRSS2Gen.RSSItem(
-                    author=msg['user'],
-                    link=widgets.post_url(msg['id']),
-                    guid=widgets.post_url(msg['id']),
-                    pubDate=datetime.utcfromtimestamp(msg['date']),
-                    categories=set(msg['tags'])|set(msg['clubs']),
-                    description=msg['text']) for msg in messages]
-            rss_feed=PyRSS2Gen.RSS2(title='Последние сообщения BnW',
+            self.set_header("Content-Type", 'application/rss+xml; charset=UTF-8')
+            defer.returnValue(rss.message_feed(messages,
                         link=bnw_core.base.config.webui_base,
-                        description=None,
-                        docs=None,
-                        items=rss_items)
-            defer.returnValue(rss_feed.to_xml(encoding='utf-8'))
+                        title='Коллективное бессознательное BnW'))
         elif format=='json':
             json_messages=[message.filter_fields() for message in messages]
             defer.returnValue(json.dumps(json_messages,ensure_ascii=False))
@@ -210,6 +194,23 @@ class CommentHandler(BnwWebHandler,AuthMixin):
         else:
             defer.returnValue(result)
 
+emptypng=base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAAXNSR0IDN8dNUwAAAANQTFRF////p8QbyAAAAAlwSFlzAAAPYQAAD2EBqD+naQAAABZ6VFh0YXV0aG9yAAB42gtOLUpPrQQACDECcKiD3nQAAAAKSURBVAjXY2AAAAACAAHiIbwzAAAAAElFTkSuQmCC')
+
+class AvatarHandler(BnwWebHandler):
+    @defer.inlineCallbacks
+    def respond(self,username):
+        user=(yield objs.User.find_one({'name': username}))
+        if not (user and 'avatar' in user):
+            self.set_header("Content-Type", "image/png")
+            defer.returnValue(emptypng)
+        fs = (yield get_fs('avatars'))
+        # воркэраунд недопила в txmongo. TODO: зарепортить или починить
+        doc = yield fs._GridFS__files.find_one({'_id':user['avatar'][0]})
+        avatar = yield fs.get(doc)
+        avatar_data = yield avatar.read()
+        self.set_header("Content-Type", user['avatar'][1])
+        defer.returnValue(avatar_data)
+
 def get_site():
     settings={
         "template_path":os.path.join(os.path.dirname(__file__), "templates"),
@@ -220,6 +221,7 @@ def get_site():
         (r"/p/([A-Z0-9]+)/?", MessageHandler),
         #(r"/p/([A-Z0-9]+)/ws", MessageWsHandler),
         (r"/u/([0-9a-z_-]+)/?", UserHandler),
+        (r"/u/([0-9a-z_-]+)/avatar/?", AvatarHandler),
         (r"/u/([0-9a-z_-]+)/info/?", UserInfoHandler),
         (r"/u/([0-9a-z_-]+)/pg([0-9]+)/?", UserHandler),
         (r"/", MainHandler),

@@ -15,6 +15,7 @@ class XmppMessage(object):
             bare_jid=jid.split('/',1)[0]
         self.bare_jid=bare_jid
         self.user=user
+        self.type='xmpp'
 
 class XmppResponse(Exception): # we do it idiotic way!
     pass
@@ -35,6 +36,8 @@ service=None
 def send_plain(dst,src,msg):
     reactor.callFromThread(service.send_plain, dst, src, msg)
     # instead of service.send_plain(dst,src,msg)
+def send_raw(dst,src,msg):
+    reactor.callFromThread(service.send_raw, dst, src, msg)
 
 def _(s,user):
     return s

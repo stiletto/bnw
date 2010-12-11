@@ -129,6 +129,11 @@ class BnwService(component.Service):
         msg.addChild(domish.Element(('http://jabber.org/protocol/chatstates','active')))
         self.xmlstream.send(msg)
 
+    def send_raw(self, jid, src, content):
+        content["to"] = jid
+        content["from"] = self.jabberId if (src is None) else src
+        self.xmlstream.send(content)
+
     def callbackMessage(self,result,jid,stime,src,body):
         etime=time.time()-stime
         println('result:',result)
@@ -138,6 +143,18 @@ class BnwService(component.Service):
         log.msg("%s - PROCESSING TIME (from %s): %f" % (str(time.time()), jid, etime))
         if jid.startswith('stiletto@stiletto.name'):
             self.send_plain(jid,src,'I did it in %f seconds.' % (etime,) )
+
+    def callbackIq(self,result,original):
+        if not (result or original['type']=='error'):
+            elem=original
+            frm = elem['from']
+            elem['from'] = elem['to']
+            elem['to']   = frm
+            elem['type'] = 'error'
+            elem.addElement('error')
+            elem.error['type']='cancel'
+            elem.error.addElement('feature-not-implemented')
+            self.xmlstream.send(elem)
 
     def errbackMessage(self,result,jid,src):
         #println('error:',result)
@@ -161,6 +178,15 @@ class BnwService(component.Service):
         stime=time.time()
         #else:
         #    println(msg.body)
+        if msg.request and msg.request.getAttribute("xmlns","urn:xmpp:receipts"):
+            rmsg = domish.Element((None, "message"))
+            rmsg["id"] = msg["id"]
+            rmsg["to"] = msg['from']
+            rmsg["from"] = msg['to']
+            rmsg.addChild(domish.Element((None,'received')))
+            rmsg.received['xmlns']='urn:xmpp:receipts'
+            self.xmlstream.send(rmsg)
+        
         cmsg = domish.Element((None, "message"))
         cmsg["to"] = msg['from']
         cmsg["from"] = msg['to']
@@ -180,10 +206,8 @@ class BnwService(component.Service):
         Act on the iq stanza that has just been received.
 
         """
-
-        #iq = create_reply(iq)
-        #self.xmlstream.send(iq)
-        pass
+        gp=stupid_handler.iq(iq)
+        gp.addCallback(self.callbackIq,original=iq)
             
     def onPresence(self, prs):
         """

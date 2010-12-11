@@ -14,20 +14,37 @@ def _(s,user):
     return s
             
 import txmongo
+from txmongo import gridfs
 connection=None
+db=None
+
 @defer.inlineCallbacks
-def get_db(collection=None):
+def get_connection():
     global connection
     if connection is None:
-        connection = (yield txmongo.MongoConnection()).bnw
+        connection = (yield txmongo.MongoConnection())
+    defer.returnValue(connection)
+    
+@defer.inlineCallbacks
+def get_db(collection=None):
+    global db
+    if not db:
+        db=(yield get_connection()).bnw
     if collection is None:
-        defer.returnValue(connection)
+        defer.returnValue(db)
     else:
-        defer.returnValue(connection[collection])
+        defer.returnValue(db[collection])
 
 def get_db_existing(collection=None):
-    global connection
-    if collection is None:
-        return connection
+    global db
+    if db is None:
+        return db
     else:
-        return connection[collection]
+        return db[collection]
+
+@defer.inlineCallbacks
+def get_fs(collection="fs"):
+    db = (yield get_connection()).bnw_fs
+    fs = gridfs.GridFS(db,collection=collection)
+    defer.returnValue(fs)
+

@@ -160,7 +160,8 @@ class MongoObject(WrappedDict):
 
     @defer.inlineCallbacks
     def save(self):
-        id=yield self.collection.save(self.doc)
+        #print self.collection,type(self.collection)
+        id=yield (self.collection.save(self.doc))
         self.doc['_id']=id
         defer.returnValue(id)
         
