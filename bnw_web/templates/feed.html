@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}BnW - лента @{{ auth_user }}{% end %}
+{% block body %}
+{% if not result['ok'] %}
+    <div id="err_outer">
+        <div id="err_middle">
+            <div id="err_inner">
+                <div id="err_inner2">
+                    Ошибка<br/>
+                    Кто бы еще знал что случилось.
+                </div>
+              </div>
+        </div>
+    </div>
+{% else %}
+    <div class='outerborder'>
+        <div class='msg'>
+            Вот эта хреновина, которую вы читаете - ваша лента.
+            Она полностью повторяет последние 20 сообщений пришедших вам в Jabber.
+            (Или не пришедших потому что вы были OFF)
+        </div>
+    </div>
+    <hr/>
+    <!-- {{ result['messages'].reverse() }} да, я ем говно -->
+    {% for msg in result['messages'] %}
+    <div class='outerborder'>
+    <div class='msg' id="{{ msg['id'] }}">
+        {{ w.tags(msg['tags'],msg['clubs']) }}
+        <pre class='pw'>{{ linkify(msg['text']) }}</pre>
+        <div>
+            {{ w.msgl(msg['id']) }} ({{ int(msg['replycount']) }}) / {{ w.userl(msg['user']) }} / {{ w.time(msg['date']) }}
+        </div>
+    </div>
+    </div>
+    {% end %}
+{% end %}
+{% end %}

@@ -15,12 +15,25 @@ def runums(n,d1,d2,d5):
         return d5
 
 class Widgets(object):
-    def tag(self,tag):
-        return '<a href="#" class="tag">%(u)s</a>' % {'u':tornado.escape.xhtml_escape(tag[:32])}
-    def club(self,club):
-        return '<a href="#" class="club">%(u)s</a>' % {'u':tornado.escape.xhtml_escape(club[:32])}
-    def tags(self,tags,clubs):
-        return '<div class="tags"> '+' '.join(self.club(c) for c in clubs)+' '+' '.join(self.tag(t) for t in tags)+' </div>'
+    def tag(self,tag,user=None):
+        pars = {'tu': tornado.escape.url_escape(tag),
+                't':  tornado.escape.xhtml_escape(tag[:32]),
+                'u':  user, }
+        if user:
+            return '<a href="/u/%(u)s/t/%(tu)s" class="tag">%(t)s</a>' % pars
+        else:
+            return '<a href="/t/%(tu)s" class="tag">%(t)s</a>' % pars
+
+    def club(self,club,user=None):
+        pars = {'tu': tornado.escape.url_escape(club),
+                't':  tornado.escape.xhtml_escape(club[:32]),
+                'u':  user, }
+        #if user:
+        #    return '<a href="/u/%(u)s/c/%(tu)s" class="tag">%(t)s</a>' % pars
+        #else:
+        return '<a href="/c/%(tu)s" class="club">%(t)s</a>' % pars
+    def tags(self,tags,clubs,user=None):
+        return '<div class="tags"> '+' '.join(self.club(c,user) for c in clubs)+' '+' '.join(self.tag(t,user) for t in tags)+' </div>'
     def user_url(self,name):
         return bnw_core.base.config.webui_base+'u/%(u)s' % {'u':name}
     def post_url(self,name):

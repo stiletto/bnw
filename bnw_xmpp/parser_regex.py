@@ -14,6 +14,8 @@ from twisted.internet import defer
 import re
 import parser_basexmpp
 
+from base import XmppResponse
+
 class RegexParser(parser_basexmpp.BaseXmppParser):
     def __init__(self,handlers,formatters):
         self._handlers = []
@@ -38,7 +40,10 @@ class RegexParser(parser_basexmpp.BaseXmppParser):
             defer.returnValue('ERROR. Parser has no idea on how to handle this.')
         # deunicodify args:
         kwargs=dict((str(k),v) for k,v in kwargs.iteritems())
-        result=yield handler(msg,**kwargs)
+        try:
+            result = yield handler(msg,**kwargs)
+        except XmppResponse, e:
+            defer.returnValue(e.args[0])
         defer.returnValue(self.formatResult(msg,result))
             
     def resolve(self,msg):

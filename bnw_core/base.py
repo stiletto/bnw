@@ -48,3 +48,6 @@ def get_fs(collection="fs"):
     fs = gridfs.GridFS(db,collection=collection)
     defer.returnValue(fs)
 
+def gc(key):
+    global config
+    return getattr(config,key)

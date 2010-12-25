@@ -2,7 +2,7 @@
 """
 """
 import bnw_objects as objs
-from base import genid,cropstring
+from base import genid,cropstring,gc
 from twisted.internet import defer, reactor
 import time
 from twisted.python import log
@@ -27,7 +27,7 @@ def subscribe(user,target_type,target,fast=False,sfrom=None):
             tuser=yield objs.User.find_one({'name':target})
             if not tuser:
                 defer.returnValue((False,'No such user.'))
-            _ = yield tuser.send_plain('@%s subscribed to your blog. http://bnw.blasux.ru/u/%s' % (user['name'],user['name']))
+            _ = yield tuser.send_plain('@%s subscribed to your blog. %su/%s' % (user['name'],gc('webui_base'),user['name']))
             pass
         if (yield sub.save()):
             defer.returnValue((True,'Subscribed.'))
@@ -176,7 +176,7 @@ def recommendMessage(user,message_id,comment="",sfrom=None):
         defer.returnValue((False,'Recommendation is too long. %d/256' % (len(comment),)))
 
     tuser=yield objs.User.find_one({'name':message['user']})
-    _ = yield tuser.send_plain('@%s recommended your message #%s. http://bnw.blasux.ru/p/%s' % (user['name'],message_id,message_id))
+    _ = yield tuser.send_plain('@%s recommended your message #%s. %sp/%s' % (user['name'],message_id,gc('webui_base'),message_id))
 
     sub_result = yield subscribe(user,'sub_message',message_id,False,sfrom)
     

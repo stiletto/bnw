@@ -27,14 +27,17 @@
     <hr/>
     <div class='outerborder'>
     <div class='msg' id="none">
-    <p>Подписчики:</p>
-    <ul>
-    {% for sub in subscribers %}
-        <li>
-            {{ w.userl(sub['user']) }}
-        </li>
-    {% end %}
-    </ul>
+    <table class='friendstable'>
+        <tr><td> Подписки:</td>
+            <td>{% for sub in subscriptions %}{{ w.userl(sub) }} {% end %}</td>
+        </tr>
+        <tr><td> Взаимные подписки:</td>
+            <td> {% for sub in friends %}{{ w.userl(sub) }} {% end %} </td>
+        </tr>
+        <tr><td> Читатели: </td>
+            <td>{% for sub in subscribers %}{{ w.userl(sub) }} {% end %}</td>
+        </tr>
+    </table>
     </div>
     </div>
 {% end %}

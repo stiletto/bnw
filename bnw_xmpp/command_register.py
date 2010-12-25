@@ -3,6 +3,7 @@
 
 from base import *
 import random
+import time
 import bnw_core.bnw_objects as objs
 
 def _(s,user):

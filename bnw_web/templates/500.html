@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+
+<html>
+<head>
+	<title>Oops!</title>
+	
+	<style type="text/css">
+	        body {height: 100%;}
+		#outer {height: 100%; overflow: hidden; position: relative; width: 100%;}
+		#outer[id] {display: table; position: static;}
+		
+		#middle {position: absolute; top: 50%; width: 100%; text-align: center;} /* for explorer only*/
+		#middle[id] {display: table-cell; vertical-align: middle; position: static;}
+		
+		#inner {position: relative; top: -50%; text-align: left;} /* for explorer only */
+		#inner {width: 849px; margin-left: auto; margin-right: auto;} /* for all browsers*/
+		/* optional: #inner[id] {position: static;} */
+		
+		/* just format */
+		div.greenBorder1 {border: 1px solid green; background-color: ivory;}
+		h1 {text-align: center; }
+		img {border: none; }
+		.ctxt { text-align: center; }
+	</style>
+</head>
+
+<body>
+<h1>Ooooooooooooops!</h1>
+<div id="outer" class="greenBorder">
+	<div id="middle">
+		<div id="inner" class="greenBorder">
+		    <img src="http://hermes.blasux.ru/bnw_prop/38da61754874b7c08d0636f2dd509e01.jpg" />
+		</div>
+	</div>
+</div>
+		    <pre>{{ text }}</pre>
+
+
+</body>
+</html>

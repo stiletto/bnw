@@ -10,7 +10,7 @@
             Я не знаю как так вышло, но на главной тоже появилась <a href="/?format=rss">RSS</a>.
             {% if display_appeal>0.9 %}
             <div id="JA1banner3" style='width: 100%; background-image: url(http://hermes.blasux.ru/jimmy.jpg); background-position: right top; background-repeat: no-repeat; overflow: hidden; height: 172px;'>
-            <a class="variable_lp cn-full-banner-click" href="/static/appeal.html" style='text-decoration: none; color: #333;'>
+            <a class="variable_lp cn-full-banner-click" href="{{ config.webui_static }}appeal.html" style='text-decoration: none; color: #333;'>
                 <div id="JA1banner3-text" style="width: 60%; font-family: helvetica, arial, monospace; font-size: 2.25em; line-height: 1.125em; padding-top: 1.25em; padding-left: 0.75em; padding-bottom: 0.75em;">
                     Пожалуйста, прочтите:<br>Личное обращение <br> основателя Бээнвача Stiletto
                 </div>
@@ -25,12 +25,12 @@
     <div class='outerborder'>
     <div class='msg' id="{{ msg['id'] }}">
         {{ w.tags(msg['tags'],msg['clubs']) }}
-        {{ linkify(msg['text']).replace('\n','<br/>') }}
+        <pre class='pw'>{{ linkify(msg['text']) }}</pre>
         <div>
             {{ w.msgl(msg['id']) }} ({{ int(msg['replycount']) }}) / {{ w.userl(msg['user']) }} / {{ w.time(msg['date']) }}
         </div>
     </div>
     </div>
     {% end %}
-    {% if page>0 %}<a class='pagelink' href='pg{{ page-1 }}'>&lt;&lt; Позже</a> -- {% end %}<a class='pagelink' href='pg{{ page+1 }}'> Раньше &gt;&gt;</a>
+    {% if page>0 %}<a class='pagelink' href='?page={{ page-1 }}'>&lt;&lt; Позже</a> -- {% end %}<a class='pagelink' href='?page={{ page+1 }}'> Раньше &gt;&gt;</a>
 {% end %}

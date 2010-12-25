@@ -9,7 +9,7 @@ from twisted.web.resource import Resource, NoResource
 import tornado.options
 import tornado.twister
 import tornado.web
-#import tornado.escape
+import tornado.escape
 import logging,traceback
 import simplejson as json
 import txmongo
@@ -60,14 +60,27 @@ class MessageWsHandler(websocket_site.RoutedWebSocketHandler):
         post.unregister_listener(self.etype,id(self))
         print 'Closed connection %d' % id(self)
 
+
+def get_page(self):
+    ra = self.request.args
+    rv = ra.get('page',['0'])[0]
+    if rv.isdigit():
+        return int(rv)
+    return 0    
+
 class UserHandler(BnwWebHandler):
     templatename='user.html'
     @defer.inlineCallbacks
-    def respond(self,username,page=0):
+    def respond(self,username,tag=None):
         f = txmongo.filter.sort(txmongo.filter.DESCENDING("date"))
-        user=(yield objs.User.find_one({'name': username}))
-        page=int(page)
-        messages=(yield objs.Message.find({'user': username},filter=f,limit=20,skip=20*page))
+        user = (yield objs.User.find_one({'name': username}))
+        page = get_page(self)
+        qdict = { 'user': username }
+        if tag:
+            tag = tornado.escape.url_unescape(tag)
+            qdict['tags'] = tag
+        print qdict
+        messages=(yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page))
         
         format=self.get_argument("format","")
         if format=='rss':
@@ -84,6 +97,7 @@ class UserHandler(BnwWebHandler):
                 'user': user,
                 'messages': messages,
                 'page': page,
+                'tag' : tag,
             })
 
 
@@ -91,35 +105,58 @@ class UserInfoHandler(BnwWebHandler,AuthMixin):
     templatename='userinfo.html'
     @defer.inlineCallbacks
     def respond(self,username):
-        user=yield objs.User.find_one({'name': username})
-        subscribers=yield objs.Subscription.find({'target':username,'type':'sub_user'})
-        messages_count=int((yield objs.Message.count({'user': username})))
+        user = yield objs.User.find_one({'name': username})
+        subscribers = set([x['user'] for x in 
+                    (yield objs.Subscription.find({'target':username,'type':'sub_user'}))])
+        subscriptions = set([x['target'] for x in 
+                    (yield objs.Subscription.find({'user':username,'type':'sub_user'}))])
+        friends = list(subscribers & subscriptions)
+        friends.sort()
+        subscribers_only = list(subscribers - subscriptions)
+        subscribers_only.sort()
+        subscriptions_only = list(subscriptions - subscribers)
+        subscriptions_only.sort()
+        messages_count = int((yield objs.Message.count({'user': username})))
         defer.returnValue({
             'username': username,
             'user': user,
             'regdate': time.ctime(user['regdate']) if user else '',
             'messages_count': messages_count,
-            'subscribers': subscribers,
+            'subscribers': subscribers_only,
+            'subscriptions': subscriptions_only,
+            'friends': friends,
         })
 
 
 class MainHandler(BnwWebHandler):
     templatename='main.html'
     @defer.inlineCallbacks
-    def respond(self,page=0):
+    def respond(self,club=None,tag=None):
         f = txmongo.filter.sort(txmongo.filter.DESCENDING("date"))
-        page=int(page)
-        messages=(yield objs.Message.find({},filter=f,limit=20,skip=20*page))
+
+        page = get_page(self)
+        qdict = {}
+        if tag:
+            tag = tornado.escape.url_unescape(tag)
+            qdict['tags'] = tag
+        if club:
+            club = tornado.escape.url_unescape(club)
+            qdict['clubs'] = club
+
+        messages=(yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page))
         uc=(yield objs.User.count())
         format=self.get_argument("format","")
+
         if format=='rss':
             self.set_header("Content-Type", 'application/rss+xml; charset=UTF-8')
             defer.returnValue(rss.message_feed(messages,
                         link=bnw_core.base.config.webui_base,
                         title='Коллективное бессознательное BnW'))
+
         elif format=='json':
             json_messages=[message.filter_fields() for message in messages]
             defer.returnValue(json.dumps(json_messages,ensure_ascii=False))
+
         else:
             defer.returnValue({
                 'messages': messages,
@@ -145,6 +182,7 @@ class BlogHandler(BnwWebHandler,AuthMixin):
         user=yield self.get_auth_user()
         self.redirect(str('/u/'+user['name']))
 
+
 class PostHandler(BnwWebHandler,AuthMixin):
     templatename='post.html'
     @requires_auth
@@ -165,7 +203,8 @@ class PostHandler(BnwWebHandler,AuthMixin):
     @defer.inlineCallbacks
     def respond(self):
         user = yield self.get_auth_user()
-        defer.returnValue({ 'auth_user': user})
+        default_text = self.get_argument("url","")
+        defer.returnValue({ 'auth_user': user, 'default_text': default_text })
 
 
 class CommentHandler(BnwWebHandler,AuthMixin):
@@ -194,6 +233,22 @@ class CommentHandler(BnwWebHandler,AuthMixin):
         else:
             defer.returnValue(result)
 
+class OexchangeHandler(BnwWebHandler):
+    templatename='oexchange.xrd'
+    @defer.inlineCallbacks
+    def respond(self):
+        self.set_header("Content-Type", "application/xrd+xml")
+        defer.returnValue({})
+        yield
+
+class HostMetaHandler(BnwWebHandler):
+    templatename='oexchange-host-meta'
+    @defer.inlineCallbacks
+    def respond(self):
+        self.set_header("Content-Type", "application/xrd+xml")
+        defer.returnValue({})
+        yield
+
 emptypng=base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAAXNSR0IDN8dNUwAAAANQTFRF////p8QbyAAAAAlwSFlzAAAPYQAAD2EBqD+naQAAABZ6VFh0YXV0aG9yAAB42gtOLUpPrQQACDECcKiD3nQAAAAKSURBVAjXY2AAAAACAAHiIbwzAAAAAElFTkSuQmCC')
 
 class AvatarHandler(BnwWebHandler):
@@ -221,11 +276,15 @@ def get_site():
         (r"/p/([A-Z0-9]+)/?", MessageHandler),
         #(r"/p/([A-Z0-9]+)/ws", MessageWsHandler),
         (r"/u/([0-9a-z_-]+)/?", UserHandler),
+        (r"/u/([0-9a-z_-]+)/?", UserHandler),
         (r"/u/([0-9a-z_-]+)/avatar/?", AvatarHandler),
         (r"/u/([0-9a-z_-]+)/info/?", UserInfoHandler),
-        (r"/u/([0-9a-z_-]+)/pg([0-9]+)/?", UserHandler),
+        (r"/u/([0-9a-z_-]+)/t/(.*)/?", UserHandler),
         (r"/", MainHandler),
-        (r"/pg([0-9]+)", MainHandler),
+        (r"/t/()(.*)/?", MainHandler),
+        (r"/c/(.*)()/?", MainHandler),
+        (r"/oexchange.xrd", OexchangeHandler),
+        (r"/.well-known/host-meta", HostMetaHandler),
         (r"/login", LoginHandler),
         (r"/post", PostHandler),
         (r"/feed", FeedHandler),

@@ -37,7 +37,7 @@ def postMessage(request,tags,clubs,text,anon=False,anoncom=False):
             msgid,qn,recepients = rest
             defer.returnValue(
                 dict(ok=True,
-                     desc='Message #%s has been delivered to %d users. $%d. http://bnw.blasux.ru/p/%s' % (msgid,recepients,qn,msgid),
+                     desc='Message #%s has been delivered to %d users. $%d. %sp/%s' % (msgid,recepients,qn,gc('webui_base'),msgid),
                      id=msgid)
             )
         else:
@@ -79,8 +79,8 @@ def cmd_comment(request,message="",anonymous="",text=""):
             msgid,num,qn,recepients = rest
             defer.returnValue(
                 dict(ok=True,
-                    desc='Comment #%s (%d) has been delivered to %d users. $%d. http://bnw.blasux.ru/p/%s' % 
-                        (msgid,num,recepients,qn,msgid.replace('/','#')),
+                    desc='Comment #%s (%d) has been delivered to %d users. $%d. %sp/%s' % 
+                        (msgid,num,recepients,qn,gc('webui_base'),msgid.replace('/','#')),
                     id=msgid,
                     num=num,)
             )
@@ -105,6 +105,6 @@ def cmd_recommend(request,message="",comment=""):
             )
         else:
             defer.returnValue(
-                dict(ok=True,
-                     desc=comment)
+                dict(ok=False,
+                     desc=rest)
             )

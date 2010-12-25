@@ -86,6 +86,7 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
             #    defer.returnValue((yield self.formatCommandHelp(command.lower())))
             if restname:
                 options[restname] = rest
+            options=dict((str(k),v) for k,v in options.iteritems()) # deunicodify options keys
             result=yield handler(msg,**options)
             defer.returnValue(self.formatResult(msg,result))
         except XmppResponse, response:

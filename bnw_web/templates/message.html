@@ -132,8 +132,18 @@
     <div class='outerborder'>
         <div class='msg'>
             {{ w.tags(msg['tags'],msg['clubs']) }}
-            {{ linkify(msg['text']).replace('\n','<br/>') }}
-            <div>{{ w.msgl(msgid) }} / {{ w.userl(msg['user']) }} / {{ w.time(msg['date']) }}</div>
+            <pre class='pw'>{{ linkify(msg['text']) }}</pre>
+            <div>{{ w.msgl(msgid) }} / {{ w.userl(msg['user']) }} / {{ w.time(msg['date']) }}
+                <div style='float: right;'>
+                    <!-- AddThis Button BEGIN -->
+                    <div class="addthis_toolbox addthis_default_style ">
+                    <a href="http://www.addthis.com/bookmark.php?v=250&amp;username=stiletto" class="addthis_button">[+] Share</a>
+                    </div>
+                    <script type="text/javascript">var addthis_config = {"data_track_clickback":true};</script>
+                    <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=stiletto"></script>
+                    <!-- AddThis Button END -->
+                </div>
+            </div>
         </div>
     </div>
     <hr/>
@@ -142,7 +152,7 @@
     {% for comment in comments %}
     <div class='outerborder' id="{{ comment['id'].split('/')[1] }}">
     <div class='comment'>
-        <span class='comment_body'>{{ linkify(comment['text']).replace('\n','<br/>') }}</span>
+        <pre class='comment_body pw'>{{ linkify(comment['text']) }}</pre>
         <span class='comment_time' style='display: none;'>{{ comment['date'] }}</span>
         <div>
             {{ w.msgl(comment['id']) }} / {{ w.userl(comment['user']) }}

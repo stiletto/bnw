@@ -24,6 +24,7 @@ import traceback
 import bnw_core.bnw_objects as objs
 import bnw_core.post as post
 from bnw_core.base import get_db
+import bnw_core.base
 
 class BnwWebRequest(object):
     def __init__(self,user=None):
@@ -72,6 +73,7 @@ class TwistedHandler(tornado.web.RequestHandler):
 ranq=(
     'Где блекджек, где мои шлюхи? Ничерта не работает!',
     'Здраствуйте. Я, Кирилл. Хотел бы чтобы вы сделали сервис, микроблог суть такова...',
+    u'Бляди тоже ок, ага.',
     u'Шлюхи без блекджека, блекджек без шлюх.',
     u'Бабушка, смотри, я сделал двач!',
     u'БЕГЕМОТИКОВ МОЖНО!',
@@ -87,7 +89,8 @@ class BnwWebHandler(TwistedHandler):
         return {
             'linkify': escape.linkify,
             'ranq': random.choice(ranq),
-            'display_appeal': random.random(),
+            'config': bnw_core.base.config,
+            'display_appeal': ranq[int(time.time()) / 10 % len(ranq)],
             'w': widgets,
             'auth_user': getattr(self,'user',None),
         }

@@ -26,7 +26,7 @@ bnw_core.base.config=config
 application = service.Application("example-echo")
 
 # set up Jabber Component
-sm = component.buildServiceManager(config.srvc_name + '.' + config.hostname, config.srvc_pwd,
+sm = component.buildServiceManager(config.srvc_name, config.srvc_pwd,
                     ('tcp:127.0.0.1:' + str(config.srvc_port) ))
 
 

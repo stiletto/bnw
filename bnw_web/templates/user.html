@@ -26,14 +26,14 @@
     {% for msg in messages %}
     <div class='outerborder'>
     <div class='msg' id="{{ msg['id'] }}">
-        {{ w.tags(msg['tags'],msg['clubs']) }}
-        {{ linkify(msg['text']).replace('\n','<br/>') }}
+        {{ w.tags(msg['tags'],msg['clubs'],username) }}
+        <pre class='pw'>{{ linkify(msg['text']) }}</pre>
         <div>
             {{ w.msgl(msg['id']) }} ({{ int(msg['replycount']) }}) / {{ w.userl(msg['user']) }} / {{ w.time(msg['date']) }}
         </div>
     </div>
     </div>
     {% end %}
-    {% if page>0 %}<a class='pagelink' href='/u/{{ username }}/pg{{ page-1 }}'>&lt;&lt; Позже</a> -- {% end %}<a class='pagelink' href='/u/{{ username }}/pg{{ page+1 }}'> Раньше &gt;&gt;</a>
+    {% if page>0 %}<a class='pagelink' href='?page={{ page-1 }}'>&lt;&lt; Позже</a> -- {% end %}<a class='pagelink' href='?page={{ page+1 }}'> Раньше &gt;&gt;</a>
 {% end %}
 {% end %}

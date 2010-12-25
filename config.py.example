@@ -4,7 +4,7 @@
 ## Для колыбели блекджекошлюхуйка было бы правильно написать:
 # hostname='blasux.ru'
 
-hostname = 'localhost'
+hostname = 'bnw.blasux.ru'
 
 ## Порт, по которому работает xmpp-сервис bnw. Просто оставь как есть.
 
@@ -15,7 +15,7 @@ srvc_port = 6591
 ## будет bnw.localhost или icanhasnigrapack@bnw.localhost если прыщеклиент не
 ## сможет добавить в ростер просто сервис без ника. Empathy, например, не смог.
 
-srvc_name = 'bnw'
+srvc_name = 'bnw.blasux.ru'
 
 ## Пароль от сервиса. Указывается не от балды, а из конфига ejabberd-сервера,
 ## которого там, кстати говоря, нет. MWAHAHA ENJOY YOUR AIDS! Надо открыть
@@ -45,6 +45,8 @@ webui_port = 7808
 ## Базовый URL
 
 webui_base = 'http://bnw.blasux.ru/'
+
+webui_static = 'http://bnw.blasux.ru/static/'
 
 ## Fuck
 

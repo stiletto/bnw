@@ -4,6 +4,7 @@
 import random
 import datetime
 import bnw_core.base
+gc = bnw_core.base.gc
 
 formatters = {
     'comment': None,
@@ -23,7 +24,7 @@ def format_message(msg):
         result += 'Clubs: %s\n' % (', '.join(msg['clubs']),)
     result += '\n%s\n' % (msg['text'],)
     result += '--- %(id)s (%(rc)d) %(base_url)sp/%(id)s' % { 
-               'base_url': bnw_core.base.config.webui_base, 
+               'base_url': gc('webui_base'), 
                'id': msg['id'].upper(),
                'rc':    msg['replycount'],
              }
@@ -37,7 +38,8 @@ def format_comment(msg,short=False):
              'replytotext': msg['replytotext'],
              'text':  msg['text'],
              'num':   msg.get('num',-1),
-             'date':  datetime.datetime.utcfromtimestamp(msg['date']).strftime('%d.%m.%Y %H:%M:%S')
+             'date':  datetime.datetime.utcfromtimestamp(msg['date']).strftime('%d.%m.%Y %H:%M:%S'),
+             'web': gc('webui_base'),
            }
     formatstring = '+++ [ %(date)s ] %(author)s'
     if msg['replyto']:
@@ -46,7 +48,7 @@ def format_comment(msg,short=False):
         formatstring += ' (in reply to %(message)s):\n'
     if not short:
         formatstring += '>%(replytotext)s\n'
-    formatstring += '\n%(text)s\n--- %(message)s/%(id)s (%(num)d) http://bnw.blasux.ru/p/%(message)s#%(id)s'
+    formatstring += '\n%(text)s\n--- %(message)s/%(id)s (%(num)d) %(web)sp/%(message)s#%(id)s'
     return formatstring % args
 
 def formatter_messages(request,result):

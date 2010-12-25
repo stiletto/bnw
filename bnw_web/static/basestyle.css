@@ -84,9 +84,33 @@
             color: #00CD00;
         }
         
+        .friendstable {
+            color: #000;
+        }
+        .friendstable th {
+            color: #FFFF00;
+            background-color: #0000CD;
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
+        .friendstable td:first-child {
+            border-left: none;
+        }
+        
+        .friendstable td {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
+        
         #err_outer {width: 100%; overflow: hidden; position: relative;}
         #err_outer[id] {display: table; position: static;}
         #err_middle {position: absolute; top: 50%;} /* for explorer only*/
         #err_middle[id] {display: table-cell; vertical-align: middle; width: 100%;}
         #err_inner { background-color: #CD0000; padding: 1em; width: 40em; margin-left: auto; margin-right: auto; position: relative; top: -50%} /* for explorer only */        
         #err_inner2 { padding: 1em; border: thin solid white; text-align: center; }
+
+        .pw {
+            white-space: pre-wrap;
+            font-family: Unifont, Monaco, Consolas, Terminus, monospace;
+            margin: 0;
+        }
