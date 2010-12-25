@@ -88,9 +88,9 @@ class BnwWebHandler(TwistedHandler):
     def get_defargs(self):
         return {
             'linkify': escape.linkify,
-            'ranq': random.choice(ranq),
+            'ranq': ranq[int(time.time()) / 10 % len(ranq)],
             'config': bnw_core.base.config,
-            'display_appeal': ranq[int(time.time()) / 10 % len(ranq)],
+            'display_appeal': random.random(),
             'w': widgets,
             'auth_user': getattr(self,'user',None),
         }
