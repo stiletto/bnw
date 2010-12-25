@@ -270,6 +270,7 @@ def get_site():
     settings={
         "template_path":os.path.join(os.path.dirname(__file__), "templates"),
         "xsrf_cookies": True,
+        "static_path":  os.path.join(os.path.dirname(__file__), "static"),
     }
     application = tornado.web.Application([
 #        (r"/posts/(.*)", MessageHandler),
