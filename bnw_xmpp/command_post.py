@@ -3,6 +3,7 @@
 
 from base import *
 import random,time
+from bnw_core.base import gc
 import bnw_core.bnw_objects as objs
 
 from twisted.python import log
