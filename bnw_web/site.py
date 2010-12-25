@@ -92,6 +92,7 @@ class UserHandler(BnwWebHandler):
             json_messages=[message.filter_fields() for message in messages]
             defer.returnValue(json.dumps(json_messages,ensure_ascii=False))
         else:
+            self.set_header("Cache-Control", "max-age=1")
             defer.returnValue({
                 'username': username,
                 'user': user,
@@ -117,6 +118,7 @@ class UserInfoHandler(BnwWebHandler,AuthMixin):
         subscriptions_only = list(subscriptions - subscribers)
         subscriptions_only.sort()
         messages_count = int((yield objs.Message.count({'user': username})))
+        self.set_header("Cache-Control", "max-age=10")
         defer.returnValue({
             'username': username,
             'user': user,
@@ -147,6 +149,7 @@ class MainHandler(BnwWebHandler):
         uc=(yield objs.User.count())
         format=self.get_argument("format","")
 
+        self.set_header("Cache-Control", "max-age=1")
         if format=='rss':
             self.set_header("Content-Type", 'application/rss+xml; charset=UTF-8')
             defer.returnValue(rss.message_feed(messages,
@@ -171,6 +174,7 @@ class FeedHandler(BnwWebHandler,AuthMixin):
     def respond(self,page=0):
         req=BnwWebRequest((yield self.get_auth_user()))
         result = yield cmd_feed(req)
+        self.set_header("Cache-Control", "max-age=1")
         defer.returnValue({
             'result': result,
         })
@@ -204,6 +208,7 @@ class PostHandler(BnwWebHandler,AuthMixin):
     def respond(self):
         user = yield self.get_auth_user()
         default_text = self.get_argument("url","")
+        self.set_header("Cache-Control", "max-age=1")
         defer.returnValue({ 'auth_user': user, 'default_text': default_text })
 
 
@@ -237,6 +242,7 @@ class OexchangeHandler(BnwWebHandler):
     templatename='oexchange.xrd'
     @defer.inlineCallbacks
     def respond(self):
+        self.set_header("Cache-Control", "max-age=1000000")
         self.set_header("Content-Type", "application/xrd+xml")
         defer.returnValue({})
         yield
@@ -245,6 +251,7 @@ class HostMetaHandler(BnwWebHandler):
     templatename='oexchange-host-meta'
     @defer.inlineCallbacks
     def respond(self):
+        self.set_header("Cache-Control", "max-age=1000000")
         self.set_header("Content-Type", "application/xrd+xml")
         defer.returnValue({})
         yield
@@ -263,6 +270,7 @@ class AvatarHandler(BnwWebHandler):
         doc = yield fs._GridFS__files.find_one({'_id':user['avatar'][0]})
         avatar = yield fs.get(doc)
         avatar_data = yield avatar.read()
+        self.set_header("Cache-Control", "max-age=10")
         self.set_header("Content-Type", user['avatar'][1])
         defer.returnValue(avatar_data)
 
