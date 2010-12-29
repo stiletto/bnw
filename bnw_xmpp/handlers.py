@@ -13,6 +13,7 @@ import command_login
 import command_onoff
 import command_ping
 import command_pm
+import command_search
 import command_post
 import command_register
 import command_show
@@ -64,6 +65,7 @@ redeye_handlers = (
 
 #        ("except", (), , ),
         ("register", (), command_register.cmd_register, "name", ),
+        ("search", (), command_search.cmd_search, "text", ),
         ("interface", (), command_interface.cmd_interface, "iface", ),
         ("subscribe", subscribe_args, command_subscription.cmd_subscribe, ),
         ("sub", subscribe_args, command_subscription.cmd_subscribe, ),
@@ -104,6 +106,7 @@ redeye_formatters = {
     'message_with_replies': formatters_redeye.formatter_message_with_replies,
     'messages': formatters_redeye.formatter_messages,
     'subscriptions': formatters_redeye.formatter_subscriptions,
+    'search': formatters_redeye.formatter_search,
 }
 
 simple_handlers = (
@@ -111,6 +114,7 @@ simple_handlers = (
         (ur'REGISTER (?P<name>\S+)',command_register.cmd_register),
         (ur'(?:INTERFACE|interface) (?P<iface>\S+)',command_interface.cmd_interface),
         (ur'(?:vcard|VCARD)', command_vcard.cmd_vcard),
+        (ur'\? (?P<text>\S+)',command_search.cmd_search),
         (ur'[DdвВ] #(?P<message>.+)',command_delete.cmd_delete),
         (ur'[DdвВ] L',command_delete.cmd_delete,{'last':True}),
         (ur'[SsыЫ]',command_subscription.cmd_subscriptions),
@@ -154,6 +158,7 @@ simple_formatters = {
     'message_with_replies': formatters_simple.formatter_message_with_replies,
     'messages': formatters_simple.formatter_messages,
     'subscriptions': formatters_simple.formatter_subscriptions,
+    'search': formatters_simple.formatter_search,
 }
 
 parsers={}

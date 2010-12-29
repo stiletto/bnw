@@ -79,7 +79,6 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
         handler,restname,options,rest = self.resolve(msg)#unicode(msg.body).encode('utf-8','ignore'))
         if not handler:
             defer.returnValue('ERROR. Command not found: %s' % (restname,))
-            )
         try:
             #if 'help' in options:
             #    defer.returnValue((yield self.formatCommandHelp(command.lower())))

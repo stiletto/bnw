@@ -26,7 +26,7 @@ from twisted.web.resource import Resource
 from twisted.python.threadpool import ThreadPool
 
 import zmq
-import json 
+import simplejson  as json
 import sys
 import xapian
  

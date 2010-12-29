@@ -1,7 +1,7 @@
 import traceback
 from uuid import uuid4
 import zmq, threading
-from twisted.internet import reactor
+from twisted.internet import reactor,defer
 
 context = zmq.Context()                  
 
@@ -23,10 +23,12 @@ class ZMQRequestService(object):
         self._started = False
         self.requests = {}
         
-    def request(self,callback,request):
+    def request(self,request):
         reqid = uuid4().hex
-        self.requests[reqid] = callback
+        d = defer.Deferred()
+        self.requests[reqid] = d.callback
         self._socket.send_multipart([reqid,request])
+        return d
 
     def start(self):
         if not self._started:
@@ -43,6 +45,7 @@ class ZMQRequestService(object):
     def _callback(self,recv):
         try:
             reactor.callFromThread(self.requests[recv[0]],recv[2])
+            del self.requests[recv[0]]
         except:
             print 'ICB',traceback.format_exc()
 

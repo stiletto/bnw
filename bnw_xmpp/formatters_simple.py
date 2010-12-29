@@ -68,4 +68,5 @@ def formatter_recommendation(request,result):
 def formatter_comment(request,result):
     return format_comment(result['comment'])
 
-
+def formatter_search(request,result):
+    return '\n\n'.join('#%s (%d%%): %s' % (x[0],x[1],x[2]) for x in result['result'])
