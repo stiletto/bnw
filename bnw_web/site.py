@@ -31,6 +31,7 @@ from bnw_xmpp.command_show import cmd_feed
 
 from base import BnwWebHandler, TwistedHandler, BnwWebRequest
 from auth import LoginHandler, requires_auth, AuthMixin
+from api import ApiHandler
 define("port", default=8888, help="run on the given port", type=int)
 
 class MessageHandler(BnwWebHandler,AuthMixin):
@@ -66,7 +67,7 @@ def get_page(self):
     rv = ra.get('page',['0'])[0]
     if rv.isdigit():
         return int(rv)
-    return 0    
+    return 0
 
 class UserHandler(BnwWebHandler):
     templatename='user.html'
@@ -81,7 +82,7 @@ class UserHandler(BnwWebHandler):
             qdict['tags'] = tag
         print qdict
         messages=(yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page))
-        
+
         format=self.get_argument("format","")
         if format=='rss':
             self.set_header("Content-Type", 'application/rss+xml; charset=UTF-8')
@@ -107,9 +108,9 @@ class UserInfoHandler(BnwWebHandler,AuthMixin):
     @defer.inlineCallbacks
     def respond(self,username):
         user = yield objs.User.find_one({'name': username})
-        subscribers = set([x['user'] for x in 
+        subscribers = set([x['user'] for x in
                     (yield objs.Subscription.find({'target':username,'type':'sub_user'}))])
-        subscriptions = set([x['target'] for x in 
+        subscriptions = set([x['target'] for x in
                     (yield objs.Subscription.find({'user':username,'type':'sub_user'}))])
         friends = list(subscribers & subscriptions)
         friends.sort()
@@ -299,6 +300,7 @@ def get_site():
         (r"/feed", FeedHandler),
         (r"/blog", BlogHandler),
         (r"/comment", CommentHandler),
+        (r"/api/([0-9a-z]+)/?", ApiHandler),
     ],**settings)
 
     ws_application = websocket_site.WebSocketApplication([

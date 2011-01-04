@@ -106,6 +106,7 @@ class BnwWebHandler(TwistedHandler):
             try:
                 self.render(self.templatename,**text)
             except Exception, e:
+                self.set_status(500)
                 self.render(self.errortemplate,text=traceback.format_exc())
         else:
             super(BnwWebHandler,self).writeandfinish(text)
@@ -114,4 +115,5 @@ class BnwWebHandler(TwistedHandler):
         #tb=text.getTracebackObject()
         #if tb:
         text=text.getTraceback()
+        self.set_status(500)
         self.render(self.errortemplate,text=text)

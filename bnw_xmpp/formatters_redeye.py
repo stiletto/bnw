@@ -67,7 +67,7 @@ def formatter_message(request,result):
     return format_message(result['message'])
 
 def formatter_recommendation(request,result):
-    return 'Recommended by @%s: %s' % (result['recommender'],result['recocomment']) + \
+    return 'Recommended by @%s: %s\n' % (result['recommender'],result['recocomment']) + \
         format_message(result['message'])
 
 def formatter_comment(request,result):

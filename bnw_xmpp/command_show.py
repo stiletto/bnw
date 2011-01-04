@@ -15,8 +15,8 @@ def findMessages(query,sort,limit):
 @defer.inlineCallbacks
 def showSearch(parameters,page):    
     # THIS COMMAND IS FUCKING SLOW SLOW SLOW AND WAS WRITTEN BY A BRAIN-DAMAGED IDIOT
-    messages=list((yield objs.Message.find_sort(
-        parameters,[('date',pymongo.DESCENDING)],limit=20,skip=page*20)))
+    messages=[x.filter_fields() for x in  (yield objs.Message.find_sort(
+        parameters,[('date',pymongo.DESCENDING)],limit=20,skip=page*20))]
     messages.reverse()
     defer.returnValue(
         dict(ok=True,format="messages",
@@ -63,9 +63,9 @@ def cmd_show(request,message="",user="",tag="",club="",page="0",replies=None):
 def cmd_feed(request):
     feed = yield objs.FeedElement.find_sort({'user':request.user['name']},
                                 [('_id',pymongo.DESCENDING)],limit=20)
-    messages = list((yield objs.Message.find_sort({'id': { '$in': 
+    messages = [x.filter_fields() for x in (yield objs.Message.find_sort({'id': { '$in': 
             [f['message'] for f in feed]
-        }},[('date',pymongo.ASCENDING)])))
+        }},[('date',pymongo.ASCENDING)]))]
     defer.returnValue(
         dict(ok=True,format="messages",
              messages=messages,
