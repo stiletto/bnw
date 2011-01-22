@@ -61,7 +61,52 @@ def version(iq,iq_user):
         send_raw(iq['from'],iq['to'],reply)
         return True
     pass
+
+DISCO_ITEMS_XMLNS="http://jabber.org/protocol/disco#items"
+def disco_items(iq,iq_user):
+    if iq.query:
+        if not DISCO_ITEMS_XMLNS in iq.query.toXml():
+            return False
+        reply = domish.Element((None,'iq'))
+        reply['type'] = 'result'
+        if iq.getAttribute('id',None):
+            reply['id'] = iq['id']
+        reply.addElement('query')
+        reply.query['xmlns'] = DISCO_ITEMS_XMLNS
+        send_raw(iq['from'],iq['to'],reply)
+        return True
+
+DISCO_INFO_XMLNS="http://jabber.org/protocol/disco#info"
+FEATURES = ('jabber:iq:version',
+            'http://jabber.org/protocol/chatstates',
+            'http://jabber.org/protocol/disco#info',
+            'http://jabber.org/protocol/disco#items',
+)
+def disco_info(iq,iq_user):
+    if iq.query:
+        if not DISCO_INFO_XMLNS in iq.query.toXml():
+            return False
+        reply = domish.Element((None,'iq'))
+        reply['type'] = 'result'
+        if iq.getAttribute('id',None):
+            reply['id'] = iq['id']
+        reply.addElement('query')
+        reply.query['xmlns'] = DISCO_INFO_XMLNS
+        reply.query.addElement('identity')
+        reply.query.identity['category']='client' # not pretty sure
+        reply.query.identity['type']='bot'
+        reply.query.identity['name']='BnW'
+
+        for feature_name in FEATURES:
+            feature = reply.query.addElement('feature')
+            feature['var'] = feature_name
+    
+        send_raw(iq['from'],iq['to'],reply)
+        return True
+
 handlers = [
     vcard_getav,
     version,
+    disco_items,
+    disco_info,
 ]

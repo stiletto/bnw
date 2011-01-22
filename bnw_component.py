@@ -208,7 +208,7 @@ class BnwService(component.Service):
         """
         gp=stupid_handler.iq(iq)
         gp.addCallback(self.callbackIq,original=iq)
-            
+
     def onPresence(self, prs):
         """
         Act on the presence stanza that has just been received.
