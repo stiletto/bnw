@@ -3,10 +3,11 @@
 
 import os,random,time
 import escape
+import simplejson as json
 from twisted.internet import defer
 from widgets import widgets
 from datetime import datetime
-from tornado.escape import json_encode,utf8,_unicode
+from tornado.escape import utf8,_unicode
 from escape import linkify
 
 import bnw_core.bnw_objects as objs
@@ -40,6 +41,8 @@ class ApiHandler(BnwWebHandler):
     @defer.inlineCallbacks
     def respond_post(self,cmd_name):
         user=yield objs.User.find_one({'login_key':self.get_argument("login","")})
+        if not cmd_name:
+            defer.returnValue(json.dumps(dict(ok=True,commands=api_handlers.handlers.keys())))
         if not (cmd_name in api_handlers.handlers):
             defer.returnValue('{ok: False, desc: "command unknown"}')
         handler = api_handlers.handlers[cmd_name]
@@ -48,5 +51,5 @@ class ApiHandler(BnwWebHandler):
             del args['login']
         req = ApiRequest('',None,user)
         result = yield handler(req,**args)
-        defer.returnValue(json_encode(result))
+        defer.returnValue(json.dumps(result,ensure_ascii=False))
     respond = respond_post

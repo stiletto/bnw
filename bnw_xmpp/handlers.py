@@ -19,6 +19,8 @@ import command_register
 import command_show
 import command_subscription
 import command_vcard
+import command_userlist
+import command_update
 import formatters_redeye
 import formatters_simple
 
@@ -53,6 +55,12 @@ recommend_args = (
             )
 delete_args = (
                 ('m',   'message',True,'Message or comment to delete.'),
+            )
+update_args = (
+                ('m', 'message',True,'Message or comment to update.'),
+                ('c', 'club',False,'Add/delete club.'),
+                ('t', 'tag',False,'Add/delete tag.'),
+                ('d', 'delete',False,'Delete, not add.'),
             )
 
 redeye_handlers = (
@@ -97,6 +105,14 @@ redeye_handlers = (
             command_pm.cmd_pm,
             "text",
         ),
+        ("userlist",
+            (
+                ("p", "page", True, u"Page number."),
+            ),
+            command_userlist.cmd_userlist,
+        ),
+        ("update", update_args, command_update.cmd_update, "text", ),
+        ("u", update_args, command_update.cmd_update, "text", ),
 )
 
 redeye_formatters = {
@@ -107,6 +123,7 @@ redeye_formatters = {
     'messages': formatters_redeye.formatter_messages,
     'subscriptions': formatters_redeye.formatter_subscriptions,
     'search': formatters_redeye.formatter_search,
+    'userlist': formatters_redeye.formatter_userlist,
 }
 
 simple_handlers = (
@@ -114,6 +131,7 @@ simple_handlers = (
         (ur'REGISTER (?P<name>\S+)',command_register.cmd_register),
         (ur'(?:INTERFACE|interface) (?P<iface>\S+)',command_interface.cmd_interface),
         (ur'(?:vcard|VCARD)', command_vcard.cmd_vcard),
+        (ur'(?:userlist|USERLIST)(?: (?P<page>\S+))?', command_userlist.cmd_userlist),
         (ur'\? (?P<text>\S+)',command_search.cmd_search),
         (ur'[DdвВ] #(?P<message>.+)',command_delete.cmd_delete),
         (ur'[DdвВ] L',command_delete.cmd_delete,{'last':True}),
@@ -144,6 +162,10 @@ simple_handlers = (
         (ur'!(?P<club>\S+)',command_show.cmd_show),
         (ur'#(?P<message>[0-9A-Za-z]+)',command_show.cmd_show),
         (ur'#(?P<message>[0-9A-Za-z]+)\+',command_show.cmd_show,{'replies':True}),
+        (ur'#(?P<message>[0-9A-Za-z]+) \+!(?P<text>.+)',command_update.cmd_update,{'club':True}),
+        (ur'#(?P<message>[0-9A-Za-z]+) \+\*(?P<text>.+)',command_update.cmd_update,{'tag':True}),
+        (ur'#(?P<message>[0-9A-Za-z]+) -!(?P<text>.+)',command_update.cmd_update,{'club':True,'delete':True}),
+        (ur'#(?P<message>[0-9A-Za-z]+) -\*(?P<text>.+)',command_update.cmd_update,{'tag':True,'delete':True}),
         (ur'#(?P<message>[0-9A-Za-z]+) (?P<text>.+)',command_post.cmd_comment),
         (ur'#(?P<message>[0-9A-Za-z]+/[0-9A-Za-z]+) (?P<text>.+)',command_post.cmd_comment),
         (ur'! +#(?P<message>[0-9A-Za-z]+)(?: (?P<comment>.+))?',command_post.cmd_recommend),
@@ -159,6 +181,7 @@ simple_formatters = {
     'messages': formatters_simple.formatter_messages,
     'subscriptions': formatters_simple.formatter_subscriptions,
     'search': formatters_simple.formatter_search,
+    'userlist': formatters_simple.formatter_userlist,
 }
 
 parsers={}

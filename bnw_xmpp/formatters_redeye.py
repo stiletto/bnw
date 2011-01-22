@@ -76,4 +76,9 @@ def formatter_comment(request,result):
 def formatter_search(request,result):
     return '\n\n'.join('%s (%d%%): %s' % (x[0],x[1],x[2]) for x in result['result'])
 
-
+def formatter_userlist(request,result):
+    if not result['users']:
+        return 'No more users.'
+    return ' '+' '.join(
+        '@'+u['name'].ljust(10)+('\n' if i%5==4 else '')
+            for i,u in enumerate(result['users']))+'\nuserlist -p '+str(result['page']+1)+' -- next page.'

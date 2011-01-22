@@ -186,7 +186,7 @@ class BlogHandler(BnwWebHandler,AuthMixin):
     def respond(self,page=0):
         user=yield self.get_auth_user()
         self.redirect(str('/u/'+user['name']))
-
+        defer.returnValue('')
 
 class PostHandler(BnwWebHandler,AuthMixin):
     templatename='post.html'
@@ -300,7 +300,7 @@ def get_site():
         (r"/feed", FeedHandler),
         (r"/blog", BlogHandler),
         (r"/comment", CommentHandler),
-        (r"/api/([0-9a-z]+)/?", ApiHandler),
+        (r"/api/([0-9a-z/]*)/?", ApiHandler),
     ],**settings)
 
     ws_application = websocket_site.WebSocketApplication([

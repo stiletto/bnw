@@ -64,6 +64,8 @@ def check_arg(**kwargs): #fun,name,rex):
         @defer.inlineCallbacks
         def new_fun(request,*args,**kwargs):
             for name,value in kwargs.iteritems():
+                if value is None:
+                    value = ''
                 if (name in rexs) and not rexs[name][1].match(value):
                     defer.returnValue(
                         dict(ok=False,

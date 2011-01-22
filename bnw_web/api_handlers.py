@@ -13,8 +13,7 @@ from bnw_xmpp import command_register
 from bnw_xmpp import command_show
 from bnw_xmpp import command_subscription
 from bnw_xmpp import command_vcard
-from bnw_xmpp import formatters_redeye
-from bnw_xmpp import formatters_simple
+from bnw_xmpp import command_userlist
 
 handlers = {
     "register":             command_register.cmd_register,
@@ -32,4 +31,5 @@ handlers = {
     "off":                  command_onoff.cmd_off,
     "delete":               command_delete.cmd_delete,
     "pm":                   command_pm.cmd_pm,
+    "userlist":             command_userlist.cmd_userlist,
 }

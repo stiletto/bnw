@@ -2,7 +2,7 @@
 import re
 from widgets import widgets
 
-from tornado.escape import _unicode,xhtml_escape
+from tornado.escape import _unicode,xhtml_escape,url_escape
 #def _unicode(value):
 #    if isinstance(value, str):
 #        return value.decode("utf-8")
@@ -19,6 +19,12 @@ linkhostings = [
     (ur'(http://ompldr.org/v([A-Za-z0-9]+))(/.+)?', lambda h,p,u,m,n: ( 
         u'<a class="imglink" href="%s"%s>[%d]</a>' % (m.group(1),p,n), 
         u'<a class="imglink" href="%s"%s><img class="imgpreview" src="http://ompldr.org/t%s"/></a>' % (m.group(1),p,m.group(2)) )),
+    (ur'http://2-ch.ru/([a-z]+)/src/([0-9]+).(png|gif|jpg)', lambda h,p,u,m,n: (
+        u'<a class="imglink" href="%s"%s>[%d]</a>' % (m.group(1),p,n),
+        u'<a class="imglink" href="%s"%s><img class="imgpreview" src="http://2-ch.ru/%s/thumb/%ss.%s"/></a>' % (h,p,m.group(1),m.group(2),m.group(3)) )),
+    (ur'http://(.+.(?:png|gif|jpg|jpeg))', lambda h,p,u,m,n: (
+        u'<a class="imglink" href="%s"%s>[%d]</a>' % (h,p,n),
+        u'<a class="imglink" href="%s"%s><img class="imgpreview imgpgen" src="http://fuck.blasux.ru/thumb?img=%s"/></a>' % (h,p,url_escape(h)) )),
 ]
 linkhostings=[(re.compile('^'+k+'$'),v,k) for (k,v) in linkhostings]
 #inkhosting=dict((re.compile(k),v) for (k,v) in linkhosting.iteritems())
