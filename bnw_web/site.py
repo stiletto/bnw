@@ -42,6 +42,7 @@ class MessageHandler(BnwWebHandler,AuthMixin):
         f = txmongo.filter.sort(txmongo.filter.ASCENDING("date"))
         msg=(yield objs.Message.find_one({'id': msgid}))
         comments=(yield objs.Comment.find({'message': msgid},filter=f))
+        self.set_header("Cache-Control", "max-age=5")
         defer.returnValue({
             'msgid': msgid,
             'msg': msg,
