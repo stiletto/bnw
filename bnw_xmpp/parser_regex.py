@@ -14,7 +14,7 @@ from twisted.internet import defer
 import re
 import parser_basexmpp
 
-from base import XmppResponse
+from bnw_core.base import BnwResponse
 
 class RegexParser(parser_basexmpp.BaseXmppParser):
     def __init__(self,handlers,formatters):
@@ -42,7 +42,7 @@ class RegexParser(parser_basexmpp.BaseXmppParser):
         kwargs=dict((str(k),v) for k,v in kwargs.iteritems())
         try:
             result = yield handler(msg,**kwargs)
-        except XmppResponse, e:
+        except BnwResponse, e:
             defer.returnValue(e.args[0])
         defer.returnValue(self.formatResult(msg,result))
             

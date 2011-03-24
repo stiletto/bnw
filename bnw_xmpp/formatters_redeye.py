@@ -82,3 +82,11 @@ def formatter_userlist(request,result):
     return ' '+' '.join(
         '@'+u['name'].ljust(10)+('\n' if i%5==4 else '')
             for i,u in enumerate(result['users']))+'\nuserlist -p '+str(result['page']+1)+' -- next page.'
+
+def formatter_settings(request,result):
+    return 'Currrent settings:\n'+'\n'.join('%10s %s' % (k,v) for k,v in result['settings'].iteritems())
+
+def formatter_clubs(request,result):
+    return ' '+' '.join(
+        ''+u['_id'].ljust(15)+' '+str(int(u['value'])).ljust(3)+('\n' if i%5==4 else '')
+            for i,u in enumerate(result['clubs']))

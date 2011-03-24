@@ -17,12 +17,6 @@ class XmppMessage(object):
         self.user=user
         self.type='xmpp'
 
-class XmppResponse(Exception): # we do it idiotic way!
-    pass
-
-class BnwResponse(Exception): # we do it idiotic way!
-    pass
-
 class CommandParserException(Exception):
     pass
 

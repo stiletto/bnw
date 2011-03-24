@@ -51,3 +51,6 @@ def get_fs(collection="fs"):
 def gc(key):
     global config
     return getattr(config,key)
+
+class BnwResponse(Exception): # we do it idiotic way!
+    pass

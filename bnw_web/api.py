@@ -50,6 +50,11 @@ class ApiHandler(BnwWebHandler):
         if 'login' in args:
             del args['login']
         req = ApiRequest('',None,user)
-        result = yield handler(req,**args)
+        try:
+            result = yield handler(req,**args)
+        except bnw_core.base.BnwResponse, br:
+            defer.returnValue(json.dumps({'ok':False,'desc':str(br)},ensure_ascii=False))
         defer.returnValue(json.dumps(result,ensure_ascii=False))
     respond = respond_post
+    def check_xsrf_cookie(self):
+        pass

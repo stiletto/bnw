@@ -11,7 +11,22 @@ def _(s,user):
 
 @require_auth
 @defer.inlineCallbacks
-def cmd_delete(request,message=None):
+def cmd_delete(request,message=None,last=False):
+    if last:
+        lastcomment = list((yield objs.Comment.find_sort({'user':request.user['name']},[('date',-1)],limit=1)))
+        lastmessage = list((yield objs.Message.find_sort({'user':request.user['name']},[('date',-1)],limit=1)))
+        if lastcomment:
+            if lastmessage:
+                message = lastmessage[0]['id'] if lastmessage[0]['date']>lastcomment[0]['date'] else lastcomment[0]['id']
+            else:
+                message = lastcomment[0]['id']
+        else:
+            if lastmessage:
+                message = lastmessage[0]['id']
+            else:
+                defer.returnValue(
+                    dict(ok=False,desc='Nothing to delete.')
+                )
     if not message:
         defer.returnValue(
             dict(ok=False,desc='Usage: delete -m POST[/COMMENT]')
@@ -34,7 +49,7 @@ def cmd_delete(request,message=None):
         _ = (yield objs.Message.mupdate({'id':message_id},{'$inc': { 'replycount': -1}}))
         _ = yield objs.Comment.remove({'id':comment['id'],'message':comment['message'],'user':comment['user']})
         defer.returnValue(
-            dict(ok=True,desc='Comment removed.')
+            dict(ok=True,desc='Comment %s removed.' % (comment_id,))
         )
     else:
         if not post:
@@ -48,5 +63,5 @@ def cmd_delete(request,message=None):
         _ = yield objs.Message.remove({'id':post['id'],'user':post['user']})
         _ = yield objs.Comment.remove({'message':post['id']})
         defer.returnValue(
-            dict(ok=True,desc='Message removed.')
+            dict(ok=True,desc='Message %s removed.' % (message,))
         )

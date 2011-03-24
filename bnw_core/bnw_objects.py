@@ -159,12 +159,18 @@ class MongoObject(WrappedDict):
         defer.returnValue(res)
 
     @defer.inlineCallbacks
-    def save(self):
+    def save(self,safe=True):
         #print self.collection,type(self.collection)
-        id=yield (self.collection.save(self.doc))
+        id=yield (self.collection.save(self.doc,safe=safe))
         self.doc['_id']=id
         defer.returnValue(id)
-        
+
+    @classmethod
+    @defer.inlineCallbacks
+    def map_reduce(self,*args,**kwargs):
+        db=(yield get_db())
+        defer.returnValue((yield db[self.collection_name].map_reduce(*args,**kwargs)))
+
     @classmethod
     @defer.inlineCallbacks
     def ensure_indexes(self):
@@ -218,8 +224,22 @@ class Message(MongoObject):
         collection=(yield get_db())[self.collection_name]
         idi=txmongo.filter.sort(txmongo.filter.ASCENDING("id"))
         _ = yield collection.create_index(idi, unique=True)
-        datei=txmongo.filter.sort(txmongo.filter.DESCENDING("date"))
+
+        datei = txmongo.filter.sort(txmongo.filter.DESCENDING("date"))
         _ = yield collection.create_index(datei)
+
+        tagi = txmongo.filter.sort(txmongo.filter.DESCENDING("user")+txmongo.filter.DESCENDING("tags")+txmongo.filter.DESCENDING("date"))
+        _ = yield collection.create_index(tagi)
+
+        useri = txmongo.filter.sort(txmongo.filter.DESCENDING("user")+txmongo.filter.DESCENDING("date"))
+        _ = yield collection.create_index(useri)
+
+        clubi = txmongo.filter.sort(txmongo.filter.DESCENDING("user")+txmongo.filter.DESCENDING("clubs")+txmongo.filter.DESCENDING("date"))
+        _ = yield collection.create_index(clubi)
+
+        recoi = txmongo.filter.sort(txmongo.filter.DESCENDING("date") + txmongo.filter.DESCENDING("recommendations"))
+        _ = yield collection.create_index(recoi)
+
         defer.returnValue(None)
 
 class FeedElement(MongoObject):
@@ -227,6 +247,13 @@ class FeedElement(MongoObject):
         id: id сообщения
         user: пользователь-обладатель ленты."""
     collection_name = "feeds"
+    @classmethod
+    @defer.inlineCallbacks
+    def ensure_indexes(self):
+        collection=(yield get_db())[self.collection_name]
+        idi=txmongo.filter.sort(txmongo.filter.ASCENDING("message")+txmongo.filter.ASCENDING("user"))
+        _ = yield collection.create_index(idi, unique=False)
+        defer.returnValue(None)
     
 class Comment(MongoObject):
     """ Объект комментария."""
@@ -243,6 +270,18 @@ class Comment(MongoObject):
             return 1 #defer.returnValue(1)
         else:
             return 0
+    @classmethod
+    @defer.inlineCallbacks
+    def ensure_indexes(self):
+        collection=(yield get_db())[self.collection_name]
+
+        idi=txmongo.filter.sort(txmongo.filter.ASCENDING("id"))
+        _ = yield collection.create_index(idi, unique=True)
+
+        msgi=txmongo.filter.sort(txmongo.filter.ASCENDING("message"))
+        _ = yield collection.create_index(msgi)
+
+        defer.returnValue(None)
 
 class User(MongoObject):
     """ Няшка-пользователь."""
@@ -256,8 +295,9 @@ class User(MongoObject):
     @defer.inlineCallbacks
     def ensure_indexes(self):
         collection=(yield get_db())[self.collection_name]
-        _ = yield collection.ensure_index('id', ttl=INDEX_TTL, unique=True)
-        _ = yield collection.ensure_index('name', ttl=INDEX_TTL)
+
+        namei=txmongo.filter.sort(txmongo.filter.ASCENDING("name"))
+        _ = yield collection.create_index(namei, unique=True)
         defer.returnValue(None)
         
 class Subscription(MongoObject):
@@ -268,18 +308,48 @@ class Subscription(MongoObject):
     @defer.inlineCallbacks
     def ensure_indexes(self):
         collection=(yield get_db())[self.collection_name]
-        _ = yield collection.ensure_index('id', ttl=INDEX_TTL, unique=True)
-        _ = yield collection.ensure_index({'user':1,'type':1}, ttl=INDEX_TTL)
+
+        typei=txmongo.filter.sort(txmongo.filter.ASCENDING("user")+txmongo.filter.ASCENDING("type"))
+        _ = yield collection.create_index(typei)#, unique=True)
+        targi=txmongo.filter.sort(txmongo.filter.ASCENDING("target")+txmongo.filter.ASCENDING("type"))
+        _ = yield collection.create_index(targi)#, unique=True)
         defer.returnValue(None)
 
     def is_remote(self):
         return '@' in self['target']
 
+class Club(MongoObject):
+    """ Клуб в выхлопе мап-редьюса."""
+    collection_name = "clubs"
+    @classmethod
+    def ensure_indexes(self):
+        pass
+
+class Tag(MongoObject):
+    """ Клуб в выхлопе мап-редьюса."""
+    collection_name = "tags"
+    @classmethod
+    def ensure_indexes(self):
+        pass
+
 class Timing(MongoObject):
     """ Время выполнения."""
     collection_name = "timings"
+    @classmethod
+    def ensure_indexes(self):
+        pass
 
 class Throttle(MongoObject):
     """ Троттлинг."""
     collection_name = "post_throttle"
+    @classmethod
+    @defer.inlineCallbacks
+    def ensure_indexes(self):
+        collection=(yield get_db())[self.collection_name]
+        
+        namei=txmongo.filter.sort(txmongo.filter.ASCENDING("user"))
+        _ = yield collection.create_index(namei, unique=True)
+        
+        defer.returnValue(None)
+
 

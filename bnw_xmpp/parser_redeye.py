@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from base import XmppResponse, CommandParserException
+from base import CommandParserException
+from bnw_core.base import BnwResponse
 from twisted.internet import defer
 import parser_basexmpp
 
@@ -87,7 +88,7 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
             options=dict((str(k),v) for k,v in options.iteritems()) # deunicodify options keys
             result=yield handler(msg,**options)
             defer.returnValue(self.formatResult(msg,result))
-        except XmppResponse, response:
+        except BnwResponse, response:
             defer.returnValue(response)
 
     def resolve(self,msg):
@@ -101,7 +102,8 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
         options={}
         wordbuf=[] # i know it's ugly and slow. is there any better way to implement quotes?
         for i,c in enumerate(text):
-            if c==' ' and not inquotes:
+            if (c==' ' and not inquotes) or c=='\n':
+                inquotes=None
                 if len(wordbuf)>0: #1: \todo check why there was 1
                     if waitcommand:
                         waitcommand=False

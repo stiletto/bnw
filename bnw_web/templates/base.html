@@ -13,6 +13,9 @@
     {% block extrastyle %}
     {% end %}
     </style>
+    <style type="text/css">
+    {% if auth_user %}{{ auth_user.get('settings',{}).get('usercss','') }}{% end %}
+    </style>
     {% block extrahead %}
     {% end %}
 </head>
@@ -24,14 +27,25 @@
             <!-- только если ты регистрат  -->
             <a href='/blog' class='headlink'>Блог</a>
             <a href='/feed' class='headlink'>Лента</a>
-            <a href='#not_done_yet' class='headlink'>Клубы</a>
+            <a href='/clubs' class='headlink'>Клубы</a>
         </span>
         <a href='/' style='color: #e5e5e5; text-decoration: none; margin-left: 1em;'>{{ ranq }}</a>
     </div>
 {% block body %}
 {% end %}
-    <div style='text-align: right; overflow: hidden; width: 100%;'>
-        <a href="http://bnw.blasux.ru/static/" class='pagelink'>Сырцы и инфа о проекте</a>
+    <div style='overflow: hidden; width: 100%;'>
+        {% block footerrow %}
+        {% end %}
+        <div style='float:right;'>
+            <a href="http://bnw.reformal.ru/" class='pagelink'>BnW на Реформале.</a>
+            <!-- <a href="http://bnw.blasux.ru/static/" class='pagelink'>Сырцы и инфа о проекте</a> -->
+            <a href="http://wiki.bnw.im/">Викивач</a>
+        </div>
+    </div>
+    <div style='text-align: center;'>
+        Цоперайт &copy; 2010,2011 <a href='/u/stiletto'>@stiletto</a>.<br/>
+        <!-- Пользуясь случаем передаю добра хостингу <a href="http://locum.ru?code=86ae196b0fc58a7f6798a45e16faf166ae42d02f">locum.ru</a>
+            Ааа, блять, все равно нихуя мне не принесет эта партнерка. -->
     </div>
 </div>
 
@@ -56,7 +70,7 @@ reformal_wdg_tbcolor  = "#FFFFFF";
  reformal_wdg_bimage = "785c6819375d7a07d2f875164a6d2eca.png";
   //-->
   </script>
-  <script type="text/javascript" language="JavaScript" src="http://widget.reformal.ru/tab6.js"></script><noscript><a href="http://bnw.reformal.ru">bnw.blasux.ru feedback </a> <a href="http://reformal.ru"><img src="http://reformal.ru/i/logo.gif" /></a></noscript>
+  <!-- <script type="text/javascript" language="JavaScript" src="http://widget.reformal.ru/tab6.js"></script><noscript><a href="http://bnw.reformal.ru">bnw.blasux.ru feedback </a> <a href="http://reformal.ru"><img src="http://reformal.ru/i/logo.gif" /></a></noscript> -->
 </body>
 </html>
 

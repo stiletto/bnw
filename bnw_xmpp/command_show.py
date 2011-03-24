@@ -24,6 +24,18 @@ def showSearch(parameters,page):
     )
 
 @defer.inlineCallbacks
+def showComment(commentid):
+        comment=yield objs.Comment.find_one({'id': commentid})
+        if comment is None:
+            defer.returnValue(
+                dict(ok=False,desc='No such comment')
+            )
+        defer.returnValue(
+            dict(ok=True,format='comment',
+                comment=comment.filter_fields(),
+                    ))
+
+@defer.inlineCallbacks
 def showComments(msgid):
         message=yield objs.Message.find_one({'id': msgid})
         if message is None:
@@ -40,10 +52,13 @@ def showComments(msgid):
                 ]
             )
         ) # suck cocks, be LISP :3
+
         
-@check_arg(message=MESSAGE_RE,page='[0-9]+')
+@check_arg(message=MESSAGE_RE+'(/'+MESSAGE_RE+')?',page='[0-9]+')
 @defer.inlineCallbacks
 def cmd_show(request,message="",user="",tag="",club="",page="0",replies=None):
+    if '/' in message:
+        defer.returnValue((yield showComment(message)))
     if replies:
         if not message:
             defer.returnValue(

@@ -97,6 +97,7 @@ def postMessage(user,tags,clubs,text,anon=False,anoncom=False,sfrom=None):
               'text': text,
               'anonymous': anon,
               'anoncomments': anoncom,
+              'recommendations': [],
             }
     if anon:
         message['real_user']=message['user']
@@ -182,6 +183,10 @@ def recommendMessage(user,message_id,comment="",sfrom=None):
     
     queries=[{'target': user['name'], 'type': 'sub_user'}]
     qn,recipients = yield send_to_subscribers(queries,message,user['name'],comment)
+
+    if len(message['recommendations'])<1024:
+        _ = (yield objs.Message.mupdate({'id':message_id},{'$addToSet': { 'recommendations': user['name']}}))
+
     defer.returnValue((True,(qn,recipients)))
 
 

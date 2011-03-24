@@ -1,4 +1,5 @@
 
+from bnw_xmpp import command_clubs
 from bnw_xmpp import command_delete
 from bnw_xmpp import command_except
 from bnw_xmpp import command_help
@@ -32,4 +33,6 @@ handlers = {
     "delete":               command_delete.cmd_delete,
     "pm":                   command_pm.cmd_pm,
     "userlist":             command_userlist.cmd_userlist,
+    "clubs":             command_clubs.cmd_clubs,
+    "tags":             command_clubs.cmd_tags,
 }

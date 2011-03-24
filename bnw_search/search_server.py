@@ -64,23 +64,29 @@ class BnwSearchService(object):
                     continue
                 terms.append(stemmer(term.lower()))
 
-            query = xapian.Query(xapian.Query.OP_AND, terms)
-            #print dir(query)
-            print "Performing query",terms #query.get_description()
 
-            enquire.set_query(query)
-            matches = enquire.get_mset(0, 10)
+            retry = True
+            while retry:
+                try:
+                    retry = False
+                    query = xapian.Query(xapian.Query.OP_AND, terms)
+                    #print dir(query)
+                    print "Performing query",terms #query.get_description()
+                    enquire.set_query(query)
+                    matches = enquire.get_mset(0, 10)
+                    print "%i results found" % matches.get_matches_estimated()
+                except xapian.DatabaseModifiedError:
+                    database.reopen()
+                    print "Database reopened"
+                    retry = True
 
             results = []
-
-            print "%i results found" % matches.get_matches_estimated()
             for match in matches:
                 msgid=match.document.get_value(0)
                 msg=match.document.get_data()
                 if len(msg)>1280:
                     msg=msg[:128]+"..."
-                results.append([msgid,match.percent,msg])
-                #print " --------- %s --- %i%% ----" % (msgid, match[xapian.MSET_PERCENT])
+                results.append([msgid,match.percent,unicode(msg,'utf-8','replace')])
             reply = [id0,id1,'1',json.dumps(results)]
             socket.send_multipart(reply)
 

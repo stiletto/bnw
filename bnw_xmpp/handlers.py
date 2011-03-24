@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 #from twisted.words.xish import domish
-from base import XmppResponse
 
 from parser_redeye import RedEyeParser
 from parser_regex import RegexParser
 
+import command_clubs
 import command_delete
 import command_except
 import command_help
@@ -16,6 +16,7 @@ import command_pm
 import command_search
 import command_post
 import command_register
+import command_settings
 import command_show
 import command_subscription
 import command_vcard
@@ -54,7 +55,8 @@ recommend_args = (
                 ("m", "message", True, u"Message to recommend."),
             )
 delete_args = (
-                ('m',   'message',True,'Message or comment to delete.'),
+                ('m', 'message',True,'Message or comment to delete.'),
+                ('l', 'last',False,'Delete last message or comment.'),
             )
 update_args = (
                 ('m', 'message',True,'Message or comment to update.'),
@@ -113,10 +115,18 @@ redeye_handlers = (
         ),
         ("update", update_args, command_update.cmd_update, "text", ),
         ("u", update_args, command_update.cmd_update, "text", ),
+        ("set",
+            (
+                ("c", "usercss", True, u"User CSS."),
+            ),
+            command_settings.cmd_set,
+        ),
+        ("clubs", (), command_clubs.cmd_clubs, ),
 )
 
 redeye_formatters = {
     'comment': formatters_redeye.formatter_comment,
+    'clubs': formatters_redeye.formatter_clubs,
     'message': formatters_redeye.formatter_message,
     'recommendation': formatters_redeye.formatter_recommendation,
     'message_with_replies': formatters_redeye.formatter_message_with_replies,
@@ -124,6 +134,7 @@ redeye_formatters = {
     'subscriptions': formatters_redeye.formatter_subscriptions,
     'search': formatters_redeye.formatter_search,
     'userlist': formatters_redeye.formatter_userlist,
+    'settings': formatters_redeye.formatter_settings,
 }
 
 simple_handlers = (
@@ -160,7 +171,7 @@ simple_handlers = (
         (ur'@(?P<user>\S+) \*(?P<tag>\S+)',command_show.cmd_show),
         (ur'\*(?P<tag>\S+)',command_show.cmd_show),
         (ur'!(?P<club>\S+)',command_show.cmd_show),
-        (ur'#(?P<message>[0-9A-Za-z]+)',command_show.cmd_show),
+        (ur'#(?P<message>[0-9A-Za-z]+(?:/[0-9A-Za-z]+))',command_show.cmd_show),
         (ur'#(?P<message>[0-9A-Za-z]+)\+',command_show.cmd_show,{'replies':True}),
         (ur'#(?P<message>[0-9A-Za-z]+) \+!(?P<text>.+)',command_update.cmd_update,{'club':True}),
         (ur'#(?P<message>[0-9A-Za-z]+) \+\*(?P<text>.+)',command_update.cmd_update,{'tag':True}),

@@ -3,7 +3,7 @@
 
 from base import *
 import random,time
-from bnw_core.base import gc
+from bnw_core.base import gc,BnwResponse
 import bnw_core.bnw_objects as objs
 
 from twisted.python import log
@@ -16,14 +16,14 @@ def _(s,user):
 def throttle_check(user):
     post_throttle=yield objs.Throttle.find_one({'user':user})
     if post_throttle and post_throttle['time']>=(time.time()-5):
-        raise XmppResponse('You are sending messages too fast!')
+        raise BnwResponse('You are sending messages too fast!')
     defer.returnValue(post_throttle)
     
 @defer.inlineCallbacks
 def throttle_update(user,post_throttle):
         throttledoc={'user':user,'time':time.time()}
-        if post_throttle:
-            _ = yield objs.Throttle.mupdate({'user':user},throttledoc)
+        if post_throttle: # TODO: заменить на upsert
+            _ = yield objs.Throttle.mupdate({'user':user},throttledoc,safe=True)
         else:
             throttle=objs.Throttle(throttledoc)
             _ = yield throttle.save()

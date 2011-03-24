@@ -13,7 +13,7 @@ def _(s,user):
 @defer.inlineCallbacks
 def update_internal(message,what,delete,text):
     action = '$pull' if delete else '$addToSet'
-    defer.returnValue((yield objs.Message.mupdate({'id':message},{action: { what: text}})))
+    defer.returnValue((yield objs.Message.mupdate({'id':message},{action: { what: text}})),safe=True)
 
 @require_auth
 @defer.inlineCallbacks

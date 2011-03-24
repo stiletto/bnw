@@ -28,6 +28,7 @@ import bnw_core.post as post
 import bnw_core.base
 from bnw_core.base import get_db,get_fs
 from bnw_xmpp.command_show import cmd_feed
+from bnw_xmpp.command_clubs import cmd_clubs,cmd_tags
 
 from base import BnwWebHandler, TwistedHandler, BnwWebRequest
 from auth import LoginHandler, requires_auth, AuthMixin
@@ -70,10 +71,11 @@ def get_page(self):
         return int(rv)
     return 0
 
-class UserHandler(BnwWebHandler):
+class UserHandler(BnwWebHandler,AuthMixin):
     templatename='user.html'
     @defer.inlineCallbacks
     def respond(self,username,tag=None):
+        _ = yield self.get_auth_user()
         f = txmongo.filter.sort(txmongo.filter.DESCENDING("date"))
         user = (yield objs.User.find_one({'name': username}))
         page = get_page(self)
@@ -108,6 +110,7 @@ class UserInfoHandler(BnwWebHandler,AuthMixin):
     templatename='userinfo.html'
     @defer.inlineCallbacks
     def respond(self,username):
+        _ = yield self.get_auth_user()
         user = yield objs.User.find_one({'name': username})
         subscribers = set([x['user'] for x in
                     (yield objs.Subscription.find({'target':username,'type':'sub_user'}))])
@@ -132,11 +135,13 @@ class UserInfoHandler(BnwWebHandler,AuthMixin):
         })
 
 
-class MainHandler(BnwWebHandler):
+class MainHandler(BnwWebHandler,AuthMixin):
     templatename='main.html'
     @defer.inlineCallbacks
     def respond(self,club=None,tag=None):
         f = txmongo.filter.sort(txmongo.filter.DESCENDING("date"))
+
+        user=yield self.get_auth_user()
 
         page = get_page(self)
         qdict = {}
@@ -163,8 +168,12 @@ class MainHandler(BnwWebHandler):
             defer.returnValue(json.dumps(json_messages,ensure_ascii=False))
 
         else:
+            req=BnwWebRequest((yield self.get_auth_user()))
+            tagres = yield cmd_tags(req)
+            toptags = tagres['tags'] if tagres['ok'] else []
             defer.returnValue({
                 'messages': messages,
+                'toptags': toptags,
                 'users_count':int(uc),
                 'page': page,
             })
@@ -177,6 +186,18 @@ class FeedHandler(BnwWebHandler,AuthMixin):
         req=BnwWebRequest((yield self.get_auth_user()))
         result = yield cmd_feed(req)
         self.set_header("Cache-Control", "max-age=1")
+        defer.returnValue({
+            'result': result,
+        })
+
+class ClubsHandler(BnwWebHandler,AuthMixin):
+    templatename='clubs.html'
+    @defer.inlineCallbacks
+    def respond(self,page=0):
+        user=yield self.get_auth_user()
+        req=BnwWebRequest((yield self.get_auth_user()))
+        result = yield cmd_clubs(req)
+        self.set_header("Cache-Control", "max-age=3600")
         defer.returnValue({
             'result': result,
         })
@@ -299,6 +320,7 @@ def get_site():
         (r"/login", LoginHandler),
         (r"/post", PostHandler),
         (r"/feed", FeedHandler),
+        (r"/clubs", ClubsHandler),
         (r"/blog", BlogHandler),
         (r"/comment", CommentHandler),
         (r"/api/([0-9a-z/]*)/?", ApiHandler),

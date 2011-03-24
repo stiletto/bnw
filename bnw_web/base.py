@@ -1,74 +1,21 @@
 # -*- coding: utf-8 -*-
-from twisted.internet import epollreactor
-#epollreactor.install()
-from twisted.internet import reactor
-from twisted.internet import interfaces, defer
-from twisted.web.server import Site, NOT_DONE_YET
-from twisted.web.resource import Resource, NoResource
 
-import tornado.options
-import tornado.twister
-import tornado.web
-#import tornado.escape
-import logging,traceback
-import simplejson as json
-import txmongo
-import os,random,time
+import random,time
 import escape
 from widgets import widgets
-import PyRSS2Gen
-import websocket_site
-from datetime import datetime
 import traceback
+from twisted.internet import defer
 
-import bnw_core.bnw_objects as objs
-import bnw_core.post as post
-from bnw_core.base import get_db
 import bnw_core.base
+from thandler import TwistedHandler
 
 class BnwWebRequest(object):
     def __init__(self,user=None):
         self.body=None
         self.to=None
-        self.jid=user['jid']
+        self.jid=user['jid'] if user else ''
         self.bare_jid=self.jid
         self.user=user
-
-
-class TwistedHandler(tornado.web.RequestHandler):
-    def writeandfinish(self,text):
-        if not self._finished:
-            self.write(text)
-            self.finish()
-    def errorfinish(self,text):
-        print 'ALARM'
-        if isinstance(text,Exception):
-            self.write(str(text))
-        else:
-            self.write(str(text))
-        self.finish()
-    def json_fuckup(self,dct):
-        if isinstance(dct,objs.MongoObject):
-            return dct.doc
-        if isinstance(dct,txmongo.ObjectId):
-            return str(dct)
-        else:
-            raise TypeError(str(type(dct)))
-    @tornado.web.asynchronous
-    def get(self,*args,**kwargs):
-        try:
-            self.respond(*args,**kwargs).addCallbacks(self.writeandfinish,self.errorfinish)
-        except Exception:
-            self.write(traceback.format_exc())
-            self.finish()
-
-    @tornado.web.asynchronous
-    def post(self,*args,**kwargs):
-        try:
-            self.respond_post(*args,**kwargs).addCallbacks(self.writeandfinish,self.errorfinish)
-        except Exception:
-            self.write(traceback.format_exc())
-            self.finish()
 
 ranq=(
     'Где блекджек, где мои шлюхи? Ничерта не работает!',
@@ -95,6 +42,18 @@ class BnwWebHandler(TwistedHandler):
             'auth_user': getattr(self,'user',None),
         }
 
+    def respond(self,*args,**kwargs):
+        self.set_status(500)
+        d = defer.Deferred()
+        d.callback(u"No GET handler, ёбаные кони гуси!")
+        return d
+
+    def respond_post(self,*args,**kwargs):
+        self.set_status(500)
+        d = defer.Deferred()
+        d.callback("No POST handler, блять!")
+        return d
+      
     def render(self,templatename,**kwargs):
         global ranq
         defargs=self.get_defargs()
@@ -112,8 +71,6 @@ class BnwWebHandler(TwistedHandler):
             super(BnwWebHandler,self).writeandfinish(text)
 
     def errorfinish(self,text):
-        #tb=text.getTracebackObject()
-        #if tb:
         text=text.getTraceback()
         self.set_status(500)
         self.render(self.errortemplate,text=text)

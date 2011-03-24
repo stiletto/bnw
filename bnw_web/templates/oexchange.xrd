@@ -12,17 +12,17 @@
 
     <!-- 
         The Target's icon is expressed as a Link of a defined relation.
+    -->
     <Link 
         rel= "icon" 
-        href="{{ config.webui_base }}/"
+        href="{{ config.webui_base }}static/logo_16x16.png"
         type="image/png" 
         />
     <Link 
         rel= "icon32" 
-        href="http://www.oexchange.org/images/linkeater_32x32.png"
+        href="{{ config.webui_base }}static/logo_32x32.png"
         type="image/png" 
         />
-    -->
     
     <!-- 
         The individual OExchange protocol endpoints are expressed as Links of a

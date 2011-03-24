@@ -25,7 +25,7 @@ def cmd_set(request,**kwargs):
                         dict(ok=False,desc='%s is too long.' % (n,))
                     )
                 _ = yield objs.User.mupdate({'name':request.user['name']},
-                    {'$set':{'settings.'+n:v}})
+                    {'$set':{'settings.'+n:v}},safe=True)
         defer.returnValue(
             dict(ok=True,desc='Settings updated.')
         )

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}BnW - {{ msgid }}{% end %}
 {% block extrahead %}
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/jquery.min.js"></script>
     <script type="text/javascript" src="/static/web-socket-js/swfobject.js"></script>
     <script type="text/javascript" src="/static/web-socket-js/FABridge.js"></script>
     <script type="text/javascript" src="/static/web-socket-js/web_socket.js"></script>
@@ -91,6 +91,10 @@
                 }
             });
         }
+        function textarea_press(event) {
+            if (event.ctrlKey && (event.keyCode==13 || event.keyCode==10))
+                $("#commentform").submit();
+        }
         $(function(){
             $("div.comments div").each(function (i,o) { 
                 var c=$(o);
@@ -133,14 +137,21 @@
         <div class='msg'>
             {{ w.tags(msg['tags'],msg['clubs']) }}
             <pre class='pw'>{{ linkify(msg['text']) }}</pre>
-            <div>{{ w.msgl(msgid) }} / {{ w.userl(msg['user']) }} / {{ w.time(msg['date']) }}
+            {% if msg['recommendations'] %}
+            <div class='recos'>
+                    Рекомендовали:
+                    {% for u in msg['recommendations'] %} {{ w.userl(u) }} {% end %}
+            </div>
+            {% end %}
+            <div class='sign'>{{ w.msgl(msgid) }} / {{ w.userl(msg['user']) }} / {{ w.time(msg['date']) }}
+
                 <div style='float: right;'>
                     <!-- AddThis Button BEGIN -->
                     <div class="addthis_toolbox addthis_default_style ">
                     <a href="http://www.addthis.com/bookmark.php?v=250&amp;username=stiletto" class="addthis_button">[+] Share</a>
                     </div>
                     <script type="text/javascript">var addthis_config = {"data_track_clickback":true};</script>
-                    <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=stiletto"></script>
+                    <script type="text/javascript" src="/static/addthis_widget.js#username=stiletto"></script>
                     <!-- AddThis Button END -->
                 </div>
             </div>
@@ -166,10 +177,10 @@
     {% if auth_user %}
     <div class='outerborder'>
         <div class='msg'>
-            <form action='/comment' method='post'>
+            <form id='commentform' action='/comment' method='post'>
                 {{ xsrf_form_html() }}
                 <input type='hidden' name='msg' value='{{ msgid }}'/>
-                <textarea name='text' style='width: 100%;' cols='3' class='blueinput'></textarea>
+                <textarea name='text' style='width: 100%;' cols='3' class='blueinput' onkeypress="textarea_press(event)"></textarea>
                 Id комментария: <input name='comment' class='blueinput' size='4'/>
                 <input type='submit' value='[&lt; Комментировать &gt;]' style='float: right;' class='styledbutton'/>
             </form>

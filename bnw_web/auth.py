@@ -23,7 +23,7 @@ from tornado.options import define, options
 import bnw_core.bnw_objects as objs
 import bnw_core.post as post
 from bnw_core.base import get_db
-from base import TwistedHandler
+from thandler import TwistedHandler
 
 class LoginHandler(TwistedHandler):
     @defer.inlineCallbacks
@@ -36,13 +36,13 @@ class LoginHandler(TwistedHandler):
             defer.returnValue('')
         else:
             defer.returnValue('Bad login key')
-        
 
 class AuthMixin(object):
     @defer.inlineCallbacks
     def get_auth_user(self):
         if not getattr(self,'user',None):
-            self.user=yield objs.User.find_one({'login_key':self.get_cookie('bnw_loginkey',"")})
+            key = self.get_cookie('bnw_loginkey',"")
+            self.user = yield objs.User.find_one({'login_key':key}) if key else None
         defer.returnValue(self.user)
         
 def requires_auth(fun):

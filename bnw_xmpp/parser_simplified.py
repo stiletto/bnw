@@ -4,13 +4,14 @@ import traceback
 import re
 import datetime
 
-from base import XmppResponse, CommandParserException, BaseParser
+from base import CommandParserException, BaseParser
+from bnw_core.base import BnwResponse
 from twisted.internet import defer
 
 def requireAuthSimplified(fun):
     def newfun(self,command,msg,parameters):
         if msg.user is None:
-            raise XmppResponse('Only for registered users')
+            raise BnwResponse('Only for registered users')
         else:
             return fun(self,command,msg,parameters)
     return newfun
@@ -64,7 +65,7 @@ class SimplifiedParser(BaseParser):
         try:
             #return str(parameters)
             defer.returnValue((yield self.commands['simplified',command]['handler'](command,msg,parameters)))
-        except XmppResponse, response:
+        except BnwResponse, response:
             defer.returnValue(response)
 
     def parse(self,text):

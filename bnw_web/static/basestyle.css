@@ -2,9 +2,13 @@
             margin: 0;
             background-color: #000;
             color: #e5e5e5;
-            font-family: Unifont, Monaco, Consolas, Terminus, monospace;
             padding: 1em;
         }
+
+        body, .pw, .blueinput, .styledbutton {
+            font-family: Unifont, Monaco, Terminus, Consolas, monospace;
+        }
+
         .bodyshit {
             padding: 1em;
         }
@@ -27,7 +31,6 @@
             color: #FFFF00;
         }
         .blueinput {
-            font-family: Unifont, Monaco, Consolas, Terminus, monospace;
             background-color: #00CDCD;
             color: #000;
             border: none;
@@ -37,7 +40,6 @@
 
         .styledbutton {
             border: none; 
-            font-family: Unifont, Monaco, Consolas, Terminus, monospace; 
             margin: 0; 
             padding: 0;
         }
@@ -111,6 +113,6 @@
 
         .pw {
             white-space: pre-wrap;
-            font-family: Unifont, Monaco, Consolas, Terminus, monospace;
+            padding-bottom: 0.5em;
             margin: 0;
         }

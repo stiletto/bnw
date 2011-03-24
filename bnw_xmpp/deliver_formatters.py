@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 #from twisted.words.xish import domish
-from base import XmppResponse
 
 import formatters_redeye
 import formatters_simple

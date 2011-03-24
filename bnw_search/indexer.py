@@ -63,7 +63,7 @@ def index(db,period):
 
         for message in messages:
             print message['id']
-            objs.Message.mupdate({'id':message['id']},{'$set':{'indexed':1}})
+            objs.Message.mupdate({'id':message['id']},{'$set':{'indexed':1}},safe=True)
             doc, id_term = create_document(message)
             db.replace_document(id_term, doc)
         skip += 20
