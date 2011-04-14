@@ -35,4 +35,5 @@ handlers = {
     "userlist":             command_userlist.cmd_userlist,
     "clubs":             command_clubs.cmd_clubs,
     "tags":             command_clubs.cmd_tags,
+    "passlogin":            command_login.cmd_passlogin,
 }

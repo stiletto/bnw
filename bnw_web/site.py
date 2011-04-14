@@ -215,8 +215,8 @@ class PostHandler(BnwWebHandler,AuthMixin):
     @requires_auth
     @defer.inlineCallbacks
     def respond_post(self):
-        tags=[i[:128] for i in self.get_argument("tags","").split(",",5)[:5]]
-        clubs=[i[:128] for i in self.get_argument("clubs","").split(",",5)[:5]]
+        tags=[i[:128] for i in self.get_argument("tags","").split(",",5)[:5] if i]
+        clubs=[i[:128] for i in self.get_argument("clubs","").split(",",5)[:5] if i]
         text=self.get_argument("text","")
         user = yield self.get_auth_user()
         ok,result = yield post.postMessage(user,tags,clubs,text)

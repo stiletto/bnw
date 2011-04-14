@@ -6,7 +6,7 @@ import random
 
 import bnw_core.bnw_objects as objs
 
-optionnames = [ 'usercss' ]
+optionnames = [ 'usercss', 'password' ]
 @require_auth
 #@check_arg(usercss=MESSAGE_RE)
 @defer.inlineCallbacks

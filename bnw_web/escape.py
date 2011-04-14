@@ -30,8 +30,16 @@ linkhostings=[(re.compile('^'+k+'$'),v,k) for (k,v) in linkhostings]
 #inkhosting=dict((re.compile(k),v) for (k,v) in linkhosting.iteritems())
 
 _URL_RE = re.compile(ur"""\b((?:([\w-]+):(/{1,3})|www[.])(?:(?:(?:[^\s&()]|&amp;|&quot;)*(?:[^!"#$%&'()*+,.:;<=>?@\[\]^`{|}~\s]))|(?:\((?:[^\s&()]|&amp;|&quot;)*\)))+)""")
+#_USER_RE = re.compile(ur"""(?:(?<=[\s\W])|^)@([0-9A-Za-z-]+)""")
 _USER_RE = re.compile(ur"""(?:(?<=[\s\W])|^)@([0-9A-Za-z-]+)""")
-_MSG_RE = re.compile(ur"""(?:(?<=[\s\W])|^)#([0-9A-Za-z]+)""")
+_MSG_RE = re.compile(ur"""(?:(?<=[\s\W])|^)#([0-9A-Za-z]+)(?:/([0-9A-Za-z]+))?""")
+
+_USER_LINK_RE = re.compile(ur"""http://bnw.im/u/([0-9A-Za-z-]+)""")
+_MSG_LINK_RE = re.compile(ur"""http://bnw.im/p/([0-9A-Za-z-]+)(?:#([0-9A-Za-z]+))?""")
+
+#_COMMENT_RE = re.compile(ur"""(?:(?<=[\s\W])|^)#([0-9A-Za-z]+/[0-9A-Za-z]+)""")
+#_MSG_RE = re.compile(ur"""(?:(?<=[\s\W])|^)#([0-9A-Za-z]+)""")
+#_MSG_RE = re.compile(ur"""(?:(?<=[\s\W])|^)#([0-9A-Za-z]+)""")
 
 def linkify(text, shorten=True, extra_params="",
             require_protocol=False, permitted_protocols=["http", "https"]):
@@ -114,7 +122,14 @@ def linkify(text, shorten=True, extra_params="",
                 appends.append(app)
                 return ret
         else:
-            #raise
+            # МНЕ БЛЯТЬ ССАНО СТЫДНО ЗА ЭТОТ КОД. ОН БУДЕТ ВЫКИНУТ НАХУЙ СКОРО СОВСЕМ.
+            ulm = _USER_LINK_RE.match(href)
+            if ulm:
+                url = '@'+ulm.group(1)
+            else:
+                plm = _MSG_LINK_RE.match(href)
+                if plm:
+                    url = '#' + plm.group(1) + ('/'+plm.group(2) if plm.group(2) else '')
             return u'<a href="%s"%s>%s</a>' % (href, params, url)
 
     def make_user(m):
@@ -125,8 +140,9 @@ def linkify(text, shorten=True, extra_params="",
     # The regex is modified to avoid character entites other than &amp; so
     # that we won't pick up &quot;, etc.
     text = _unicode(xhtml_escape(text))
-    restext = _URL_RE.sub(make_link, text)
-    #restext = _USER_RE.sub(make_user,restext)
+    restext = _USER_RE.sub((lambda m: 'http://bnw.im/u/'+m.group(1)),text)
+    restext = _MSG_RE.sub((lambda m: 'http://bnw.im/p/'+m.group(1)+('#'+m.group(2) if m.group(2) else '')),restext)
+    restext = _URL_RE.sub(make_link, restext)
     #restext = _MSG_RE.sub(make_msg,restext)
     if appends:
         return restext+('<div class="imgpreviews">%s</div>' % (''.join(appends),))
