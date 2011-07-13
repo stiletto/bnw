@@ -8,6 +8,12 @@ import bnw_core.bnw_objects as objs
 @require_auth
 @defer.inlineCallbacks
 def cmd_interface(request,iface=None): # TODO: asynchronize
+        """ Переключение интерфейса
+        
+        Переключение парсера команд xmpp-интерфейса.
+        
+        redeye: interface simplified
+        simple: INTERFACE redeye"""
         parsers=('simplified','redeye')
         if not iface:
             defer.returnValue(

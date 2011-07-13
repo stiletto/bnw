@@ -14,7 +14,7 @@ class ZMQRequestThread(threading.Thread):
         self.running = True
     def run(self):
         while self.running:
-            inputready, outputready, exceptready = zmq.select([self.socket], [], [], 4)
+            inputready, outputready, exceptready = zmq.select([self.socket], [], [], 1)
             if inputready:
                 recv = self.socket.recv_multipart()
                 self.callback(recv)
@@ -33,6 +33,7 @@ class ZMQRequestService(object):
         reqid = uuid4().hex
         d = defer.Deferred()
         self.requests[reqid] = d.callback
+        print 'ZMQ request',request
         self._socket.send_multipart([reqid,request])
         return d
 

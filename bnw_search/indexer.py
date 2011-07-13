@@ -56,7 +56,8 @@ def index(db,period):
 
     skip = 0
     while True:
-        messages = list((yield objs.Message.find(query,skip=skip,limit=20)))
+        print '-- Messages %d-%d' % (skip,skip+20)
+        messages = list((yield objs.Message.find(query))) #,skip=skip,limit=20)))
 
         if len(messages)==0:
             break
@@ -67,6 +68,7 @@ def index(db,period):
             doc, id_term = create_document(message)
             db.replace_document(id_term, doc)
         skip += 20
+        break
     reactor.stop()
 
 if __name__=="__main__":

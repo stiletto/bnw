@@ -26,6 +26,7 @@ srtypes = dict((d[1],d[0]) for d in stypes.items())
 @require_auth
 @defer.inlineCallbacks
 def cmd_subscriptions(request):
+    """ Список подписок """
     defer.returnValue(
         dict(ok=True, format="subscriptions",
             subscriptions=[x.filter_fields() for x in
@@ -33,13 +34,14 @@ def cmd_subscriptions(request):
                     'type':{'$ne':'sub_message'}}))
             ])
     )
-    
+
 @require_auth
 @check_arg(user=USER_RE)
 @defer.inlineCallbacks
 def cmd_subscribe(request,message="",user="",tag="",club="",newtab=None):
+        """ Подписка """
         user = user.lower()
-        message = message.upper()
+        message = canonic_message(message).upper()
         tag = tag.lower()
         club = club.lower()
         starget,stype = parseSubscription(message=message,user=user,tag=tag,club=club)
@@ -59,9 +61,10 @@ def cmd_subscribe(request,message="",user="",tag="",club="",newtab=None):
 @check_arg(user=USER_RE)
 @defer.inlineCallbacks
 def cmd_unsubscribe(request,message="",user="",tag="",club="",newtab=None): 
+        """ Отписывание """
         # В этой функции DRY всосало по полной
         user = user.lower()
-        message = message.upper()
+        message = canonic_message(message).upper()
         tag = tag.lower()
         club = club.lower()
         starget,stype = parseSubscription(message=message,user=user,tag=tag,club=club)

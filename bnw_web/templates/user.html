@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}BnW - @{{ username }}{% end %}
+{% block title %}BnW - {{ username }}{% end %}
 {% block extrahead %}
     <link rel="alternate" type="application/rss+xml" title="Поток сознания @{{ username }}" href="/u/{{ username }}/?format=rss" />
 {% end %}
@@ -23,17 +23,11 @@
         </div>
     </div>
     <hr/>
+    <!-- {{ hasmes = False }} -->
     {% for msg in messages %}
-    <div class='outerborder'>
-    <div class='msg' id="{{ msg['id'] }}">
-        {{ w.tags(msg['tags'],msg['clubs'],username) }}
-        <pre class='pw'>{{ linkify(msg['text']) }}</pre>
-        <div>
-            {{ w.msgl(msg['id']) }} ({{ int(msg['replycount']) }}{% if msg['recommendations'] %}+{{ len(msg['recommendations']) }}{% end %}) / {{ w.userl(msg['user']) }} / {{ w.time(msg['date']) }}
-        </div>
-    </div>
-    </div>
+    <!-- {{ hasmes = True }} -->
+    {{ modules.Message(msg,username=username) }}
     {% end %}
-    {% if page>0 %}<a class='pagelink' href='?page={{ page-1 }}'>&lt;&lt; Позже</a> -- {% end %}<a class='pagelink' href='?page={{ page+1 }}'> Раньше &gt;&gt;</a>
+    {% if page>0 %}<a class='pagelink' href='?page={{ page-1 }}'>&lt;&lt; Позже</a> -- {% end %}{% if hasmes %}<a class='pagelink' href='?page={{ page+1 }}'> Раньше &gt;&gt;</a>{% end %}
 {% end %}
 {% end %}

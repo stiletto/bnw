@@ -15,6 +15,7 @@ from bnw_xmpp import command_show
 from bnw_xmpp import command_subscription
 from bnw_xmpp import command_vcard
 from bnw_xmpp import command_userlist
+from bnw_xmpp import command_bl
 
 handlers = {
     "register":             command_register.cmd_register,
@@ -33,7 +34,9 @@ handlers = {
     "delete":               command_delete.cmd_delete,
     "pm":                   command_pm.cmd_pm,
     "userlist":             command_userlist.cmd_userlist,
-    "clubs":             command_clubs.cmd_clubs,
-    "tags":             command_clubs.cmd_tags,
+    "vcard":                command_vcard.cmd_vcard,
+    "clubs":                command_clubs.cmd_clubs,
+    "tags":                 command_clubs.cmd_tags,
     "passlogin":            command_login.cmd_passlogin,
+    "blacklist":            command_bl.cmd_blacklist,
 }

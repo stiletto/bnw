@@ -60,8 +60,13 @@ def formatter_message_with_replies(request,result):
 
 def formatter_subscriptions(request,result):
     return 'Your subscriptions:\n'+'\n'.join(
-        (s['type'][4:].ljust(5)+s['target'].rjust(10)+' '+s.get('from','')
+        (s['type'][4:].ljust(5)+s['target'].rjust(10)+' '+s.get('from','bnw.im')
          for s in result['subscriptions']))
+
+def formatter_blacklist(request,result):
+    return 'Your blacklist:\n'+'\n'.join(
+        (s[0].ljust(5)+s[1].rjust(10)
+         for s in result['blacklist']))
 
 def formatter_message(request,result):
     return format_message(result['message'])
@@ -74,6 +79,8 @@ def formatter_comment(request,result):
     return format_comment(result['comment'])
 
 def formatter_search(request,result):
+    if not result['result']:
+        return 'No results.'
     return '\n\n'.join('%s (%d%%): %s' % (x[0],x[1],x[2]) for x in result['result'])
 
 def formatter_userlist(request,result):
@@ -90,3 +97,12 @@ def formatter_clubs(request,result):
     return ' '+' '.join(
         ''+u['_id'].ljust(15)+' '+str(int(u['value'])).ljust(3)+('\n' if i%5==4 else '')
             for i,u in enumerate(result['clubs']))
+
+def formatter_jids(request,result):
+    res = 'JIDs:\n' + ' '.join(u for u in result['jids'])
+    if result['pending_jids']:
+        res += '\n\nPending JIDs:\n' + ' '.join(u for u in result['pending_jids'])
+    res += '\n\nActive JID: ' + result['jid']
+    return res
+
+    

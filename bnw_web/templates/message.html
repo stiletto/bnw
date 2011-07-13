@@ -1,7 +1,6 @@
 {% extends "base.html" %}
-{% block title %}BnW - {{ msgid }}{% end %}
+{% block title %}BnW - {{ msg.get('user','None') if msg else 'None' }}: {{ w.shorttext(msg['text']) if msg else 'None' }}{% end %}
 {% block extrahead %}
-    <script type="text/javascript" src="/static/jquery.min.js"></script>
     <script type="text/javascript" src="/static/web-socket-js/swfobject.js"></script>
     <script type="text/javascript" src="/static/web-socket-js/FABridge.js"></script>
     <script type="text/javascript" src="/static/web-socket-js/web_socket.js"></script>
@@ -133,36 +132,14 @@
         </div>
     </div>
 {% else %}
-    <div class='outerborder'>
-        <div class='msg'>
-            {{ w.tags(msg['tags'],msg['clubs']) }}
-            <pre class='pw'>{{ linkify(msg['text']) }}</pre>
-            {% if msg['recommendations'] %}
-            <div class='recos'>
-                    Рекомендовали:
-                    {% for u in msg['recommendations'] %} {{ w.userl(u) }} {% end %}
-            </div>
-            {% end %}
-            <div class='sign'>{{ w.msgl(msgid) }} / {{ w.userl(msg['user']) }} / {{ w.time(msg['date']) }}
-
-                <div style='float: right;'>
-                    <!-- AddThis Button BEGIN -->
-                    <div class="addthis_toolbox addthis_default_style ">
-                    <a href="http://www.addthis.com/bookmark.php?v=250&amp;username=stiletto" class="addthis_button">[+] Share</a>
-                    </div>
-                    <script type="text/javascript">var addthis_config = {"data_track_clickback":true};</script>
-                    <script type="text/javascript" src="/static/addthis_widget.js#username=stiletto"></script>
-                    <!-- AddThis Button END -->
-                </div>
-            </div>
-        </div>
-    </div>
+    {{ modules.Message(msg, full=True) }}
     <hr/>
     <div class="comments rich_comments" style="display: none;"></div> 
     <div class="comments simple_comments">
     {% for comment in comments %}
     <div class='outerborder' id="{{ comment['id'].split('/')[1] }}">
     <div class='comment'>
+        <img class='avatar' style='max-height: 2em; float: right; border: none;' src='/u/{{ comment['user'] }}/avatar'/>
         <pre class='comment_body pw'>{{ linkify(comment['text']) }}</pre>
         <span class='comment_time' style='display: none;'>{{ comment['date'] }}</span>
         <div>

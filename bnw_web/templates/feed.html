@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}BnW - лента @{{ auth_user['name'] }}{% end %}
+{% block title %}BnW - лента @{{auth_user['name']}} {% end %}
 {% block body %}
 {% if not result['ok'] %}
     <div id="err_outer">
@@ -23,15 +23,7 @@
     <hr/>
     <!-- {{ result['messages'].reverse() }} да, я ем говно -->
     {% for msg in result['messages'] %}
-    <div class='outerborder'>
-    <div class='msg' id="{{ msg['id'] }}">
-        {{ w.tags(msg['tags'],msg['clubs']) }}
-        <pre class='pw'>{{ linkify(msg['text']) }}</pre>
-        <div>
-            {{ w.msgl(msg['id']) }} ({{ int(msg['replycount']) }}{% if msg['recommendations'] %}+{{ len(msg['recommendations']) }}{% end %}) / {{ w.userl(msg['user']) }} / {{ w.time(msg['date']) }}
-        </div>
-    </div>
-    </div>
+        {{ modules.Message(msg) }}
     {% end %}
 {% end %}
 {% end %}

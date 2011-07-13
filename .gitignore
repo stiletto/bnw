@@ -13,3 +13,4 @@ config.py
 passwords.py
 flashshit.py
 bnw_search/test
+bnwach.log*

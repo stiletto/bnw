@@ -50,6 +50,7 @@ class ApiHandler(BnwWebHandler):
         if 'login' in args:
             del args['login']
         req = ApiRequest('',None,user)
+        self.set_header("Cache-Control", "no-cache")
         try:
             result = yield handler(req,**args)
         except bnw_core.base.BnwResponse, br:

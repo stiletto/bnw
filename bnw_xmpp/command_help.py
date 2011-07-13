@@ -2,6 +2,7 @@
 #from twisted.words.xish import domish
 
 from base import *
+import random
 
 helptext="""
 1. Постинг сообщений. Делается командой post.
@@ -53,29 +54,35 @@ helptext="""
 
 """
 helptext_simple="""
+!club *tag blah-blah-blah - отправить сообщение с тэгом “tag” в клуб “club”
+#number blah-blah-blah - отправить комментарий к сообщению #number
+#number/id blah-blah-blah - ответить на комментарий #number/id
+! #number Look at this idiot! - рекомендовать сообщение с заметкой (можно и без неё)
+PM @user - отправить личное сообщение пользователю @user
 
-*tagname Blah-blah-blah - Post a message with tag 'tagname'
-#1234 Blah-blah-blah - Answer to message #1234
-#1234/5 Blah - Answer to reply #1234/5
-! #1234 Look at this idiot - Recommend a message with comment
+D - удалить: сообщение - D #number, комментарий - D #number/id, последнее сообщение - D L
 
-# - Show last messages from public timeline
-#1234 - Show message
-#1234+ - Show message with replies
-@username - Show user's info and last 20 messages
-@username+ - Show user's info and last 20 messages
-*tag - Show last 20 messages with this tag
-S - Show your subscriptions
-S #123 - Subscribe to message replies
-S @username - Subscribe to user's blog
-S *tag - Subscribe to tag
-U #123 - Unsubscribe from comments
-U @username - Unsubscribe from user's blog
-U *tag - Unsubscribe from tag
-D #123 - Delete message
-D #123/4 - Delete comment
-PING - Pong :)
-INTERFACE redeye - return to redeyed interface"""
+# - показать последние сообщения
+!club - показать последние сообщения клуба “club”
+*tag - показать последнее сообщения с тэгом “tag”
+#number - показать сообщение (без ответов)
+#number+ - показать сообщение (с ответами)
+#number/id - показать комментарий #number/id
+
+S - показать список подписок или подписаться: пользователь - S @user, тэг - S *tag, клуб - S !club, сообщение - S #number
+U - отписаться от: пользователя - U @user, тэга - U *tag, клуба - U !club, сообщения - U #number
+BL - показать чёрный список
+BL + - добавить в чёрный список: пользователя - BL +@user, тэг - BL +*tag, клуб - BL +!club
+BL - - удалить из чёрного списка: пользователя - BL -@user, тэг - BL -*tag, клуб - BL -!club
+
+? string - искать сообщения, которые содержат текст "string"
+
+PING (ПИНГ, ЗШТП) - Пинг
+INTERFACE - выбор интерфейса (redeye - консолеподобный, simplified - жуйкоподобный)
+VCARD - обновить VCARD
+USERLIST [page] - список всх пользователей, 50 на страницу
+LOGIN - получить ссылку для входа на сайт."""
+helptext_yesimple = helptext_simple.replace('ё','е')+'\n\n@l29ah - лох :3'
 
 def formatCommand(command):
         defer.returnValue(command+':\n'+'\n'.join( (("-"+arg[0]).rjust(4)+(' ARG' if arg[2] else '    ') + \
@@ -83,8 +90,11 @@ def formatCommand(command):
           ' '+arg[3]) for arg in elf.parser.commands[command]))
 
 def cmd_help_simple(request):
-    return dict(ok=True,desc='Help:'+helptext_simple)
+    """ Справка """
+    return dict(ok=True,desc='Help:'+(helptext_simple if random.random()<0.9 else helptext_yesimple) + \
+            ('\n\nАлсо, @vrusha - няша' if random.random() > 0.65 else ''),cache=3600,cache_public=True)
 
 def cmd_help_redeye(request):
-    return dict(ok=True,desc='Help:'+helptext)
+    """ Справка """
+    return dict(ok=True,desc='Help:'+helptext,cache=3600,cache_public=True)
         #+'\n'.join(self.formatCommand(command) for command in self.parser.commands)

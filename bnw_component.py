@@ -68,10 +68,10 @@ class LogService(component.Service):
         xmlstream.rawDataOutFn = self.rawDataOut
 
     def rawDataIn(self, buf):
-        log.msg("%s - RECV: %s" % (str(time.time()), unicode(buf, 'utf-8').encode('ascii', 'replace')))
+        log.msg("%s - RECV: %s" % (str(time.time()), unicode(buf, 'utf-8').encode('utf-8', 'replace')))
 
     def rawDataOut(self, buf):
-        log.msg("%s - SEND: %s" % (str(time.time()), unicode(buf, 'utf-8').encode('ascii', 'replace')))
+        log.msg("%s - SEND: %s" % (str(time.time()), unicode(buf, 'utf-8').encode('utf-8', 'replace')))
 
 
 #class MessageSender(xmlrpc.XMLRPC):
@@ -135,14 +135,15 @@ class BnwService(component.Service):
         self.xmlstream.send(content)
 
     def callbackMessage(self,result,jid,stime,src,body):
-        etime=time.time()-stime
-        println('result:',result)
-        self.send_plain(jid,src,str(result))
-        t=objs.Timing({'date': stime, 'time': etime, 'command': unicode(body),'jid': jid})
-        t.save().addCallback(lambda x: None)
-        log.msg("%s - PROCESSING TIME (from %s): %f" % (str(time.time()), jid, etime))
-        if jid.startswith('stiletto@stiletto.name'):
-            self.send_plain(jid,src,'I did it in %f seconds.' % (etime,) )
+        if result:
+            etime=time.time()-stime
+            println('result:',result)
+            self.send_plain(jid,src,str(result))
+            t=objs.Timing({'date': stime, 'time': etime, 'command': unicode(body),'jid': jid})
+            t.save().addCallback(lambda x: None)
+            log.msg("%s - PROCESSING TIME (from %s): %f" % (str(time.time()), jid, etime))
+            if jid.startswith('stiletto@stiletto.name'):
+                self.send_plain(jid,src,'I did it in %f seconds.' % (etime,) )
 
     def callbackIq(self,result,original):
         if not (result or original['type']=='error'):
@@ -187,12 +188,13 @@ class BnwService(component.Service):
             rmsg.received['xmlns']='urn:xmpp:receipts'
             self.xmlstream.send(rmsg)
         
-        cmsg = domish.Element((None, "message"))
-        cmsg["to"] = msg['from']
-        cmsg["from"] = msg['to']
-        cmsg["type"] = 'chat'
-        cmsg.addChild(domish.Element(('http://jabber.org/protocol/chatstates','composing')))
-        self.xmlstream.send(cmsg)
+        if msg.body and False:
+            cmsg = domish.Element((None, "message"))
+            cmsg["to"] = msg['from']
+            cmsg["from"] = msg['to']
+            cmsg["type"] = 'chat'
+            cmsg.addChild(domish.Element(('http://jabber.org/protocol/chatstates','composing')))
+            self.xmlstream.send(cmsg)
         
         gp=stupid_handler.idiotic(msg)
         #self.send_plain(msg['from'],'processing...')

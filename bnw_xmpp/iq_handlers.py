@@ -21,11 +21,13 @@ def vcard_getav(iq,iq_user):
         if not filedata:
             defer.returnValue( True )
         filedata = str(filedata)
-        if len(filedata)>32768: # xep-0153 says 8KB
+        if len(filedata)>32768*2: # xep-0153 says 8KB
             defer.returnValue( True )
         try:
-            decoded = base64.b64decode(filedata)
+            decoded = base64.b64decode(filedata) # TODO: deferToThread
         except TypeError:
+            defer.returnValue( True )
+        if len(decoded)>32768: # check decoded size
             defer.returnValue( True )
         fs = yield bnw_core.base.get_fs('avatars')
         extension = mimetype.split('/')[1]

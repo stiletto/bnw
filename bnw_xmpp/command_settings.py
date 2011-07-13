@@ -8,9 +8,9 @@ import bnw_core.bnw_objects as objs
 
 optionnames = [ 'usercss', 'password' ]
 @require_auth
-#@check_arg(usercss=MESSAGE_RE)
 @defer.inlineCallbacks
 def cmd_set(request,**kwargs):
+    """ Настройки """
     if not kwargs:
         current = request.user.get('settings',{})
         defer.returnValue(

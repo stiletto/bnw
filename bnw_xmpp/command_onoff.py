@@ -9,6 +9,7 @@ import bnw_core.bnw_objects as objs
 @require_auth
 @defer.inlineCallbacks
 def cmd_on(request):
+    """ Включение доставки сообщений """
     request.user['off']=False
     _ = yield objs.User.mupdate({'name':request.user['name']},request.user,safe=True)
     defer.returnValue(
@@ -18,6 +19,7 @@ def cmd_on(request):
 @require_auth
 @defer.inlineCallbacks
 def cmd_off(request):
+    """ Выключение доставки сообщений """
     request.user['off']=True
     _ = yield objs.User.mupdate({'name':request.user['name']},request.user,safe=True)
     defer.returnValue(

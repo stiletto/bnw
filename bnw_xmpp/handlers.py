@@ -4,11 +4,13 @@
 from parser_redeye import RedEyeParser
 from parser_regex import RegexParser
 
+import command_bl
 import command_clubs
 import command_delete
 import command_except
 import command_help
 import command_interface
+import command_jids
 import command_login
 import command_onoff
 import command_ping
@@ -25,6 +27,12 @@ import command_update
 import formatters_redeye
 import formatters_simple
 
+bl_args = (
+                ("u", "user", True, u"Blacklist user."),
+                ("t", "tag", True, u"Blacklist tag."),
+                ("c", "club", True, u"Blacklist club."),
+                ("d", "delete", False, u"Delete blacklist item."),
+            )
 subscribe_args = (
                 ("m", "message", True, u"Subscribe to message."),
                 ("u", "user", True, u"Subscribe to user."),
@@ -99,6 +107,7 @@ redeye_handlers = (
         ("delete", delete_args, command_delete.cmd_delete, ),
         ("d", delete_args, command_delete.cmd_delete, ),
         ("login", (), command_login.cmd_login, ),
+        ("bl", bl_args, command_bl.cmd_blacklist, ),
         ("vcard", (), command_vcard.cmd_vcard, ),
         ("pm",
             (
@@ -123,6 +132,15 @@ redeye_handlers = (
             command_settings.cmd_set,
         ),
         ("clubs", (), command_clubs.cmd_clubs, ),
+        ("jids",
+            (
+                ("a", "add", True, u"JID to add."),
+                ("d", "delete", True, u"JID to delete."),
+                ("s", "select", True, u"JID to select."),
+            ),
+            command_jids.cmd_jids,
+        ),
+        ("confirm", (), command_jids.cmd_confirm, "code", ),
 )
 
 redeye_formatters = {
@@ -133,9 +151,11 @@ redeye_formatters = {
     'message_with_replies': formatters_redeye.formatter_message_with_replies,
     'messages': formatters_redeye.formatter_messages,
     'subscriptions': formatters_redeye.formatter_subscriptions,
+    'blacklist': formatters_redeye.formatter_blacklist,
     'search': formatters_redeye.formatter_search,
     'userlist': formatters_redeye.formatter_userlist,
     'settings': formatters_redeye.formatter_settings,
+    'jids': formatters_redeye.formatter_jids,
 }
 
 simple_handlers = (
@@ -145,42 +165,53 @@ simple_handlers = (
         (ur'(?:vcard|VCARD)', command_vcard.cmd_vcard),
         (ur'(?:userlist|USERLIST)(?: (?P<page>\S+))?', command_userlist.cmd_userlist),
         (ur'\? (?P<text>\S+)',command_search.cmd_search),
-        (ur'[DdвВ] #(?P<message>.+)',command_delete.cmd_delete),
+        (ur'[DdвВ] (?:#|http://bnw.im/p/)(?P<message>.+)',command_delete.cmd_delete),
         (ur'[DdвВ] L',command_delete.cmd_delete,{'last':True}),
         (ur'[SsыЫ]',command_subscription.cmd_subscriptions),
-        (ur'[SsыЫ] #(?P<message>.+)',command_subscription.cmd_subscribe),
-        (ur'[SsыЫ] @(?P<user>\S+)',command_subscription.cmd_subscribe),
+        (ur'[SsыЫ] (?:#|http://bnw.im/p/)(?P<message>.+)',command_subscription.cmd_subscribe),
+        (ur'[SsыЫ] (?:@|http://bnw.im/u/)(?P<user>\S+)',command_subscription.cmd_subscribe),
         (ur'[SsыЫ] \*(?P<tag>\S+)',command_subscription.cmd_subscribe),
         (ur'[SsыЫ] !(?P<club>\S+)',command_subscription.cmd_subscribe),
-        (ur'[UuгГ] #(?P<message>.+)',command_subscription.cmd_unsubscribe),
-        (ur'[UuгГ] @(?P<user>\S+)',command_subscription.cmd_unsubscribe),
+        (ur'[UuгГ] (?:#|http://bnw.im/p/)(?P<message>.+)',command_subscription.cmd_unsubscribe),
+        (ur'[UuгГ] (?:@|http://bnw.im/u/)(?P<user>\S+)',command_subscription.cmd_unsubscribe),
         (ur'[UuгГ] \*(?P<tag>\S+)',command_subscription.cmd_unsubscribe),
         (ur'[UuгГ] !(?P<club>\S+)',command_subscription.cmd_unsubscribe),
-        (ur'L @(?P<user>\S+)','not_implemented'),
+#        (ur'L @(?P<user>\S+)','not_implemented'),
         (ur'(?:HELP|help)',command_help.cmd_help_simple),
         (ur'(?:LOGIN|login)',command_login.cmd_login),
         (ur'(?:ON|on)',command_onoff.cmd_on),
         (ur'(?:OFF|off)',command_onoff.cmd_off),
         (ur'PM +@(?P<user>\S+) +(?P<text>.+)',command_pm.cmd_pm),
-        (ur'BL','not_implemented'),
-        (ur'BL .+','not_implemented'),
-        (ur'\? .+','not_implemented'),
+
+        (ur'BL',command_bl.cmd_blacklist),
+        (ur'BL \+?(?:@|http://bnw.im/u/)(?P<user>\S+)',command_bl.cmd_blacklist),
+        (ur'BL \+?\*(?P<tag>\S+)',command_bl.cmd_blacklist),
+        (ur'BL \+?!(?P<club>\S+)',command_bl.cmd_blacklist),
+        (ur'BL -(?:@|http://bnw.im/u/)(?P<user>\S+)',command_bl.cmd_blacklist,{'delete':True}),
+        (ur'BL -\*(?P<tag>\S+)',command_bl.cmd_blacklist,{'delete':True}),
+        (ur'BL -!(?P<club>\S+)',command_bl.cmd_blacklist,{'delete':True}),
+
+        (ur'JID \+(?P<add>\S+)',command_jids.cmd_jids),
+        (ur'JID -(?P<delete>\S+)',command_jids.cmd_jids),
+        (ur'JID !(?P<select>\S+)',command_jids.cmd_jids),
+        (ur'JID',command_jids.cmd_jids),
         (ur'[#№]',command_show.cmd_feed),
         (ur'[#№]\+',command_show.cmd_show),
-        (ur'@(?P<user>\S+)',command_show.cmd_show),
-        (ur'@(?P<user>\S+)',command_show.cmd_show),
-        (ur'@(?P<user>\S+) \*(?P<tag>\S+)',command_show.cmd_show),
+        (ur'(?:@|http://bnw.im/u/)(?P<user>\S+)',command_show.cmd_show),
+        (ur'(?:@|http://bnw.im/u/)(?P<user>\S+)',command_show.cmd_show),
+        (ur'(?:@|http://bnw.im/u/)(?P<user>\S+) \*(?P<tag>\S+)',command_show.cmd_show),
         (ur'\*(?P<tag>\S+)',command_show.cmd_show),
         (ur'!(?P<club>\S+)',command_show.cmd_show),
-        (ur'#(?P<message>[0-9A-Za-z]+(?:/[0-9A-Za-z]+))',command_show.cmd_show),
-        (ur'#(?P<message>[0-9A-Za-z]+)\+',command_show.cmd_show,{'replies':True}),
-        (ur'#(?P<message>[0-9A-Za-z]+) \+!(?P<text>.+)',command_update.cmd_update,{'club':True}),
-        (ur'#(?P<message>[0-9A-Za-z]+) \+\*(?P<text>.+)',command_update.cmd_update,{'tag':True}),
-        (ur'#(?P<message>[0-9A-Za-z]+) -!(?P<text>.+)',command_update.cmd_update,{'club':True,'delete':True}),
-        (ur'#(?P<message>[0-9A-Za-z]+) -\*(?P<text>.+)',command_update.cmd_update,{'tag':True,'delete':True}),
-        (ur'#(?P<message>[0-9A-Za-z]+) (?P<text>.+)',command_post.cmd_comment),
-        (ur'#(?P<message>[0-9A-Za-z]+/[0-9A-Za-z]+) (?P<text>.+)',command_post.cmd_comment),
-        (ur'! +#(?P<message>[0-9A-Za-z]+)(?: (?P<comment>.+))?',command_post.cmd_recommend),
+        (ur'(?:#|http://bnw.im/p/)(?P<message>[0-9A-Za-z]+(?:/[0-9A-Za-z]+))',command_show.cmd_show),
+        (ur'(?:#|http://bnw.im/p/)(?P<message>[0-9A-Za-z]+)',command_show.cmd_show,{}),
+        (ur'(?:#|http://bnw.im/p/)(?P<message>[0-9A-Za-z]+)\+',command_show.cmd_show,{'replies':True}),
+        (ur'(?:#|http://bnw.im/p/)(?P<message>[0-9A-Za-z]+) \+!(?P<text>.+)',command_update.cmd_update,{'club':True}),
+        (ur'(?:#|http://bnw.im/p/)(?P<message>[0-9A-Za-z]+) \+\*(?P<text>.+)',command_update.cmd_update,{'tag':True}),
+        (ur'(?:#|http://bnw.im/p/)(?P<message>[0-9A-Za-z]+) -!(?P<text>.+)',command_update.cmd_update,{'club':True,'delete':True}),
+        (ur'(?:#|http://bnw.im/p/)(?P<message>[0-9A-Za-z]+) -\*(?P<text>.+)',command_update.cmd_update,{'tag':True,'delete':True}),
+        (ur'(?:#|http://bnw.im/p/)(?P<message>[0-9A-Za-z]+) (?P<text>.+)',command_post.cmd_comment),
+        (ur'(?:#|http://bnw.im/p/)(?P<message>[0-9A-Za-z]+/[0-9A-Za-z]+) (?P<text>.+)',command_post.cmd_comment),
+        (ur'! +(?:#|http://bnw.im/p/)(?P<message>[0-9A-Za-z]+)(?: (?P<comment>.+))?',command_post.cmd_recommend),
         (ur'(?:(?P<tag1>[\*!]\S+)?(?:\s+(?P<tag2>[\*!]\S+))?(?:\s+(?P<tag3>[\*!]\S+))?(?:\s+(?P<tag4>[\*!]\S+))?(?:\s+(?P<tag5>[\*!]\S+))?\s+)?(?P<text>.+)',
             command_post.cmd_post_simple),
     )
@@ -191,11 +222,15 @@ simple_formatters = {
     'recommendation': formatters_simple.formatter_recommendation,
     'message_with_replies': formatters_simple.formatter_message_with_replies,
     'messages': formatters_simple.formatter_messages,
-    'subscriptions': formatters_simple.formatter_subscriptions,
-    'search': formatters_simple.formatter_search,
+    'subscriptions': formatters_redeye.formatter_subscriptions,
+    'blacklist': formatters_redeye.formatter_blacklist,
+    'search': formatters_redeye.formatter_search,
     'userlist': formatters_simple.formatter_userlist,
+    'jids': formatters_redeye.formatter_jids,
 }
 
 parsers={}
 parsers['redeye']=RedEyeParser(redeye_handlers,redeye_formatters)
 parsers['simplified']=RegexParser(simple_handlers,simple_formatters)
+
+s2s_handlers = {}

@@ -8,11 +8,13 @@ from twisted.internet import defer
 
 @require_auth
 def cmd_login(request):
+    """ Логин-ссылка """
     return dict(ok=True,
              desc=bnw_core.base.config.webui_base+'login?key='+request.user.get('login_key',''))
 
 @defer.inlineCallbacks
 def cmd_passlogin(request,user,password):
+    """ Логин паролем """
     if not (user and password):
         defer.returnValue(dict(ok=False,desc='Credentials cannot be empty'))
     u = yield objs.User.find_one({'name':user,'settings.password':password})

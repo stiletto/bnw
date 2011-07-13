@@ -8,6 +8,7 @@ import bnw_core.bnw_objects as objs
 @check_arg(user=USER_RE)
 @defer.inlineCallbacks
 def cmd_pm(request,text,user=""):
+    """ Отправка приватного сообщения """
     user=user.lower()
     if len(text)>2048:
         defer.returnValue(dict(ok=False,desc='Too long.'))

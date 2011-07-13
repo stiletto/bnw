@@ -46,6 +46,6 @@ if config.fuck_enabled:
 
 if config.webui_enabled:
     import bnw_web.site
-    internet.TCPServer(config.webui_port, bnw_web.site.get_site(), interface="0.0.0.0"
+    internet.TCPServer(config.webui_port, bnw_web.site.get_site(), interface="127.0.0.1"
                        ).setServiceParent(serviceCollection)                   
     sm.setServiceParent(serviceCollection)

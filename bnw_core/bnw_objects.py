@@ -286,7 +286,7 @@ class Comment(MongoObject):
 class User(MongoObject):
     """ Няшка-пользователь."""
     collection_name = "users"
-    dangerous_fields=('_id','login_key','avatar','jid','id','settings')
+    dangerous_fields=('_id','login_key','avatar','jid','jids','pending_jids','id','settings')
     def send_plain(self,message,sfrom=None):
         if self['jid']:
             send_plain(self['jid'],sfrom,message)

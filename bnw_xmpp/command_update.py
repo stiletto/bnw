@@ -18,6 +18,7 @@ def update_internal(message,what,delete,text):
 @require_auth
 @defer.inlineCallbacks
 def cmd_update(request,text,message='',club='',tag='',delete=''):
+    """ Редактирование сооббщений """
     if not ((message and text) or (club or text)):
         defer.returnValue(
             dict(ok=False,desc='Usage: <update|u> -m <message> <--club|--tag> [--delete] <tag|club>')

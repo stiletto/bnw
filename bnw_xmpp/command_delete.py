@@ -10,8 +10,16 @@ def _(s,user):
     return s
 
 @require_auth
+@check_arg(message=MESSAGE_COMMENT_RE)
 @defer.inlineCallbacks
 def cmd_delete(request,message=None,last=False):
+    """ Удаление
+    
+    Удаление поста или коммента.
+    
+    redeye: delete --message=123456, d -m ABCDEF/123, d --last, d -l
+    simple: D #123456, D #ABDEF/123, D L"""
+    message=canonic_message_comment(message).upper()
     if last:
         lastcomment = list((yield objs.Comment.find_sort({'user':request.user['name']},[('date',-1)],limit=1)))
         lastmessage = list((yield objs.Message.find_sort({'user':request.user['name']},[('date',-1)],limit=1)))

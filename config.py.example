@@ -46,6 +46,9 @@ webui_port = 7808
 
 webui_base = 'http://bnw.blasux.ru/'
 
+webuiws_base = 'ws://bnw.blasux.ru/'
+
+
 webui_static = 'http://bnw.blasux.ru/static/'
 
 ## Fuck

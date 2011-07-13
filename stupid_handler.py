@@ -16,10 +16,26 @@ def idiotic(msg):
         #return str(request.body)
         message_from=msg['from']
         message_bare_from=message_from.split('/',1)[0]
-        message_user=(yield objs.User.find_one({'jid':message_bare_from.lower()}))
+        message_user=(yield objs.User.find_one({'jids':message_bare_from.lower()}))
+        if not message_user:
+            message_user=(yield objs.User.find_one({'jid':message_bare_from.lower()}))
+        
         #if message.body is None:
         #    return ''
 
+        if msg.bnw_s2s:
+            bnw_s2s = msg.bnw_s2s
+            print 'GOT AN s2s MESSAGE',bnw_s2s
+            try:
+                s2s_type = bnw_s2s['type']
+            except KeyError:
+                s2s_type = None
+            handler = bnw_xmpp.handlers.s2s_handlers.get(s2s_type)
+            if not handler:
+                print 'NO HANDLER FOR THIS TYPE (%s)' % (s2s_type)
+            else:
+                _ = yield handler(msg,bnw_s2s)
+            defer.returnValue(None)
         message_body=unicode(msg.body)
 
         if message_body is None:
@@ -54,7 +70,9 @@ def iq(msg):
                                                                                                     
         try:
             iq_bare_from=msg['from'].split('/',1)[0]
-            iq_user=(yield objs.User.find_one({'jid':iq_bare_from.lower()}))
+            iq_user=(yield objs.User.find_one({'jids':iq_bare_from.lower()}))
+            if not iq_user:
+                iq_user=(yield objs.User.find_one({'jid':iq_bare_from.lower()}))
             for handler in bnw_xmpp.iq_handlers.handlers:
                 if (yield handler(msg,iq_user)):
                     defer.returnValue(True)

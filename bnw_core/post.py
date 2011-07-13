@@ -2,7 +2,7 @@
 """
 """
 import bnw_objects as objs
-from base import genid,cropstring,gc
+from base import genid,cropstring,gc,mongo_errors
 from twisted.internet import defer, reactor
 import time
 from twisted.python import log
@@ -18,19 +18,26 @@ def subscribe(user,target_type,target,fast=False,sfrom=None):
     @param target Цель подписки.
     @param fast Если равно true, не проверяем существование подписки."""
     sub_rec={ 'user': user['name'], 'target': target, 'type': target_type }
+    adddesc=''
     if fast or ((yield objs.Subscription.find_one(sub_rec)) is None):
         sub=objs.Subscription(sub_rec)
         sub['jid']=user['jid']
         if sfrom:
             sub['from']=sfrom
         if target_type=='sub_user':
-            tuser=yield objs.User.find_one({'name':target})
+            tuser = yield objs.User.find_one({'name':target})
             if not tuser:
                 defer.returnValue((False,'No such user.'))
             _ = yield tuser.send_plain('@%s subscribed to your blog. %su/%s' % (user['name'],gc('webui_base'),user['name']))
             pass
+        elif target_type=='sub_message' and not fast:
+            msg = yield objs.Message.find_one({'id':target})
+            if not msg:
+                defer.returnValue((False,'No such message.'))
+            else:
+                adddesc=' (%d replies)' % (msg['replycount'],)
         if (yield sub.save()):
-            defer.returnValue((True,'Subscribed.'))
+            defer.returnValue((True,'Subscribed'+adddesc+'.'))
         else:
             defer.returnValue((False,'Error while saving.'))
     else:
@@ -46,6 +53,18 @@ def unsubscribe(user,target_type,target,fast=False):
     sub_rec={ 'user': user['name'], 'target': target, 'type': target_type }
     rest = yield objs.Subscription.remove(sub_rec)
     defer.returnValue((True,'Unsubscribed.'))
+
+
+def isdisjoint_compat(self, other):
+    for value in other:
+        if value in self:
+            return False
+    return True
+
+if not hasattr(frozenset, "isdisjoint"):
+    isdisjoint=isdisjoint_compat
+else:
+    isdisjoint=frozenset.isdisjoint
 
 @defer.inlineCallbacks
 def send_to_subscribers(queries,message,recommender=None,recocomment=None):
@@ -66,12 +85,18 @@ def send_to_subscribers(queries,message,recommender=None,recocomment=None):
             recipients[result['user']]=result
     reccount=0
     print recipients
+    bl_items = frozenset([('user',message['user'])] + [('tag',x) for x in message.get('tags',[])] +
+        [('club',x) for x in message.get('clubs',[])])
+        
     for target_name,subscription in recipients.iteritems():
         target=yield objs.User.find_one({'name': target_name})
         qn+=1
         if target:
-            reccount += yield message.deliver(target,recommender,recocomment,sfrom=subscription.get('from',None))
-            log.msg('Sent %s to %s' % (message['id'],target['jid']))
+            if isdisjoint(bl_items,(tuple(x) for x in target.get('blacklist',[]))):
+                reccount += yield message.deliver(target,recommender,recocomment,sfrom=subscription.get('from',None))
+                log.msg('Sent %s to %s' % (message['id'],target['jid']))
+            else:
+                log.msg('Not delivering %s to %s because of blacklist' % (message['id'],target['jid']))
     defer.returnValue((qn,reccount))
 
 @defer.inlineCallbacks
@@ -139,7 +164,6 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
         defer.returnValue((False,'No such message.'))
     
     comment={ 'user': user['name'],
-              'id': message_id+'/'+genid(3),
               'message': message_id,
               'date': time.time(),
               'replyto': old_comment['id'] if old_comment else None,
@@ -152,7 +176,18 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
         comment['real_user']=comment['user']
         comment['user']='anonymous'
     comment = objs.Comment(comment)
-    comment_id = yield comment.save()
+    for x in range(0,10):
+        try:
+            comment['id'] = message_id+'/'+genid(3)
+            comment_id = yield comment.save()
+        except mongo_errors.OperationFailure, e:
+            pass
+            if e['code']!=11000:
+                raise
+        else:
+            break
+    else:
+        defer.returnValue((False,'Looks like this message has reached its bumplimit.'))
     sub_result = yield subscribe(user,'sub_message',message_id,False,sfrom)
     _ = (yield objs.Message.mupdate({'id':message_id},{'$inc': { 'replycount': 1}}))
     
@@ -176,18 +211,18 @@ def recommendMessage(user,message_id,comment="",sfrom=None):
     if len(comment)>256:
         defer.returnValue((False,'Recommendation is too long. %d/256' % (len(comment),)))
 
-    tuser=yield objs.User.find_one({'name':message['user']})
-    _ = yield tuser.send_plain('@%s recommended your message #%s. %sp/%s' % (user['name'],message_id,gc('webui_base'),message_id))
-
     sub_result = yield subscribe(user,'sub_message',message_id,False,sfrom)
     
     queries=[{'target': user['name'], 'type': 'sub_user'}]
     qn,recipients = yield send_to_subscribers(queries,message,user['name'],comment)
 
+    tuser=yield objs.User.find_one({'name':message['user']})
+    _ = yield tuser.send_plain('@%s recommended your message #%s, so %d more users received it. %sp/%s' % (user['name'],message_id,recipients,gc('webui_base'),message_id))
+
     if len(message['recommendations'])<1024:
         _ = (yield objs.Message.mupdate({'id':message_id},{'$addToSet': { 'recommendations': user['name']}}))
 
-    defer.returnValue((True,(qn,recipients)))
+    defer.returnValue((True,(qn,recipients,message['replycount'])))
 
 
 listenerscount=0

@@ -30,68 +30,51 @@ import simplejson  as json
 import sys
 import xapian
  
-context = zmq.Context()
+from twisted.web import xmlrpc, server
 
-class BnwSearchService(object):
-    def __init__(self,dbname,language="russian",bind_addr="tcp://127.0.0.1:7850"):
-        self._bind_addr = bind_addr
-        self.dbname = dbname
+class BnwSearchService(xmlrpc.XMLRPC):
+    def __init__(self,dbname,language="russian"):
+        xmlrpc.XMLRPC.__init__(self)
         self.language = language
+        self.dbname = dbname
+        self.database = xapian.Database(self.dbname)
+        self.stemmer = xapian.Stem(self.language)
+        self.query_parser = xapian.QueryParser()
+        self.query_parser.set_stemmer(self.stemmer)
+        
+    def xmlrpc_search(self,query):
+        print "Received msg:", query
+        if type(query)!=unicode: query = unicode(query,'utf-8','replace')
+        query = self.query_parser.parse_query(query.encode('utf-8','replace'))
+        retry = True
+        enquire = xapian.Enquire(self.database)
+        while retry:
+            try:
+                retry = False
+                #print dir(query)
+                print "Performing query", query
+                enquire.set_query(query)
+                matches = enquire.get_mset(0, 10)
+                print "%i results found" % matches.get_matches_estimated()
+            except xapian.DatabaseModifiedError:
+                database.reopen()
+                print "Database reopened"
+                retry = True
 
-    def run(self):
-        database = xapian.Database(self.dbname)
-
-        enquire = xapian.Enquire(database)
-        stemmer = xapian.Stem(self.language)
-
-        socket = context.socket(zmq.XREP)
-        socket.bind(self._bind_addr)
-
-        while True:
-            msg = socket.recv_multipart()
-            print "Received msg: ", msg
-            if  len(msg) != 3:
-                error_msg = 'invalid message received: %s' % msg
-                print error_msg
-                reply = [msg[0],msg[1], '0', error_msg]
-                socket.send_multipart(reply)
-                continue
-            id0,id1 = msg[0],msg[1]
-            contents = msg[2]
-            terms = []
-            for term in contents.strip().split(' '):
-                if not term:
-                    continue
-                terms.append(stemmer(term.lower()))
-
-
-            retry = True
-            while retry:
-                try:
-                    retry = False
-                    query = xapian.Query(xapian.Query.OP_AND, terms)
-                    #print dir(query)
-                    print "Performing query",terms #query.get_description()
-                    enquire.set_query(query)
-                    matches = enquire.get_mset(0, 10)
-                    print "%i results found" % matches.get_matches_estimated()
-                except xapian.DatabaseModifiedError:
-                    database.reopen()
-                    print "Database reopened"
-                    retry = True
-
-            results = []
-            for match in matches:
-                msgid=match.document.get_value(0)
-                msg=match.document.get_data()
-                if len(msg)>1280:
-                    msg=msg[:128]+"..."
-                results.append([msgid,match.percent,unicode(msg,'utf-8','replace')])
-            reply = [id0,id1,'1',json.dumps(results)]
-            socket.send_multipart(reply)
+        results = []
+        for match in matches:
+            msgid=match.document.get_value(0)
+            msg=match.document.get_data()
+            if len(msg)>2048:
+                msg=msg[:2048]+"..."
+            results.append([msgid,match.percent,unicode(msg,'utf-8','replace')])
+        return results
 
 def main():
-    BnwSearchService('test/').run()
+    r=BnwSearchService('test/')
+    from twisted.internet import reactor
+    reactor.listenTCP(7850, server.Site(r), interface="127.0.0.1")
+    reactor.run()
 
 if __name__ == "__main__":
     main()

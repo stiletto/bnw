@@ -7,6 +7,7 @@ from twisted.internet import defer
 
 @require_auth
 def cmd_vcard(request,safe=None):
+    """ Запрос вкарда """
     vreq = domish.Element((None, "iq"))
     vreq['type']='get'
     vreq.addChild(domish.Element((None,'vCard')))

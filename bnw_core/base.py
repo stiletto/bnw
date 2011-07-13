@@ -15,6 +15,7 @@ def _(s,user):
             
 import txmongo
 from txmongo import gridfs
+from txmongo.collection import errors as mongo_errors
 connection=None
 db=None
 

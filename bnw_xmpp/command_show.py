@@ -19,7 +19,7 @@ def showSearch(parameters,page):
         parameters,[('date',pymongo.DESCENDING)],limit=20,skip=page*20))]
     messages.reverse()
     defer.returnValue(
-        dict(ok=True,format="messages",
+        dict(ok=True,format="messages", cache=5,cache_public=True,
              messages=messages)
     )
 
@@ -28,10 +28,10 @@ def showComment(commentid):
         comment=yield objs.Comment.find_one({'id': commentid})
         if comment is None:
             defer.returnValue(
-                dict(ok=False,desc='No such comment')
+                dict(ok=False,desc='No such comment',cache=5,cache_public=True)
             )
         defer.returnValue(
-            dict(ok=True,format='comment',
+            dict(ok=True,format='comment', cache=5, cache_public=True,
                 comment=comment.filter_fields(),
                     ))
 
@@ -40,10 +40,10 @@ def showComments(msgid):
         message=yield objs.Message.find_one({'id': msgid})
         if message is None:
             defer.returnValue(
-                dict(ok=False,desc='No such message')
+                dict(ok=False,desc='No such message',cache=5,cache_public=True)
             )
         defer.returnValue(
-            dict(ok=True,format='message_with_replies',
+            dict(ok=True,format='message_with_replies', cache=5, cache_public=True,
                 msgid=msgid, message=message.filter_fields(),
                 replies=[comment.filter_fields() for comment in (
                     yield objs.Comment.find_sort(
@@ -53,16 +53,17 @@ def showComments(msgid):
             )
         ) # suck cocks, be LISP :3
 
-        
-@check_arg(message=MESSAGE_RE+'(/'+MESSAGE_RE+')?',page='[0-9]+')
+@check_arg(message=MESSAGE_COMMENT_RE,page='[0-9]+')
 @defer.inlineCallbacks
 def cmd_show(request,message="",user="",tag="",club="",page="0",replies=None):
+    """ Показать сообщения """
+    message=canonic_message_comment(message).upper()
     if '/' in message:
         defer.returnValue((yield showComment(message)))
     if replies:
         if not message:
             defer.returnValue(
-                dict(ok=False,desc='Error: ''replies'' is allowed only with ''message''.')
+                dict(ok=False,desc='Error: ''replies'' is allowed only with ''message''.',cache=3600)
             )
         defer.returnValue((yield showComments(message)))
     else:
@@ -76,6 +77,7 @@ def cmd_show(request,message="",user="",tag="",club="",page="0",replies=None):
 @require_auth
 @defer.inlineCallbacks
 def cmd_feed(request):
+    """ Показать ленту """
     feed = yield objs.FeedElement.find_sort({'user':request.user['name']},
                                 [('_id',pymongo.DESCENDING)],limit=20)
     messages = [x.filter_fields() for x in (yield objs.Message.find_sort({'id': { '$in': 
@@ -84,6 +86,7 @@ def cmd_feed(request):
     defer.returnValue(
         dict(ok=True,format="messages",
              messages=messages,
-             desc='Your feed')
+             desc='Your feed',
+             cache=5)
     )
     

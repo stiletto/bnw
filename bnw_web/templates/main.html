@@ -1,17 +1,25 @@
 {% extends "base.html" %}
-{% block title %}BnW - Гланге{% end %}
+{% block title %}
+    BnW -
+    {% if tag %} *{{ tag }}
+    {% else %}{% if club %} !{{ club }}
+    {% else %} Гланге
+    {% end %}{% end %}
+{% end %}
 {% block extrahead %}
     <link rel="alternate" type="application/rss+xml" title="Последние сообщения BnW" href="/?format=rss" />
 {% end %}
 {% block body %}
     <div class='outerborder'>
         <div class='msg'>
-            TbI - HRWKA! {{ users_count }}.0238 пользователей не могут ошибаться!
+            Привет{% if auth_user %}, {{ auth_user['name'] }}{% end %}, TbI - HRWKA! {{ users_count }}.0238 пользователей не могут ошибаться!
+            {% if auth_user %}<a href='javascript:$.cookie("bnw_loginkey","")'>Красная пилюля.</a>{% end %}
+            <br/>
+            {% if False %}
             Я не знаю как так вышло, но на главной тоже появилась <a href="/?format=rss">RSS</a>.
             <br/>
             Если вы проворонили такое знаменательное событие как переезд: Мы переехали с bnw.blasux.ru на bnw.im. Всё что нужно сделать - добавить в ростер 
             bnw.im и удалить bnw.blasux.ru.<br/>
-            {% if False %}
             <div id="JA1banner3" style='width: 100%; background-image: url(http://hermes.blasux.ru/jimmy.jpg); background-position: right top; background-repeat: no-repeat; overflow: hidden; height: 172px;'>
             <a class="variable_lp cn-full-banner-click" href="{{ config.webui_static }}appeal.html" style='text-decoration: none; color: #333;'>
                 <div id="JA1banner3-text" style="width: 60%; font-family: helvetica, arial, monospace; font-size: 2.25em; line-height: 1.125em; padding-top: 1.25em; padding-left: 0.75em; padding-bottom: 0.75em;">
@@ -20,22 +28,16 @@
             </a>
             </div>
             {% end %}
-            {% for tag in toptags %}
-                <div style='display: inline-block;'> {{ w.tag(tag['_id']) }}<sup>{{ int(tag['value']) }}</sup></div>
+            {% for mtag in toptags %}
+                <div style='display: inline-block;'> {{ w.tag(mtag['_id']) }}<sup>{{ int(mtag['value']) }}</sup></div>
             {% end %}
         </div>
     </div>
     <hr/>
+    <!-- {{ hasmes = False }} -->
     {% for msg in messages %}
-    <div class='outerborder'>
-    <div class='msg' id="{{ msg['id'] }}">
-        {{ w.tags(msg['tags'],msg['clubs']) }}
-        <pre class='pw'>{{ linkify(msg['text']) }}</pre>
-        <div>
-            {{ w.msgl(msg['id']) }} ({{ int(msg['replycount']) }}{% if msg['recommendations'] %}+{{ len(msg['recommendations']) }}{% end %}) / {{ w.userl(msg['user']) }} / {{ w.time(msg['date']) }}
-        </div>
-    </div>
-    </div>
+        <!-- {{ hasmes = True }} -->
+        {{ modules.Message(msg) }}
     {% end %}
 {% end %}
-{% block footerrow %}{% if page>0 %}<a class='pagelink' href='?page={{ page-1 }}'>&lt;&lt; Позже</a> -- {% end %}<a class='pagelink' href='?page={{ page+1 }}'> Раньше &gt;&gt;</a>{% end %}
+{% block footerrow %}{% if page>0 %}<a class='pagelink' href='?page={{ page-1 }}'>&lt;&lt; Позже</a> -- {% end %}{% if hasmes %}<a class='pagelink' href='?page={{ page+1 }}'> Раньше &gt;&gt;</a>{% end %}{% end %}

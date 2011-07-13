@@ -1,10 +1,30 @@
 # -*- coding: utf-8 -*-
 import re
 from twisted.internet import defer, reactor
+import bnw_core.base
 
 USER_RE=ur'[0-9A-Za-z_-]+'
-MESSAGE_RE=ur'[0-9A-Za-z]+'
 
+FUCK = 'http://bnw.im/' 
+MESSAGE_RE=ur'(?:#|'+FUCK+ur'p/)?([0-9A-Za-z]+)'
+COMMENT_RE=ur'(?:#|'+FUCK+ur'p/)?([0-9A-Za-z]+(?:#|/)[0-9A-Za-z]+)'
+MESSAGE_COMMENT_RE=ur'(?:#|'+FUCK+ur'p/)?([0-9A-Za-z]+(?:(?:#|/)[0-9A-Za-z]+)?)'
+
+MESSAGE_REC = re.compile(MESSAGE_RE)
+COMMENT_REC = re.compile(COMMENT_RE)
+MESSAGE_COMMENT_REC = re.compile(MESSAGE_COMMENT_RE)
+
+def canonic_message(s):
+    m=MESSAGE_REC.match(s)
+    return m.group(1) if m else ""
+
+def canonic_comment(s):
+    m=COMMENT_REC.match(s)
+    return m.group(1).replace('#','/') if m else ""
+
+def canonic_message_comment(s):
+    m=MESSAGE_COMMENT_REC.match(s)
+    return m.group(1).replace('#','/') if m else ""
 
 class XmppMessage(object):
     def __init__(self,body,to,jid=None,bare_jid=None,user=None):
@@ -47,6 +67,7 @@ def require_auth(fun):
             )
         else:
             defer.returnValue((yield fun(request,*args,**kwargs)))
+    newfun.__doc__ = fun.__doc__
     return newfun
 
 def check_arg(**kwargs): #fun,name,rex):
@@ -67,5 +88,6 @@ def check_arg(**kwargs): #fun,name,rex):
                              constraint=True)
                     )
             defer.returnValue((yield fun(request,*args,**kwargs)))
+        new_fun.__doc__ = fun.__doc__
         return new_fun
     return damndeco

@@ -16,6 +16,7 @@ import txmongo
 import os,random,time
 import escape
 from widgets import widgets
+import uimodules
 import rss
 import base64
 import websocket_site
@@ -176,6 +177,8 @@ class MainHandler(BnwWebHandler,AuthMixin):
                 'toptags': toptags,
                 'users_count':int(uc),
                 'page': page,
+                'tag': tag,
+                'club': club,
             })
 
 class FeedHandler(BnwWebHandler,AuthMixin):
@@ -185,6 +188,7 @@ class FeedHandler(BnwWebHandler,AuthMixin):
     def respond(self,page=0):
         req=BnwWebRequest((yield self.get_auth_user()))
         result = yield cmd_feed(req)
+        print '--------------------------------------------------',self.get_defargs()
         self.set_header("Cache-Control", "max-age=1")
         defer.returnValue({
             'result': result,
@@ -285,7 +289,7 @@ class AvatarHandler(BnwWebHandler):
     @defer.inlineCallbacks
     def respond(self,username):
         user=(yield objs.User.find_one({'name': username}))
-        if not (user and 'avatar' in user):
+        if not (user and user.get('avatar',None)):
             self.set_header("Content-Type", "image/png")
             defer.returnValue(emptypng)
         fs = (yield get_fs('avatars'))
@@ -302,6 +306,7 @@ def get_site():
         "template_path":os.path.join(os.path.dirname(__file__), "templates"),
         "xsrf_cookies": True,
         "static_path":  os.path.join(os.path.dirname(__file__), "static"),
+        "ui_modules": uimodules,
     }
     application = tornado.web.Application([
 #        (r"/posts/(.*)", MessageHandler),

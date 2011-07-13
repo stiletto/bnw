@@ -15,4 +15,8 @@ answers = ('Pong, чо.',
 
 @require_auth
 def cmd_ping(request,safe=None):
+    """ Пинг """
     return dict(ok=True,desc='Pong.' if safe else random.choice(answers))
+
+def cmd_fuckoff(request,*args,**kwargs):
+    return dict(ok=False,desc='Fuck off. Not implemented')

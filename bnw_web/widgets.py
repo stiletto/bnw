@@ -39,6 +39,8 @@ class Widgets(object):
     def post_url(self,name):
         return bnw_core.base.config.webui_base+'p/%(u)s' % {'u':name}
     def userl(self,name):
+        #return '<a href="/u/%(u)s" class="usrid"><img style="border: none; height: 0.5em;" src="/u/%(u)s/avatar"/>%(u)s</a>' % {'u':name}
+        #return '<a href="/u/%(u)s" class="usrid"><img style="border: none; height: 0.5em;" src="http://huynya2.blasux.ru/cgi-bin/identicon.sh?id=%(u)s&s=16"/>%(u)s</a>' % {'u':name}
         return '<a href="/u/%(u)s" class="usrid">@%(u)s</a>' % {'u':name}
     def msgl(self,msg):
         return '<a href="/p/%(u)s" class="msgid">#%(n)s</a>' % {'u':msg.replace('/','#'),'n':msg}
@@ -60,4 +62,23 @@ class Widgets(object):
                 res=str(dd.seconds)+' '+runums(dd.seconds,'секунду','секунды','секунд')
         return res+' назад'
         #.strftime('%d.%m.%Y %H:%M:%S')
+    #SHORTENER_RE=re.compile(ur'((?:.+\s+){1,7})',re.U|re.I)
+    def shorttext(self,txt,maxwords=7,maxlen=70,ellipsis="..."):
+        words=0
+        pos=0
+        lt=len(txt)
+        while words<maxwords and pos<lt:
+            prevpos=pos
+            pos=txt.find(" ",pos+1)
+            if pos==-1: pos=lt
+            if pos>=maxlen:
+                if ellipsis and pos<lt:
+                    return txt[:prevpos]+ellipsis
+                else:
+                    return txt[:prevpos]
+            words+=1
+        if ellipsis and pos<lt:
+            return txt[:pos]+ellipsis
+        else:
+            return txt[:pos]
 widgets=Widgets()

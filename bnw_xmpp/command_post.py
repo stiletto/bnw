@@ -49,10 +49,11 @@ def postMessage(request,tags,clubs,text,anon=False,anoncom=False):
 @require_auth
 @defer.inlineCallbacks
 def cmd_post(request,tags="",clubs="",anonymous="",text=""):
+        """ Отправка псто """
         tags=tags.split(',')[:5]
         clubs=clubs.split(',')[:5]
-        tags=filter(None,set([x.lower().strip().replace('\n',' ') for x in tags]))
-        clubs=filter(None,set([x.lower().strip().replace('\n',' ') for x in clubs]))
+        tags=filter(None,set([x.lower().strip().replace('\n',' ')[:256] for x in tags]))
+        clubs=filter(None,set([x.lower().strip().replace('\n',' ')[:256] for x in clubs]))
         defer.returnValue(
             (yield postMessage(request,tags,clubs,text,anonymous,False)))
 
@@ -61,16 +62,18 @@ def cmd_post(request,tags="",clubs="",anonymous="",text=""):
 def cmd_post_simple(request,text,tag1=None,tag2=None,tag3=None,tag4=None,tag5=None):
 #        (ur'(?:(?P<tag1>[\*!]\S+)?(?: (?P<tag2>[\*!]\S+))?(?: (?P<tag3>[\*!]\S+))?(?: (?P<tag4>[\*!]\S+))?(?: (?P<tag5>[\*!]\S+))? )?(?P<text>.+)',
 #            command_post.cmd_post_simple),
+    """ Отправка псто """
     raw_tags=[t for t in (tag1,tag2,tag3,tag4,tag5) if t]
     clubs=','.join([x[1:] for x in raw_tags if x.startswith('!')])
     tags=','.join([x[1:] for x in raw_tags if x.startswith('*')])
     defer.returnValue((yield cmd_post(request,tags=tags,clubs=clubs,text=text)))
 
 @require_auth
-@check_arg(message=MESSAGE_RE+'(?:/'+MESSAGE_RE+')?')
+@check_arg(message=MESSAGE_COMMENT_RE)
 @defer.inlineCallbacks
 def cmd_comment(request,message="",anonymous="",text=""):
-        message=message.upper()
+        """ Отправка комментария """
+        message=canonic_message_comment(message).upper()
         message_id=message.split('/')[0]
         comment_id=message if '/' in message else None
         post_throttle=yield throttle_check(request.user['name'])
@@ -95,14 +98,16 @@ def cmd_comment(request,message="",anonymous="",text=""):
 @check_arg(message=MESSAGE_RE)
 @defer.inlineCallbacks
 def cmd_recommend(request,message="",comment=""):
+        """ Рекомендация псто """
+        message=canonic_message(message).upper()
         post_throttle=yield throttle_check(request.user['name'])
         ok,rest = yield bnw_core.post.recommendMessage(request.user,message,comment)
         _ = yield throttle_update(request.user['name'],post_throttle)
         if ok:
-            qn,recepients = rest
+            qn,recepients,replies = rest
             defer.returnValue(
                 dict(ok=True,
-                     desc='Recommended and delivered to %d users.' % (recepients,))
+                     desc='Recommended and delivered to %d users (%d replies).' % (recepients,replies,))
             )
         else:
             defer.returnValue(

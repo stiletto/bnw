@@ -16,6 +16,7 @@ import re
 @check_arg(name=USER_RE)
 @defer.inlineCallbacks
 def cmd_register(request,name=""):
+        """ Регистрация """
         if request.user:
             defer.returnValue(
                 dict(ok=False,
@@ -23,7 +24,7 @@ def cmd_register(request,name=""):
                 )
             )
         else:
-            name=name.lower()
+            name=name.lower()[:128]
             if name=='anonymous':
                 defer.returnValue(
                     dict(ok=False,desc=u'You aren''t anonymous.')
