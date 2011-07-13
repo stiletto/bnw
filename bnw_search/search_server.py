@@ -25,7 +25,7 @@ from twisted.web.server import Site, NOT_DONE_YET
 from twisted.web.resource import Resource
 from twisted.python.threadpool import ThreadPool
 
-import zmq
+#import zmq
 import simplejson  as json
 import sys
 import xapian

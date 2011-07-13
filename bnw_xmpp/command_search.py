@@ -5,7 +5,7 @@ from twisted.internet import defer
 import bnw_core.bnw_objects as objs
 
 from functools import partial
-from bnw_search import zmq_fuckup
+#from bnw_search import zmq_fuckup
 
 from twisted.web.xmlrpc import Proxy
 
