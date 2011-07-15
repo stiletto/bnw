@@ -12,7 +12,7 @@ def _(s,user):
 @require_auth
 @check_arg(message=MESSAGE_COMMENT_RE)
 @defer.inlineCallbacks
-def cmd_delete(request,message=None,last=False):
+def cmd_delete(request,message="",last=False):
     """ Удаление
     
     Удаление поста или коммента.
