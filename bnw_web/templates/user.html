@@ -23,10 +23,10 @@
         </div>
     </div>
     <hr/>
-    <!-- {{ hasmes = False }} -->
+    {% set hasmes = False %}
     {% for msg in messages %}
-    <!-- {{ hasmes = True }} -->
-    {{ modules.Message(msg,username=username) }}
+        {% set hasmes = True %}
+        {{ modules.Message(msg,username=username) }}
     {% end %}
     {% if page>0 %}<a class='pagelink' href='?page={{ page-1 }}'>&lt;&lt; Позже</a> -- {% end %}{% if hasmes %}<a class='pagelink' href='?page={{ page+1 }}'> Раньше &gt;&gt;</a>{% end %}
 {% end %}

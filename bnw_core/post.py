@@ -30,12 +30,22 @@ def subscribe(user,target_type,target,fast=False,sfrom=None):
                 defer.returnValue((False,'No such user.'))
             _ = yield tuser.send_plain('@%s subscribed to your blog. %su/%s' % (user['name'],gc('webui_base'),user['name']))
             pass
-        elif target_type=='sub_message' and not fast:
-            msg = yield objs.Message.find_one({'id':target})
-            if not msg:
-                defer.returnValue((False,'No such message.'))
-            else:
-                adddesc=' (%d replies)' % (msg['replycount'],)
+        elif target_type=='sub_message':
+            if not fast:
+                msg = yield objs.Message.find_one({'id':target})
+                if not msg:
+                    defer.returnValue((False,'No such message.'))
+                else:
+                    adddesc=' (%d replies)' % (msg['replycount'],)
+            
+            feedel_val = dict(user=user['name'],message=target)
+            feedel = None if fast else (yield objs.FeedElement.find_one(feedel_val)) 
+            if not feedel:
+                feedel_val.update(dict(recommender=None,
+                                   recocomment=None,
+                                   date=time.time()))
+                feedel = objs.FeedElement(feedel_val)
+                _ = yield feedel.save()
         if (yield sub.save()):
             defer.returnValue((True,'Subscribed'+adddesc+'.'))
         else:
@@ -167,6 +177,7 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
               'message': message_id,
               'date': time.time(),
               'replyto': old_comment['id'] if old_comment else None,
+#              'depth': old_comment.get('depth',0)+1 if old_comment else 0,
               'num': message['replycount']+1,
               'replytotext': cropstring(old_comment['text'] if comment_id else message['text'],128),
               'text': ('@'+old_comment['user']+' 'if comment_id else '')+text,
@@ -182,8 +193,8 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
             comment_id = yield comment.save()
         except mongo_errors.OperationFailure, e:
             pass
-            if e['code']!=11000:
-                raise
+            #if e['code']!=11000:
+            #    raise
         else:
             break
     else:

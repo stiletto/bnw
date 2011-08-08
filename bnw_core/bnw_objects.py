@@ -318,6 +318,18 @@ class Subscription(MongoObject):
     def is_remote(self):
         return '@' in self['target']
 
+class GlobalState(MongoObject):
+    """ Всякие глобальные переменные."""
+    collection_name = "globalstate"
+    @classmethod
+    @defer.inlineCallbacks
+    def ensure_indexes(self):
+        collection=(yield get_db())[self.collection_name]
+
+        namei=txmongo.filter.sort(txmongo.filter.ASCENDING("name"))
+        _ = yield collection.create_index(namei, unique=True)
+        defer.returnValue(None)
+
 class Club(MongoObject):
     """ Клуб в выхлопе мап-редьюса."""
     collection_name = "clubs"
@@ -328,6 +340,13 @@ class Club(MongoObject):
 class Tag(MongoObject):
     """ Клуб в выхлопе мап-редьюса."""
     collection_name = "tags"
+    @classmethod
+    def ensure_indexes(self):
+        pass
+
+class Today(MongoObject):
+    """ Обсуждаемый сегодня пост в выхлопе мап-редьюса."""
+    collection_name = "today"
     @classmethod
     def ensure_indexes(self):
         pass

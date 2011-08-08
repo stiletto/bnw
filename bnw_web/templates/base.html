@@ -1,30 +1,32 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>{% block title %}BnW - Somewhere in Nevada{% end %}</title>
-    <link rel="stylesheet" href="{{ config.webui_static }}basestyle.css" type="text/css" />
-    <link rel="http://oexchange.org/spec/0.8/rel/related-target" 
-          type="application/xrd+xml"
-          href="{{ config.webui_base }}oexchange.xrd"> 
+    <link rel="stylesheet" href="{{ static_url("basestyle.css") }}" type="text/css" />
+    <script type="text/javascript" src="{{ static_url("jquery.min.js") }}"></script>
+    <script type="text/javascript" src="{{ static_url("jquery.cookie.js") }}"></script>
+    <script type="text/javascript" src="{{ static_url("dlgs/login.js") }}"></script>
+    <script type="text/javascript">
+            jQuery(window).load(function(){
+                $(".avatar_ps").removeClass('avatar_ps');
+                $(".imgpreview_ps").removeClass('imgpreview_ps');
+            });
+    </script>
     <style type="text/css">
-    {% block basestyles %}
-    /* dark: CD, light: FF, gray E5 */
-    {% end %}
-    {% block extrastyle %}
-    {% end %}
+    {% block basestyles %}/* dark: CD, light: FF, gray E5 */{% end %}
+    {% block extrastyle %}{% end %}
     </style>
     <style type="text/css">
     {% if auth_user %}{{ auth_user.get('settings',{}).get('usercss','') }}{% end %}
     </style>
-    <script type="text/javascript" src="/static/jquery.min.js"></script>
-    <script type="text/javascript" src="/static/jquery.cookie.js"></script>
-    <script type="text/javascript" src="/static/dlgs/login.js"></script>
     {% block extrahead %}
     {% end %}
 </head>
 <body>
 <div class='bodyshit'>
     <div style='text-align: left; overflow: hidden; width: 100%;'>
+        <a href='/' class='tagline'>{{ ranq }}</a>
         <span style='float: right; padding-right: 1em;'>
             {% if auth_user %}
             <a href='/post' class='headlink'>Написать</a>
@@ -35,10 +37,9 @@
             <a href='#' class='headlink' onClick='login_win()'>Войти</a>
             {% end %}
             <a href='/c/bnw' class='headlink'>!bnw</a>
+            <a href='/today' class='headlink'>Сегодня</a>
             <a href='/clubs' class='headlink'>Клубы</a>
         </span>
-        <!-- <a href='/' style='color: #e5e5e5; text-decoration: none; margin-left: 1em;'>-->
-        <a href='/' style='color: #B80049; text-decoration: none; margin-left: 1em;'>{{ ranq }}</a>
     </div>
 {% block body %}
 {% end %}
@@ -46,10 +47,9 @@
         {% block footerrow %}
         {% end %}
         <div style='float:right;'>
-            <a href="http://ipv6-test.com/validate.php?url=referer"><img src="http://ipv6-test.com/button-ipv6-80x15.png" alt="ipv6 ready" title="ipv6 ready" border="0" style="vertical-align: middle;"></a>
+            <a href="http://ipv6-test.com/validate.php?url=referer"><img src="http://ipv6-test.com/button-ipv6-80x15.png" alt="ipv6 ready" title="ipv6 ready" style="border: none; vertical-align: middle;" /></a>
             <a href="http://bnw.reformal.ru/" class='pagelink'>BnW на Реформале.</a>
-            <!-- <a href="http://bnw.blasux.ru/static/" class='pagelink'>Сырцы и инфа о проекте</a> -->
-            <a href="http://wiki.bnw.im/" class="pagelink">Викивач</a>
+            <a href="http://hive.blasux.ru/u/Stiletto/bnw" class="pagelink">Викивач</a>
         </div>
     </div>
     <div style='text-align: center;'>
@@ -69,7 +69,7 @@
 </div>
 
 
-<script type="text/javascript"><!--
+<script type="text/javascript">
 reformal_wdg_domain    = "bnw";
 reformal_wdg_mode    = 0;
 reformal_wdg_title   = "bnw.blasux.ru";
@@ -88,9 +88,7 @@ reformal_wdg_glcolor  = "#105895";
 reformal_wdg_tbcolor  = "#FFFFFF";
  
  reformal_wdg_bimage = "785c6819375d7a07d2f875164a6d2eca.png";
-  //-->
   </script>
-  <!-- <script type="text/javascript" language="JavaScript" src="http://widget.reformal.ru/tab6.js"></script><noscript><a href="http://bnw.reformal.ru">bnw.blasux.ru feedback </a> <a href="http://reformal.ru"><img src="http://reformal.ru/i/logo.gif" /></a></noscript> -->
 </body>
 </html>
 

@@ -83,6 +83,7 @@ FEATURES = ('jabber:iq:version',
             'http://jabber.org/protocol/chatstates',
             'http://jabber.org/protocol/disco#info',
             'http://jabber.org/protocol/disco#items',
+            'urn:xmpp:receipts',
 )
 def disco_info(iq,iq_user):
     if iq.query:

@@ -5,6 +5,7 @@ from base import *
 import bnw_core.bnw_objects as objs
 
 import pymongo
+import time
 
 def _(s,user):
     return s
@@ -89,4 +90,48 @@ def cmd_feed(request):
              desc='Your feed',
              cache=5)
     )
-    
+
+TODAY_REBUILD_PERIOD = 300
+TODAY_MAP = 'function() { emit(this.message, 1); }'
+TODAY_REDUCE = 'function(k,vals) { var sum=0; for(var i in vals) sum += vals[i]; return sum; }'
+
+@defer.inlineCallbacks
+def cmd_today(request):
+    """ Показать обсуждаемое за последние 24 часа """
+    last_rebuild = yield objs.GlobalState.find_one({'name':'today_rebuild'})
+    if not last_rebuild:
+        last_rebuild = {'name':'today_rebuild','value':0}
+    rebuild = time.time() > TODAY_REBUILD_PERIOD + last_rebuild['value']
+    if rebuild:
+        _ = yield objs.GlobalState.mupdate({'name':'today_rebuild'},{'name':'today_rebuild','value':time.time()},True)
+        
+        start = time.time() - 86400
+        _ = yield objs.Today.remove({})
+        result = yield objs.Comment.map_reduce(TODAY_MAP,TODAY_REDUCE,out='today',query={'date':{'$gte':start}})
+    if (not rebuild) or result:
+        postids = list(x['_id'] for x in (yield objs.Today.find_sort({},[('value',-1)],limit=20)))
+        dbposts = dict((x['id'],x.doc) for x in (yield objs.Message.find({'id':{'$in':postids}})))
+        messages = [dbposts[x] for x in postids]
+        messages.reverse()
+        defer.returnValue(
+            dict(ok=True,format="messages",
+                 messages=messages,
+                 desc='Today''s most discussed',
+                 cache=300)
+        )
+    else:
+        defer.returnValue(dict(ok=False,desc='Map/Reduce failed'))
+
+@defer.inlineCallbacks
+def cmd_today2(request):
+    """ Показать обсуждаемое за последние 24 часа """
+    start = time.time() - 86400
+    messages = [x.filter_fields() for x in (yield objs.Message.find_sort({'date':{'$gte':start}},[('replycount',pymongo.DESCENDING)],limit=20))]
+    messages.reverse()
+    defer.returnValue(
+        dict(ok=True,format="messages",
+             messages=messages,
+             desc='Today''s most discussed',
+             cache=300)
+    )
+

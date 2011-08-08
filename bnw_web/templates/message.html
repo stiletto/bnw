@@ -1,123 +1,34 @@
 {% extends "base.html" %}
 {% block title %}BnW - {{ msg.get('user','None') if msg else 'None' }}: {{ w.shorttext(msg['text']) if msg else 'None' }}{% end %}
 {% block extrahead %}
-    <script type="text/javascript" src="/static/web-socket-js/swfobject.js"></script>
-    <script type="text/javascript" src="/static/web-socket-js/FABridge.js"></script>
-    <script type="text/javascript" src="/static/web-socket-js/web_socket.js"></script>
+    <script type="text/javascript" src="{{ static_url("web-socket-js/swfobject.js") }}"></script>
+    <script type="text/javascript" src="{{ static_url("web-socket-js/FABridge.js") }}"></script>
+    <script type="text/javascript" src="{{ static_url("web-socket-js/web_socket.js") }}"></script>
     
     <script type="text/javascript">
         // Set URL of your WebSocketMain.swf here:
-            WEB_SOCKET_SWF_LOCATION = "/static/web-socket-js/WebSocketMain.swf";
+            WEB_SOCKET_SWF_LOCATION = "{{ static_url("web-socket-js/WebSocketMain.swf") }}";
         // Set this to dump debug message from Flash to console.log:
         //    WEB_SOCKET_DEBUG = true;
-    </script>
-            
-    <script type="text/javascript">
-        jQuery.fn.swapWith = function(to) {
-            return this.each(function() {
-                var copy_to = $(to).clone(true);
-                var copy_from = $(this).clone(true);
-                $(to).replaceWith(copy_from);
-                $(this).replaceWith(copy_to);
-            });            
+
+        var websocket_base = "{{ config.webui_wsbase }}";
+        var message_id = "{{ msgid }}";
+        var comment_count = {{ len(comments) }};        
+        var comment_info = {
+            {% if msg %}
+            {% for c in comments %}
+                "{{ c['id'] }}" : { 
+                    "date": {{ c['date'] }},
+                    "replyto": {{ ('"'+c['replyto']+'"') if c['replyto'] else "null" }},
+                    "num": {{ c['num'] }},
+                    "user": "{{ c['user'] }}",
+                },
+            {% end %}
+            {% end %}
         };
-        
-        var comment_parents={};
-        function get_comment_parent(cmt) {
-            var cmt_id = $(cmt).attr("id");
-            var parent;
-            if (comment_parents[cmt_id]) {
-                parent=comment_parents[cmt_id];
-            } else {
-                parent=$("div div a",cmt).eq(2).text();
-                parent=parent.split("/")[1]
-                comment_parents[cmt.id]=parent;
-            }
-            parent=$("#"+parent);
-            return parent;
-        }
-        var times={};
-        function get_times(cmt) {
-            var cmt_id = cmt.attr("id");
-            if(times[cmt_id]&&cmt_id)
-                return times[cmt_id];
-            var parent=get_comment_parent(cmt);
-            var val;
-            if(parent.length==0)
-                val=[parseFloat($(".comment_time",cmt).text())];
-            else
-                val=get_times(parent).concat([parseFloat($(".comment_time",cmt).text())]);
-            times[cmt_id]=val;
-            return val;
-        }
-        function get_comment_parents_count(cmt) {
-            var parent=get_comment_parent(cmt);
-            if(parent.length==0)
-                return 0;
-            else
-                return 1+get_comment_parents_count(parent);
-        }
-        function sort_comments() {
-            // ем говно, сосу хуи
-            var roc=true;
-            while (roc) {
-                roc=false;
-                $("div.comments div").each(function (i,o) {
-                    var cur=$(o);
-                    var next=cur.next();
-                    if (next.length==0) return;
-                    if (times[cur.attr("id")]>times[next.attr("id")]) {
-                        //$(".msg").append("Exchange "+cur.attr("id")+" ------- "+next.attr("id")+"<br/>");
-                        cur.swapWith(next);
-                        if($("#"+cur.attr("id")).length==0)
-                            alert("Lost cur "+cur.attr("id"));
-                        if($("#"+next.attr("id")).length==0)
-                            alert("Lost next "+next.attr("id"));
-                        roc=true;
-                    }
-                })
-            }
-        }
-        function comment_reply() {
-            $(".msgid").each(function (i,o) {
-                var cur=$(o);
-                var text=cur.text();
-                var lp = text.split('/');
-                if ((lp[1])&&(lp[0]=="#{{ msgid }}")) {
-                    cur.click(function () {
-                        $("[name=comment]").val($(this).text().split('/')[1]);
-                    });
-                }
-            });
-        }
-        function textarea_press(event) {
-            if (event.ctrlKey && (event.keyCode==13 || event.keyCode==10))
-                $("#commentform").submit();
-        }
-        $(function(){
-            $("div.comments div").each(function (i,o) { 
-                var c=$(o);
-                var margin=get_comment_parents_count(o);
-                if (margin>15) margin=15;
-                c.css("margin-left",margin+"em")
-                times[c.attr("id")]=get_times(c);
-            });
-            sort_comments();
-            comment_reply();
-            
-            var ws = new WebSocket("{{ config.webui_wsbase }}"+window.location.pathname);
-            ws.onmessage = function (e) {
-                var d=JSON.parse(e.data);
-                var new_comment=$("<div class='comment'>").text(d.text);
-                var addinfo=$("<div>").text("#"+d['id']+" / @"+d['user']);
-                if (d['replyto'])
-                    addinfo.append(' --> '+d['replyto']);
-                new_comment.append(addinfo);
-                $("div.comments").append($("<div class='outerborder'>").append(new_comment));
-            };
-            
-        });
     </script>
+            
+    <script type="text/javascript" src="{{ static_url("tree-comments.js") }}"></script>
 {% end %}
 {% block body %}
 {% if not msg %}
@@ -134,12 +45,13 @@
 {% else %}
     {{ modules.Message(msg, full=True) }}
     <hr/>
+    <div class="somenote" style="display: none;"></div>
     <div class="comments rich_comments" style="display: none;"></div> 
     <div class="comments simple_comments">
     {% for comment in comments %}
     <div class='outerborder' id="{{ comment['id'].split('/')[1] }}">
     <div class='comment'>
-        <img class='avatar' style='max-height: 2em; float: right; border: none;' src='/u/{{ comment['user'] }}/avatar'/>
+        <img class='avatar avatar_ps' src='/u/{{ comment['user'] }}/avatar'/>
         <pre class='comment_body pw'>{{ linkify(comment['text']) }}</pre>
         <span class='comment_time' style='display: none;'>{{ comment['date'] }}</span>
         <div>

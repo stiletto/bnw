@@ -15,10 +15,12 @@ def update_internal(message,what,delete,text):
     action = '$pull' if delete else '$addToSet'
     defer.returnValue((yield objs.Message.mupdate({'id':message},{action: { what: text}},safe=True)))
 
+@check_arg(message=MESSAGE_COMMENT_RE)
 @require_auth
 @defer.inlineCallbacks
 def cmd_update(request,text,message='',club='',tag='',delete=''):
     """ Редактирование сооббщений """
+    message=canonic_message(message).upper()
     if not ((message and text) or (club or text)):
         defer.returnValue(
             dict(ok=False,desc='Usage: <update|u> -m <message> <--club|--tag> [--delete] <tag|club>')

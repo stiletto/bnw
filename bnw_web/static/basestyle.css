@@ -12,6 +12,14 @@
         .bodyshit {
             padding: 1em;
         }
+        
+        .tagline {
+            color: #B80049; 
+            text-decoration: none; 
+            margin-left: 1em;
+            float: left;
+        }
+        
         .outerborder {
             background-color: #e5e5e5;
             /*padding-left: 1em;
@@ -84,6 +92,11 @@
             max-height: 4em;
             margin-right: 1em;
         }
+        .imgpreview_ps {
+            height: 3em;
+            width: 4em;
+        }
+        
         .tag {
             color: #CD0000;
         }
@@ -108,6 +121,14 @@
             padding-left: 0.5em;
             padding-right: 0.5em;
         }
+        
+        .avatar {
+            max-height: 2em; max-width: 6em; float: right; border: none;
+        }
+        .avatar_ps {
+            width: 2em; height: 2em;
+        }
+        
         
         #err_outer {width: 100%; overflow: hidden; position: relative;}
         #err_outer[id] {display: table; position: static;}

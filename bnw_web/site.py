@@ -28,7 +28,7 @@ import bnw_core.bnw_objects as objs
 import bnw_core.post as post
 import bnw_core.base
 from bnw_core.base import get_db,get_fs
-from bnw_xmpp.command_show import cmd_feed
+from bnw_xmpp.command_show import cmd_feed,cmd_today
 from bnw_xmpp.command_clubs import cmd_clubs,cmd_tags
 
 from base import BnwWebHandler, TwistedHandler, BnwWebRequest
@@ -43,7 +43,7 @@ class MessageHandler(BnwWebHandler,AuthMixin):
         user = yield self.get_auth_user()
         f = txmongo.filter.sort(txmongo.filter.ASCENDING("date"))
         msg=(yield objs.Message.find_one({'id': msgid}))
-        comments=(yield objs.Comment.find({'message': msgid},filter=f))
+        comments=list((yield objs.Comment.find({'message': msgid},filter=f))) # ненавидь себя, сука
         self.set_header("Cache-Control", "max-age=5")
         defer.returnValue({
             'msgid': msgid,
@@ -188,8 +188,18 @@ class FeedHandler(BnwWebHandler,AuthMixin):
     def respond(self,page=0):
         req=BnwWebRequest((yield self.get_auth_user()))
         result = yield cmd_feed(req)
-        print '--------------------------------------------------',self.get_defargs()
         self.set_header("Cache-Control", "max-age=1")
+        defer.returnValue({
+            'result': result,
+        })
+
+class TodayHandler(BnwWebHandler,AuthMixin):
+    templatename='today.html'
+    @defer.inlineCallbacks
+    def respond(self,page=0):
+        req=BnwWebRequest((yield self.get_auth_user()))
+        result = yield cmd_today(req)
+        self.set_header("Cache-Control", "max-age=300")
         defer.returnValue({
             'result': result,
         })
@@ -289,6 +299,8 @@ class AvatarHandler(BnwWebHandler):
     @defer.inlineCallbacks
     def respond(self,username):
         user=(yield objs.User.find_one({'name': username}))
+        self.set_header("Cache-Control", "max-age=36000, public")
+        self.set_header("Vary", "Accept-Encoding")
         if not (user and user.get('avatar',None)):
             self.set_header("Content-Type", "image/png")
             defer.returnValue(emptypng)
@@ -297,7 +309,6 @@ class AvatarHandler(BnwWebHandler):
         doc = yield fs._GridFS__files.find_one({'_id':user['avatar'][0]})
         avatar = yield fs.get(doc)
         avatar_data = yield avatar.read()
-        self.set_header("Cache-Control", "max-age=10")
         self.set_header("Content-Type", user['avatar'][1])
         defer.returnValue(avatar_data)
 
@@ -325,6 +336,7 @@ def get_site():
         (r"/login", LoginHandler),
         (r"/post", PostHandler),
         (r"/feed", FeedHandler),
+        (r"/today", TodayHandler),
         (r"/clubs", ClubsHandler),
         (r"/blog", BlogHandler),
         (r"/comment", CommentHandler),

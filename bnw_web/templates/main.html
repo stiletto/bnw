@@ -13,7 +13,7 @@
     <div class='outerborder'>
         <div class='msg'>
             Привет{% if auth_user %}, {{ auth_user['name'] }}{% end %}, TbI - HRWKA! {{ users_count }}.0238 пользователей не могут ошибаться!
-            {% if auth_user %}<a href='javascript:$.cookie("bnw_loginkey","")'>Красная пилюля.</a>{% end %}
+            {% if auth_user %}<a href='javascript:$.cookie("bnw_loginkey","");window.location=window.location;'>Красная пилюля.</a>{% end %}
             <br/>
             {% if False %}
             Я не знаю как так вышло, но на главной тоже появилась <a href="/?format=rss">RSS</a>.
@@ -34,9 +34,9 @@
         </div>
     </div>
     <hr/>
-    <!-- {{ hasmes = False }} -->
+    {% set hasmes = False %}
     {% for msg in messages %}
-        <!-- {{ hasmes = True }} -->
+        {% set hasmes = True %}
         {{ modules.Message(msg) }}
     {% end %}
 {% end %}

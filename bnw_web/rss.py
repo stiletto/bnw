@@ -9,6 +9,12 @@ from datetime import datetime
 from escape import linkify
 
 from xml.sax import saxutils
+
+try:
+    XMLGenerator = saxutils.LexicalXMLGenerator
+except:
+    XMLGenerator = saxutils.XMLGenerator
+
 class BnwRSSFeed(PyRSS2Gen.RSS2):
     rss_attrs = {
         "version":"2.0",
@@ -18,7 +24,7 @@ class BnwRSSFeed(PyRSS2Gen.RSS2):
         "xmlns:image":"http://purl.org/rss/1.0/modules/image/",
     }
     def write_xml(self, outfile, encoding = "iso-8859-1"):
-        handler = saxutils.LexicalXMLGenerator(outfile, encoding)
+        handler = XMLGenerator(outfile, encoding)
         handler.startDocument()
         self.publish(handler)
         handler.endDocument()
@@ -36,9 +42,12 @@ class BnwDescription(object):
         self.text=text or ''
     def publish(self,handler):
         handler.startElement('description',{})
-        handler.startCDATA()
-        handler.characters(self.text)
-        handler.endCDATA()
+        #handler.startCDATA()
+        handler._write('<![CDATA[')
+        #handler.characters(self.text)
+        handler._write(self.text.replace(']]>',']]&gt;'))
+        handler._write(']]>')
+        #handler.endCDATA()
         handler.endElement('description')
 
 class AtomSelf(object):

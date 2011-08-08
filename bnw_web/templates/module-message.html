@@ -1,8 +1,8 @@
 <div class='outerborder'>
     <div class='msg'>
-        <img class='avatar' style='max-height: 2em; max-width: 6em; float: right; border: none;' src='/u/{{ msg['user'] }}/avatar'/>
+        <img class='avatar avatar_ps' alt='' src='http://fuck.blasux.ru/thumb?max=48&fmt=png&img=http://bnw.im/u/{{ msg['user'] }}/avatar'/>
         {{ w.tags(msg['tags'],msg['clubs'],username) }}
-        <pre class='pw'>{{ linkify(msg['text']) }}</pre>
+        <div class='pw'>{{ linkify(msg['text']) }}</div>
         {% if msg['recommendations'] and full %}
             <div class='recos'>
                 Рекомендовали:
@@ -19,7 +19,7 @@
                         <a href="http://www.addthis.com/bookmark.php?v=250&amp;username=stiletto" class="addthis_button">[+] Share</a>
                     </div>
                     <script type="text/javascript">var addthis_config = {"data_track_clickback":true};</script>
-                    <script type="text/javascript" src="/static/addthis_widget.js#username=stiletto"></script>
+                    <script type="text/javascript" src="{{ static_url("addthis_widget.js#username=stiletto") }}"></script>
                     <!-- AddThis Button END -->
             </div>
             {% end %}
