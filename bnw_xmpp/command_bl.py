@@ -6,8 +6,6 @@ import random
 
 import bnw_core.bnw_objects as objs
 
-optionnames = [ 'usercss', 'password' ]
-
 @defer.inlineCallbacks
 def bl_internal(user,what,delete,text):
     action = '$pull' if delete else '$addToSet'

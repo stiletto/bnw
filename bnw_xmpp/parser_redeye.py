@@ -5,6 +5,8 @@ from bnw_core.base import BnwResponse
 from twisted.internet import defer
 import parser_basexmpp
 
+import alias_subst
+
 class RedEyeParser(parser_basexmpp.BaseXmppParser):
     def __init__(self,commands,formatters):
 
@@ -75,11 +77,27 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
           ' '+arg[3]) for arg in self.commands['redeye',command]['handler'].arguments)
         pass
 
+    def alias_resolve(self,msg):
+        if msg.user:
+            text = msg.body
+            cmda = text.split(' ',1)
+            alias = msg.user.get('aliases',{}).get(cmda[0],None)
+            if alias:
+                if len(cmda)<2:
+                    cmda.append('')
+                msg.body = alias_subst.arg_substitution(alias,cmda[1].strip())
+                return self.resolve(msg)
+        return None,None,None,None
+
     @defer.inlineCallbacks        
     def handle(self,msg):
         handler,restname,options,rest = self.resolve(msg)#unicode(msg.body).encode('utf-8','ignore'))
         if not handler:
-            defer.returnValue('ERROR. Command not found: %s' % (restname,))
+            handler, restname2, options, rest = self.alias_resolve(msg)
+            if not handler:
+                defer.returnValue('ERROR. Command not found: %s' % (restname,))
+            else:
+                restname = restname2
         try:
             #if 'help' in options:
             #    defer.returnValue((yield self.formatCommandHelp(command.lower())))

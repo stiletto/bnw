@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #from twisted.words.xish import domish
+from twisted.web.client import getPage
 
 from base import *
 import random
@@ -82,17 +83,24 @@ INTERFACE - выбор интерфейса (redeye - консолеподобн
 VCARD - обновить VCARD
 USERLIST [page] - список всх пользователей, 50 на страницу
 LOGIN - получить ссылку для входа на сайт."""
-helptext_yesimple = helptext_simple.replace('ё','е')+'\n\n@l29ah - лох :3'
+def de_yo(s):
+    return s.replace('ё','е')+'\n\n@l29ah - лох :3'
 
+HELP_BASE='http://hive.blasux.ru/u/Stiletto/bnw/help/'
 def formatCommand(command):
         defer.returnValue(command+':\n'+'\n'.join( (("-"+arg[0]).rjust(4)+(' ARG' if arg[2] else '    ') + \
           ("--"+arg[1]).rjust(10)+('=ARG' if arg[2] else '    ') + \
           ' '+arg[3]) for arg in elf.parser.commands[command]))
 
+@defer.inlineCallbacks
 def cmd_help_simple(request):
     """ Справка """
-    return dict(ok=True,desc='Help:'+(helptext_simple if random.random()<0.9 else helptext_yesimple) + \
-            ('\n\nАлсо, @vrusha - няша' if random.random() > 0.65 else ''),cache=3600,cache_public=True)
+    page = yield getPage(HELP_BASE+'simplified'+'?action=raw')
+    if page.startswith('{{{\r\n'): page=page[3:]
+    if page.endswith('}}}\r\n'): page=page[:-5]
+    defer.returnValue(
+        dict(ok=True,desc='Help:'+(page if random.random()<0.9 else de_yo(page)) + \
+            ('\n\nАлсо, @vrusha - няша' if random.random() > 0.65 else ''),cache=3600,cache_public=True))
 
 def cmd_help_redeye(request):
     """ Справка """

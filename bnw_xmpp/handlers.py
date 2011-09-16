@@ -4,6 +4,7 @@
 from parser_redeye import RedEyeParser
 from parser_regex import RegexParser
 
+import command_alias
 import command_bl
 import command_clubs
 import command_delete
@@ -142,6 +143,14 @@ redeye_handlers = (
             command_jids.cmd_jids,
         ),
         ("confirm", (), command_jids.cmd_confirm, "code", ),
+        ("alias",
+            (
+                ("d", "delete", True, u"Delete an alias."),
+                ("s", "set", True, u"Update an alias."),
+            ),
+            command_alias.cmd_alias,
+            'value',
+        ),
 )
 
 redeye_formatters = {

@@ -27,5 +27,5 @@ def cmd_interface(request,iface=None): # TODO: asynchronize
             )
         else:
             defer.returnValue(
-                dict(ok=True,desc='No such interface.')
+                dict(ok=False,desc='No such interface.')
             )
