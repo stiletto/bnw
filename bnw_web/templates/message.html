@@ -51,11 +51,10 @@
     {% for comment in comments %}
     <div class='outerborder' id="{{ comment['id'].split('/')[1] }}">
     <div class='comment'>
-        <img class='avatar avatar_ps' src='/u/{{ comment['user'] }}/avatar'/>
+        <img class='avatar avatar_ps' src='http://fuck.blasux.ru/thumb?max=48&fmt=png&img=http://bnw.im/u/{{ comment['user'] }}/avatar'/>
         <pre class='comment_body pw'>{{ linkify(comment['text']) }}</pre>
-        <span class='comment_time' style='display: none;'>{{ comment['date'] }}</span>
         <div>
-            {{ w.msgl(comment['id']) }} / {{ w.userl(comment['user']) }}
+            {{ w.msgl(comment['id']) }}<span class='cmtb' id='cmtb-{{ comment['id'] }}'></span> / {{ w.userl(comment['user']) }}
             {% if comment['replyto'] %} --> <a href="/p/{{ comment['replyto'].replace('/','#') }}" class="msgid">#{{ comment['replyto']}}</a>{% end %}
              / {{ w.time(comment['date']) }}
         </div>

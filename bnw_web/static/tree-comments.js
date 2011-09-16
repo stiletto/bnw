@@ -7,31 +7,6 @@
             });            
         };
         
-        function sort_comments() {
-            // ем говно, сосу хуи
-            var roc=true;
-            while (roc) {
-                roc=false;
-                $("div.comments div.outerborder").each(function (i,o) {
-                    var cur=$(o);
-                    var next=cur.next();
-                    if (next.length==0) return;
-
-                    var curid=message_id+"/"+cur.attr("id");
-                    var nextid=message_id+"/"+next.attr("id");
-
-                    if (comment_info[curid].sorter>comment_info[nextid].sorter) {
-                        //$(".msg").append("Exchange "+cur.attr("id")+" ------- "+next.attr("id")+"<br/>");
-                        cur.swapWith(next);
-                        if($("#"+cur.attr("id")).length==0)
-                            alert("Lost cur "+cur.attr("id"));
-                        if($("#"+next.attr("id")).length==0)
-                            alert("Lost next "+next.attr("id"));
-                        roc=true;
-                    }
-                })
-            }
-        }
         function comment_reply() {
             $(".msgid").each(function (i,o) {
                 var cur=$(o);
@@ -63,6 +38,7 @@
             return as.length-bs.length;
         }
 
+        var comments_max_depth=0;
         function commentinfo_generate() {
             var updating = true;
             comments_order = [];
@@ -88,6 +64,8 @@
                             }
                         }
                         if (v.depth!=undefined) {
+                            if (v.depth>comments_max_depth)
+                                comments_max_depth = v.depth;
                             comments_order.push([k,v.sorter]);
                         }
                         updating = true;
@@ -102,14 +80,14 @@
                 var comments_html={};
                 comments_order.sort(comments_order_compare);
                 $("div.comments div.outerborder").each(function (i,o) { 
-                    //var c=$(o);
                     var cmt_id = message_id+"/"+o.getAttribute("id");
-                    /*var margin=comment_info[cmt_id].depth;
-                    if (margin>15) margin=15;
-                    c.css("margin-left",margin+"em");*/
                     comments_html[cmt_id]=o.innerHTML;
                 });
                 var element_idx = 0;
+                var margin_ratio = 32.0 / comments_max_depth;
+                if (comments_max_depth>50)
+                    margin_ratio = 32.0 / 50;
+                if (margin_ratio > 1) margin_ratio = 1;
                 $("div.comments div.outerborder").each(function (i,o) { 
                     var cmt_id = comments_order[element_idx][0];
                     var cmt_html = comments_html[cmt_id];
@@ -118,12 +96,47 @@
                     o.setAttribute("id",cmt_id.split("/")[1]);
 
                     var margin=comment_info[cmt_id].depth;
-                    if (margin>15) margin=15;
+                    if (margin>50)
+                        margin=50;
+                    margin = margin * margin_ratio;
+                    
                     o.setAttribute("style","margin-left: "+margin+"em;");
                     element_idx++;
                 });
-                //sort_comments();
                 tree_comments_time = (new Date()).getTime() - tree_comments_time;
+        }
+        
+        function api_call_alert(func,args) {
+            args['login']=$.cookie("bnw_loginkey");
+            $.ajax({ url: "/api/"+func,
+                data:args,
+                dataType:'json',
+                success: function (data) {
+                    if (data.ok)
+                        alert("OK. "+data.desc);
+                    else
+                        alert("ERROR. "+data.desc);
+                },
+                error: function (data,status) {
+                    alert("API request failed.");
+                    return false;
+                }
+            });
+        }
+        
+        var add_message_actions_time;
+        function add_message_actions() {
+            add_message_actions_time = (new Date()).getTime();
+            var isloggedin = $.cookie("bnw_loginkey")!=null;
+                $(".msgb, .cmtb").each(function (i,o) { 
+                    var id = o.getAttribute("id").split("-")[1];
+                    var ismsg = id.indexOf("/")==-1;
+                    var jo = $(o);
+                    $(o).html(" ");
+                    if (ismsg&&isloggedin)
+                        jo.append( $("<a/>").text("r").click(function () { api_call_alert("recommend",{message:id}); }) );
+                });
+            add_message_actions_time = (new Date()).getTime() - add_message_actions_time;
         }
         
         var commentinfo_generate_time;
@@ -133,7 +146,7 @@
             commentinfo_generate_time = (new Date()).getTime() - commentinfo_generate_time;
 
             if (comment_count) {
-                if ( comment_count > 50 ) {
+                if ( comment_count > 200 ) {
                     $(".somenote").html("В этом треде слишком много комментариев. Ваш браузер <a href='#' id='force_tree'>не лопнет</a> от их отображения в виде дерева?");
                     $("#force_tree").click(function () {
                         $(".somenote").css("display","none");
@@ -146,6 +159,8 @@
             }
             comment_reply();
             
+            
+            add_message_actions();
             
             var ws = new WebSocket(websocket_base+window.location.pathname);
             ws.onmessage = function (e) {

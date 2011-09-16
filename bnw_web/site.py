@@ -106,6 +106,29 @@ class UserHandler(BnwWebHandler,AuthMixin):
                 'tag' : tag,
             })
 
+class UserRecoHandler(BnwWebHandler,AuthMixin):
+    templatename='user.html'
+    @defer.inlineCallbacks
+    def respond(self,username,tag=None):
+        _ = yield self.get_auth_user()
+        f = txmongo.filter.sort(txmongo.filter.DESCENDING("date"))
+        user = (yield objs.User.find_one({'name': username}))
+        page = get_page(self)
+        qdict = { 'recommendations': username }
+        if tag:
+            tag = tornado.escape.url_unescape(tag)
+            qdict['tags'] = tag
+        messages=(yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page))
+
+        self.set_header("Cache-Control", "max-age=1")
+        defer.returnValue({
+                'username': username,
+                'user': user,
+                'messages': messages,
+                'page': page,
+                'tag' : tag,
+            })
+
 
 class UserInfoHandler(BnwWebHandler,AuthMixin):
     templatename='userinfo.html'
@@ -124,12 +147,14 @@ class UserInfoHandler(BnwWebHandler,AuthMixin):
         subscriptions_only = list(subscriptions - subscribers)
         subscriptions_only.sort()
         messages_count = int((yield objs.Message.count({'user': username})))
+        comments_count = int((yield objs.Comment.count({'user': username})))
         self.set_header("Cache-Control", "max-age=10")
         defer.returnValue({
             'username': username,
             'user': user,
             'regdate': time.ctime(user['regdate']) if user else '',
             'messages_count': messages_count,
+            'comments_count': comments_count,
             'subscribers': subscribers_only,
             'subscriptions': subscriptions_only,
             'friends': friends,
@@ -239,14 +264,14 @@ class PostHandler(BnwWebHandler,AuthMixin):
             self.redirect('/p/'+msg_id)
             defer.returnValue('')
         else:
-            defer.returnValue(result.get('desc','Error'))
+            defer.returnValue({'error':result})
     @requires_auth
     @defer.inlineCallbacks
     def respond(self):
         user = yield self.get_auth_user()
         default_text = self.get_argument("url","")
         self.set_header("Cache-Control", "max-age=1")
-        defer.returnValue({ 'auth_user': user, 'default_text': default_text })
+        defer.returnValue({ 'auth_user': user, 'default_text': default_text, 'error':None })
 
 
 class CommentHandler(BnwWebHandler,AuthMixin):
@@ -273,7 +298,7 @@ class CommentHandler(BnwWebHandler,AuthMixin):
                 self.redirect(str(redirtarget))
                 defer.returnValue('')
         else:
-            defer.returnValue(result)
+            defer.returnValue({'error':result})
 
 class OexchangeHandler(BnwWebHandler):
     templatename='oexchange.xrd'
@@ -324,7 +349,7 @@ def get_site():
         (r"/p/([A-Z0-9]+)/?", MessageHandler),
         #(r"/p/([A-Z0-9]+)/ws", MessageWsHandler),
         (r"/u/([0-9a-z_-]+)/?", UserHandler),
-        (r"/u/([0-9a-z_-]+)/?", UserHandler),
+        (r"/u/([0-9a-z_-]+)/recommendations/?", UserRecoHandler),
         (r"/u/([0-9a-z_-]+)/avatar/?", AvatarHandler),
         (r"/u/([0-9a-z_-]+)/info/?", UserInfoHandler),
         (r"/u/([0-9a-z_-]+)/t/(.*)/?", UserHandler),
