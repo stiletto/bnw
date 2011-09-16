@@ -177,12 +177,12 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
               'message': message_id,
               'date': time.time(),
               'replyto': old_comment['id'] if old_comment else None,
-#              'depth': old_comment.get('depth',0)+1 if old_comment else 0,
               'num': message['replycount']+1,
               'replytotext': cropstring(old_comment['text'] if comment_id else message['text'],128),
               'text': ('@'+old_comment['user']+' 'if comment_id else '')+text,
               'anonymous': anon,
             }
+#              'depth': old_comment.get('depth',0)+1 if old_comment else 0,
     if anon:
         comment['real_user']=comment['user']
         comment['user']='anonymous'

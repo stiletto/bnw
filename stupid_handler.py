@@ -78,8 +78,6 @@ def iq(msg):
                     defer.returnValue(True)
             else:
                 defer.returnValue(False)
-        #except pymongo.errors.AutoReconnect:
-        #    defer.returnValue((yield 'Sorry, our database is down.'))
         except Exception:
             raise
             print ("Error while processing iq:\n\n"+\

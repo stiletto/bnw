@@ -1,3 +1,4 @@
+#!/ben/echo tac is a python source file, but should be started via twistd
 # coding: utf-8
 import sys
 import config
@@ -19,9 +20,11 @@ from twisted.words.protocols.jabber import component
 
 from twisted.web import resource, server, static, xmlrpc
 
-import bnw_component,bnw_core.base
+import bnw_core.base
 
-bnw_core.base.config=config
+bnw_core.base.config.register(config)
+
+import bnw_component
 
 application = service.Application("example-echo")
 

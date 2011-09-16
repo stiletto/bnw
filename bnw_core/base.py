@@ -2,6 +2,8 @@
 import random
 from twisted.internet import defer
 
+from delayed_global import DelayedGlobal
+
 idchars='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     
 def genid(idlen):
@@ -12,6 +14,8 @@ def cropstring(string,maxlen):
         
 def _(s,user):
     return s
+    
+config=DelayedGlobal('config')
             
 import txmongo
 from txmongo import gridfs

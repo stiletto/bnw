@@ -172,7 +172,7 @@ class BnwService(component.Service):
 
         """
         try:
-            if msg['type']!='chat' or str(msg.body) in ('','None'):
+            if msg['type']!='chat' or not msg.body:
                 return
         except KeyError: # somebody plz kick ma ass 4 dat
             return
