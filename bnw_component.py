@@ -104,7 +104,6 @@ class BnwService(component.Service):
         
         self.jabberId = xmlstream.authenticator.otherHost
         self.xmlstream = xmlstream # set the xmlstream so we can reuse it
-        bnw_xmpp.base.service=self # bakabakabaka
         
         xmlstream.addObserver(PRESENCE, self.onPresence, 1)
         xmlstream.addObserver(IQ, self.onIq, 1)

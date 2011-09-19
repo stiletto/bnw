@@ -15,7 +15,8 @@ def cropstring(string,maxlen):
 def _(s,user):
     return s
     
-config=DelayedGlobal('config')
+config = DelayedGlobal('config')
+#connection_class = DelayedGlobal('connection_class')
             
 import txmongo
 from txmongo import gridfs
@@ -34,7 +35,7 @@ def get_connection():
 def get_db(collection=None):
     global db
     if not db:
-        db=(yield get_connection()).bnw
+        db=(yield get_connection())[config.database]
     if collection is None:
         defer.returnValue(db)
     else:
@@ -49,7 +50,7 @@ def get_db_existing(collection=None):
 
 @defer.inlineCallbacks
 def get_fs(collection="fs"):
-    db = (yield get_connection()).bnw_fs
+    db = (yield get_connection())[config.database_fs]
     fs = gridfs.GridFS(db,collection=collection)
     defer.returnValue(fs)
 

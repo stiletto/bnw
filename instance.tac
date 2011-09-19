@@ -40,6 +40,10 @@ bnw_component.LogService().setServiceParent(sm)
 s = bnw_component.BnwService()
 s.setServiceParent(sm)
 
+import bnw_xmpp.base
+bnw_xmpp.base.service.register(s)
+
+
 serviceCollection = service.IServiceCollection(application)
 
 if config.fuck_enabled:

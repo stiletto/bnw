@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 from twisted.internet import defer, reactor
+from bnw_core.delayed_global import DelayedGlobal
 import bnw_core.base
 
 USER_RE=ur'[0-9A-Za-z_-]+'
@@ -46,7 +47,8 @@ class BaseCommand(object):
 class BaseParser(object):
     pass
 
-service=None
+service = DelayedGlobal('xmpp_service')
+
 def send_plain(dst,src,msg):
     reactor.callFromThread(service.send_plain, dst, src, msg)
     # instead of service.send_plain(dst,src,msg)

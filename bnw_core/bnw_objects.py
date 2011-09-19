@@ -2,7 +2,7 @@
 from base import get_db,get_db_existing
 from bnw_xmpp.base import send_plain
 from bnw_xmpp import deliver_formatters
-from twisted.internet import interfaces, defer
+from twisted.internet import defer
 #from bnw_xmpp.parser_redeye import requireAuthRedeye, formatMessage, formatComment
 #from bnw_xmpp.parser_simplified import requireAuthSimplified, formatMessageSimple, formatCommentSimple
 import txmongo,time
@@ -299,7 +299,7 @@ class User(MongoObject):
         namei=txmongo.filter.sort(txmongo.filter.ASCENDING("name"))
         _ = yield collection.create_index(namei, unique=True)
         defer.returnValue(None)
-        
+
 class Subscription(MongoObject):
     """ Сраная подписка. """
     collection_name = "subscriptions"
