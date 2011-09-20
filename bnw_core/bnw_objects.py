@@ -47,9 +47,14 @@ class CollectionWrapper(object):
 
 INDEX_TTL = 946080000 # one year. i don't think you will ever need to change this
 
+class MongoObjectCollectionProxy(type):
+    def __getattr__(self,mongo_method):
+        return getattr(self.collection,mongo_method)
+
 class MongoObject(WrappedDict):
     """ Обертка для куска говна хранящегося в бд.
     Это чтобы опечатки не убивали."""
+    __metaclass__ = MongoObjectCollectionProxy
     # any subclass MUST define "collection"
     # 
     dangerous_fields=('_id',)
@@ -110,8 +115,6 @@ class MongoObject(WrappedDict):
                 del msg[fld]
         return msg
 
-    def __getattr__(self,mongo_method):
-        return getattr(self.collection,mongo_method)
 
 class Message(MongoObject):
     """ Сообщение. Просто объект сообщения."""
