@@ -1,50 +1,11 @@
 # -*- coding: utf-8 -*-
-from base import get_db,get_db_existing
+from base import get_db
 from bnw_xmpp.base import send_plain
 from bnw_xmpp import deliver_formatters
 from twisted.internet import defer
 #from bnw_xmpp.parser_redeye import requireAuthRedeye, formatMessage, formatComment
 #from bnw_xmpp.parser_simplified import requireAuthSimplified, formatMessageSimple, formatCommentSimple
 import txmongo,time
-# TODO: suck cocks
-class LazyRelated(object):
-    """
-    \todo suck cocks """
-    def __getattr__(self, name):
-        cache=super(LazyRelated, self).getattr('_lazy_relations_cache')
-        relations=super(LazyRelated, self).getattr('_lazy_relations')
-        if name in relations:
-            if name in cache:
-                return cache[name]
-            else:
-                rel=relations[name]
-                obj=rel(self.__getattr__(name+'_id'))
-                cache[name]=obj
-                return obj
-        else:
-            return super(LazyRelated, self).__getattr__(name)
-    def __setattr__(self, name, value):
-        cache=super(LazyRelated, self).getattr('_lazy_relations_cache')
-        relations=super(LazyRelated, self).getattr('_lazy_relations')
-        if name in relations:
-            cache[name]=value
-            super(LazyRelated, self).__setattr__(name+"_id", value['id'])
-        if name.endswith('_id') and (name[:-3] in self._lazy_relations):
-            del cache[name[:-3]]
-            return super(LazyRelated, self).__setattr__(name, value)
-        else:
-            return super(LazyRelated, self).__setattr__(name, value)
-    def __delattr__(self, name, value):
-        cache=super(LazyRelated, self).getattr('_lazy_relations_cache')
-        relations=super(LazyRelated, self).getattr('_lazy_relations')
-        if name in relations:
-            del cache[name]
-            super(LazyRelated, self).__delattr__(name+'_id')
-        if name.endswith('_id') and (name[:-3] in self._lazy_relations):
-            del cache[name[:-3]]
-            super(LazyRelated, self).__delattr__(name)
-        else:
-            return super(LazyRelated, self).__delattr__(name)
 
 class WrappedDict(object):
     """Обертка для говна словаря содержащегося в поле doc."""
@@ -71,44 +32,34 @@ class WrappedDict(object):
     def __unicode__(self):
         return self.doc.__unicode__()
 
-class AdvancedWrappedDict(object):
-    """This is advanced version of WrappedDict and will sometime superseed it.
-    It isn't used anywhere now, so just skip to next class."""
-    def __getattr__(self, name):
-        sup=super(LazyRelated, self)
-        if sup.__hasattr__(name) or name=='doc':
-            return sup.__getattr__(name)
-        else:
-            return sup.__getattr__('doc').__getitem__(name)
-    def __setattr__(self, name, value):
-        sup=super(LazyRelated, self)
-        if sup.__hasattr__(name):
-            raise NotImplementedError()
-        elif name=='doc':
-            return sup.__setattr__(name, value)
-        else:
-            return sup.__getattr__('doc').__setitem__(name, value)
-    def __delattr__(self, name, value):
-        sup=super(LazyRelated, self)
-        if sup.__hasattr__(name) or name=='doc':
-            raise NotImplementedError()
-        else:
-            return sup.__getattr__('doc').__delitem__(name, value)
-    
+class CollectionWrapper(object):
+    def __init__(self,collection_name):
+        self.collection_name = collection_name
+
+    def __getattr__(self, db_method):
+        def fn(*args, **kwargs):
+            d = get_db(self.collection_name)
+            d.addCallback(
+                lambda collection:
+                    getattr(collection, db_method)(*args, **kwargs))
+            return d
+        return fn
 
 INDEX_TTL = 946080000 # one year. i don't think you will ever need to change this
+
 class MongoObject(WrappedDict):
     """ Обертка для куска говна хранящегося в бд.
     Это чтобы опечатки не убивали."""
-    # any subclass MUST define "collection_name"
+    # any subclass MUST define "collection"
     # 
     dangerous_fields=('_id',)
+    indexes = (
+        (txmongo.filter.ASCENDING("id"), True, False),
+    )
+
     def __init__(self, src=None):
-        self.collection=get_db_existing(self.collection_name)
         if type(src)==str:
-            #_ = yield self.collection.ensure_index('id', ttl=INDEX_TTL, unique=True)
-            #self.doc=yield self.collection.find_one({'id':src.lower()})
-            raise NotImplementedError('sorry, i can''t load document because there is no way to defer __init__ T_T')
+            raise NotImplementedError('WUT')
         elif type(src)==dict:
             self.doc=src
         else:
@@ -116,69 +67,42 @@ class MongoObject(WrappedDict):
     
     @classmethod
     @defer.inlineCallbacks
-    def find_one(self, *args,**kwargs):
-        db=(yield get_db())
-        res=yield db[self.collection_name].find_one(*args,**kwargs)
-        defer.returnValue(None if (not res) else self(res))
-        
-    @classmethod
-    @defer.inlineCallbacks
-    def find(self, *args,**kwargs):
-        db=(yield get_db())
-        res=yield db[self.collection_name].find(*args,**kwargs)
-        defer.returnValue(self(doc) for doc in res)  # wrap all documents in our class
-    @classmethod
-    @defer.inlineCallbacks
-    def count(self, *args,**kwargs):
-        db=(yield get_db())
-        res=yield db[self.collection_name].count(*args,**kwargs)
-        defer.returnValue(res)  # return raw result
-
+    def find_one(cls, *args,**kwargs):
+        res=yield cls.collection.find_one(*args,**kwargs)
+        defer.returnValue(None if (not res) else cls(res))
 
     @classmethod
     @defer.inlineCallbacks
-    def find_sort(self, spec,sort,**kwargs):
-        db=(yield get_db())
-        res=yield db[self.collection_name].find(spec,filter=txmongo.filter.sort(sort),**kwargs)
-        defer.returnValue(self(doc) for doc in res)  # wrap all documents in our class
+    def find(cls, *args,**kwargs):
+        res=yield cls.collection.find(*args,**kwargs)
+        defer.returnValue(cls(doc) for doc in res)  # wrap all documents in our class
 
     @classmethod
     @defer.inlineCallbacks
-    def remove(self, *args,**kwargs):
-        db=(yield get_db())
-        res=yield db[self.collection_name].remove(*args,**kwargs)
-        defer.returnValue(res)
+    def find_sort(cls, spec,sort,**kwargs):
+        res=yield cls.collection.find(spec,filter=txmongo.filter.sort(sort),**kwargs)
+        defer.returnValue(cls(doc) for doc in res)  # wrap all documents in our class
 
     @classmethod
-    @defer.inlineCallbacks
-    def mupdate(self, spec, document, *args,**kwargs):
-        db=(yield get_db())
+    def mupdate(cls, spec, document, *args,**kwargs):
         if not isinstance(document,dict):
             document=document.doc
-        res=yield db[self.collection_name].update(spec,document,*args,**kwargs)
-        defer.returnValue(res)
+        return cls.collection.update(spec,document,*args,**kwargs)
 
     @defer.inlineCallbacks
-    def save(self,safe=True):
-        #print self.collection,type(self.collection)
-        id=yield (self.collection.save(self.doc,safe=safe))
-        self.doc['_id']=id
+    def save(cls,safe=True):
+        #print cls.collection,type(cls.collection)
+        id=yield (cls.collection.save(cls.doc,safe=safe))
+        cls.doc['_id']=id
         defer.returnValue(id)
 
     @classmethod
     @defer.inlineCallbacks
-    def map_reduce(self,*args,**kwargs):
-        db=(yield get_db())
-        defer.returnValue((yield db[self.collection_name].map_reduce(*args,**kwargs)))
-
-    @classmethod
-    @defer.inlineCallbacks
-    def ensure_indexes(self):
-        collection=(yield get_db())[self.collection_name]
-        #_ = yield collection.create_index('id', unique=True)
-        idi=txmongo.filter.sort(txmongo.filter.ASCENDING("id"))
-        _ = yield collection.create_index(idi, unique=True)
+    def ensure_indexes(cls):
+        for idi, unique, drop_dups in cls.indexes:
+            _ = yield cls.collection.create_index(txmongo.filter.sort(idi), unique=unique, dropDups=drop_dups)
         defer.returnValue(None)
+
     def filter_fields(self):
         msg=self.doc.copy()
         for fld in self.dangerous_fields:
@@ -186,10 +110,22 @@ class MongoObject(WrappedDict):
                 del msg[fld]
         return msg
 
+    def __getattr__(self,mongo_method):
+        return getattr(self.collection,mongo_method)
+
 class Message(MongoObject):
     """ Сообщение. Просто объект сообщения."""
-    collection_name = "messages"
+    collection = CollectionWrapper("messages")
     dangerous_fields = ('_id','real_user')
+    indexes = MongoObject.indexes + (
+        (txmongo.filter.DESCENDING("date"), False, False), 
+        
+        (txmongo.filter.DESCENDING("user") + txmongo.filter.DESCENDING("tags") + txmongo.filter.DESCENDING("date"),
+            False, False),
+        (txmongo.filter.DESCENDING("user") + txmongo.filter.DESCENDING("date"), False, False),
+        (txmongo.filter.DESCENDING("user") + txmongo.filter.DESCENDING("clubs") + txmongo.filter.DESCENDING("date"), False, False),
+        (txmongo.filter.DESCENDING("date") + txmongo.filter.DESCENDING("recommendations"), False, False),
+    )
 
     @defer.inlineCallbacks
     def deliver(self,target,recommender=None,recocomment=None,sfrom=None):
@@ -218,47 +154,22 @@ class Message(MongoObject):
         else:
             defer.returnValue(0)
 
-    @classmethod
-    @defer.inlineCallbacks
-    def ensure_indexes(self):
-        collection=(yield get_db())[self.collection_name]
-        idi=txmongo.filter.sort(txmongo.filter.ASCENDING("id"))
-        _ = yield collection.create_index(idi, unique=True)
-
-        datei = txmongo.filter.sort(txmongo.filter.DESCENDING("date"))
-        _ = yield collection.create_index(datei)
-
-        tagi = txmongo.filter.sort(txmongo.filter.DESCENDING("user")+txmongo.filter.DESCENDING("tags")+txmongo.filter.DESCENDING("date"))
-        _ = yield collection.create_index(tagi)
-
-        useri = txmongo.filter.sort(txmongo.filter.DESCENDING("user")+txmongo.filter.DESCENDING("date"))
-        _ = yield collection.create_index(useri)
-
-        clubi = txmongo.filter.sort(txmongo.filter.DESCENDING("user")+txmongo.filter.DESCENDING("clubs")+txmongo.filter.DESCENDING("date"))
-        _ = yield collection.create_index(clubi)
-
-        recoi = txmongo.filter.sort(txmongo.filter.DESCENDING("date") + txmongo.filter.DESCENDING("recommendations"))
-        _ = yield collection.create_index(recoi)
-
-        defer.returnValue(None)
-
 class FeedElement(MongoObject):
     """ Элемент ленты. 
         id: id сообщения
         user: пользователь-обладатель ленты."""
-    collection_name = "feeds"
-    @classmethod
-    @defer.inlineCallbacks
-    def ensure_indexes(self):
-        collection=(yield get_db())[self.collection_name]
-        idi=txmongo.filter.sort(txmongo.filter.ASCENDING("message")+txmongo.filter.ASCENDING("user"))
-        _ = yield collection.create_index(idi, unique=False)
-        defer.returnValue(None)
-    
+    collection = CollectionWrapper("feeds")
+    indexes = (
+        (txmongo.filter.ASCENDING("message")+txmongo.filter.ASCENDING("user"), False, False),
+    )
+
 class Comment(MongoObject):
     """ Объект комментария."""
-    collection_name = "comments"
+    collection = CollectionWrapper("comments")
     dangerous_fields = ('_id','real_user')
+    indexes = MongoObject.indexes + (
+        (txmongo.filter.ASCENDING("message"), False, False),
+    )
 
     def deliver(self,target,recommender=None,recocomment=None,sfrom=None):
         if not target.get('off',False):
@@ -270,105 +181,60 @@ class Comment(MongoObject):
             return 1 #defer.returnValue(1)
         else:
             return 0
-    @classmethod
-    @defer.inlineCallbacks
-    def ensure_indexes(self):
-        collection=(yield get_db())[self.collection_name]
-
-        idi=txmongo.filter.sort(txmongo.filter.ASCENDING("id"))
-        _ = yield collection.create_index(idi, unique=True)
-
-        msgi=txmongo.filter.sort(txmongo.filter.ASCENDING("message"))
-        _ = yield collection.create_index(msgi)
-
-        defer.returnValue(None)
 
 class User(MongoObject):
     """ Няшка-пользователь."""
-    collection_name = "users"
+    collection = CollectionWrapper("users")
     dangerous_fields=('_id','login_key','avatar','jid','jids','pending_jids','id','settings')
+    indexes = (
+        (txmongo.filter.ASCENDING("name"), True, False),
+    )
+    
     def send_plain(self,message,sfrom=None):
         if self['jid']:
             send_plain(self['jid'],sfrom,message)
 
-    @classmethod
-    @defer.inlineCallbacks
-    def ensure_indexes(self):
-        collection=(yield get_db())[self.collection_name]
-
-        namei=txmongo.filter.sort(txmongo.filter.ASCENDING("name"))
-        _ = yield collection.create_index(namei, unique=True)
-        defer.returnValue(None)
-
 class Subscription(MongoObject):
     """ Сраная подписка. """
-    collection_name = "subscriptions"
-
-    @classmethod
-    @defer.inlineCallbacks
-    def ensure_indexes(self):
-        collection=(yield get_db())[self.collection_name]
-
-        typei=txmongo.filter.sort(txmongo.filter.ASCENDING("user")+txmongo.filter.ASCENDING("type"))
-        _ = yield collection.create_index(typei)#, unique=True)
-        targi=txmongo.filter.sort(txmongo.filter.ASCENDING("target")+txmongo.filter.ASCENDING("type"))
-        _ = yield collection.create_index(targi)#, unique=True)
-        defer.returnValue(None)
+    collection = CollectionWrapper("subscriptions")
+    indexes = (
+        (txmongo.filter.ASCENDING("user")+txmongo.filter.ASCENDING("type"), False, False),
+        (txmongo.filter.ASCENDING("target")+txmongo.filter.ASCENDING("type"), False, False),
+    )
 
     def is_remote(self):
         return '@' in self['target']
 
 class GlobalState(MongoObject):
     """ Всякие глобальные переменные."""
-    collection_name = "globalstate"
-    @classmethod
-    @defer.inlineCallbacks
-    def ensure_indexes(self):
-        collection=(yield get_db())[self.collection_name]
-
-        namei=txmongo.filter.sort(txmongo.filter.ASCENDING("name"))
-        _ = yield collection.create_index(namei, unique=True)
-        defer.returnValue(None)
+    collection = CollectionWrapper("globalstate")
+    indexes = (
+        (txmongo.filter.ASCENDING("name"), True, False),
+    )
 
 class Club(MongoObject):
     """ Клуб в выхлопе мап-редьюса."""
-    collection_name = "clubs"
-    @classmethod
-    def ensure_indexes(self):
-        pass
+    collection = CollectionWrapper("clubs")
+    indexes = ()
 
 class Tag(MongoObject):
     """ Клуб в выхлопе мап-редьюса."""
-    collection_name = "tags"
-    @classmethod
-    def ensure_indexes(self):
-        pass
+    collection = CollectionWrapper("tags")
+    indexes = ()
 
 class Today(MongoObject):
     """ Обсуждаемый сегодня пост в выхлопе мап-редьюса."""
-    collection_name = "today"
-    @classmethod
-    def ensure_indexes(self):
-        pass
+    collection = CollectionWrapper("today")
+    indexes = ()
 
 class Timing(MongoObject):
     """ Время выполнения."""
-    collection_name = "timings"
-    @classmethod
-    def ensure_indexes(self):
-        pass
+    collection = CollectionWrapper("timings")
+    indexes = ()
 
 class Throttle(MongoObject):
     """ Троттлинг."""
-    collection_name = "post_throttle"
-    @classmethod
-    @defer.inlineCallbacks
-    def ensure_indexes(self):
-        collection=(yield get_db())[self.collection_name]
-        
-        namei=txmongo.filter.sort(txmongo.filter.ASCENDING("user"))
-        _ = yield collection.create_index(namei, unique=True)
-        
-        defer.returnValue(None)
-
-
+    collection = CollectionWrapper("post_throttle")
+    indexes = (
+        (txmongo.filter.ASCENDING("user"), True, False),
+    )
