@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from datetime import *
-import xapian
 
 import sys
 sys.path.append('..')
