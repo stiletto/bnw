@@ -27,14 +27,15 @@ def create_document(message):
     a unique article identifier."""
 
     doc = xapian.Document()
-    text = message['text']#.encode("utf8")
+    text = message['text']
 
     # go word by word, stem it and add to the
     # document.
     for index, term in enumerate(WORD_RE.finditer(text)):
-        doc.add_posting(
-          stemmer(term.group()),
-          index)
+        tg = term.group().encode("utf-8")
+        st = stemmer(tg)
+        print tg, st
+        doc.add_posting(st, index)
     doc.add_term("A"+message['user'])
     doc.set_data(text)
     #doc.add_term("S"+message['article.subject.encode("utf8"))
@@ -44,12 +45,14 @@ def create_document(message):
     return doc, article_id_term
 
 @defer.inlineCallbacks
-def index(db,period):
+def index(db,period,force=False):
     """Index all articles that were modified
     in the last <period> hours into the given
     Xapian database"""
 
-    query = {'indexed': {'$ne': 1}}
+    query = {}
+    if not force:
+        query['indexed'] = {'$ne': 1}
     if period:
         start = time.time()-3600*period
         query['date']= { '$gte': start}
@@ -73,6 +76,9 @@ def index(db,period):
 
 if __name__=="__main__":
     #configfile, dbpath, period = sys.argv[1:]
+    import config
+    import bnw_core.base
+    bnw_core.base.config.register(config)
     db = xapian.WritableDatabase('test/',
         xapian.DB_CREATE_OR_OPEN)
     index(db, 10000)

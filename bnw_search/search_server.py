@@ -41,11 +41,12 @@ class BnwSearchService(xmlrpc.XMLRPC):
         self.stemmer = xapian.Stem(self.language)
         self.query_parser = xapian.QueryParser()
         self.query_parser.set_stemmer(self.stemmer)
+        self.query_parser.set_stemming_strategy(xapian.QueryParser.STEM_ALL)
         
     def xmlrpc_search(self,query):
         print "Received msg:", query
         if type(query)!=unicode: query = unicode(query,'utf-8','replace')
-        query = self.query_parser.parse_query(query.encode('utf-8','replace'))
+        query = self.query_parser.parse_query(query.encode('utf-8','replace'),xapian.QueryParser.FLAG_PHRASE|xapian.QueryParser.FLAG_PHRASE)
         retry = True
         enquire = xapian.Enquire(self.database)
         while retry:
