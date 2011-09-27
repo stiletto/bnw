@@ -40,4 +40,4 @@
         {{ modules.Message(msg) }}
     {% end %}
 {% end %}
-{% block footerrow %}{% if page>0 %}<a class='pagelink' href='?page={{ page-1 }}'>&lt;&lt; Позже</a> -- {% end %}{% if hasmes %}<a class='pagelink' href='?page={{ page+1 }}'> Раньше &gt;&gt;</a>{% end %}{% end %}
+{% block footerrow %}{% if page>0 %}<a class='pagelink' href='?page={{ page-1 }}' rel='prev'>&lt;&lt; Позже</a> -- {% end %}{% if hasmes %}<a class='pagelink' href='?page={{ page+1 }}' rel='next'> Раньше &gt;&gt;</a>{% end %}{% end %}

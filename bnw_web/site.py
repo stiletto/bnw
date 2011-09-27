@@ -45,6 +45,8 @@ class MessageHandler(BnwWebHandler,AuthMixin):
         msg=(yield objs.Message.find_one({'id': msgid}))
         comments=list((yield objs.Comment.find({'message': msgid},filter=f))) # ненавидь себя, сука
         self.set_header("Cache-Control", "max-age=5")
+        if not msg:
+            self.set_status(404)
         defer.returnValue({
             'msgid': msgid,
             'msg': msg,
