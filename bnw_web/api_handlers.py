@@ -1,21 +1,21 @@
 
-from bnw_xmpp import command_clubs
-from bnw_xmpp import command_delete
-from bnw_xmpp import command_except
-from bnw_xmpp import command_help
-from bnw_xmpp import command_interface
-from bnw_xmpp import command_login
-from bnw_xmpp import command_onoff
-from bnw_xmpp import command_ping
-from bnw_xmpp import command_pm
-from bnw_xmpp import command_search
-from bnw_xmpp import command_post
-from bnw_xmpp import command_register
-from bnw_xmpp import command_show
-from bnw_xmpp import command_subscription
-from bnw_xmpp import command_vcard
-from bnw_xmpp import command_userlist
-from bnw_xmpp import command_bl
+from bnw_handlers import command_clubs
+from bnw_handlers import command_delete
+from bnw_handlers import command_except
+from bnw_handlers import command_help
+from bnw_handlers import command_interface
+from bnw_handlers import command_login
+from bnw_handlers import command_onoff
+from bnw_handlers import command_ping
+from bnw_handlers import command_pm
+from bnw_handlers import command_search
+from bnw_handlers import command_post
+from bnw_handlers import command_register
+from bnw_handlers import command_show
+from bnw_handlers import command_subscription
+from bnw_handlers import command_vcard
+from bnw_handlers import command_userlist
+from bnw_handlers import command_bl
 
 handlers = {
     "register":             command_register.cmd_register,

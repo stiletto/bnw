@@ -28,8 +28,8 @@ import bnw_core.bnw_objects as objs
 import bnw_core.post as post
 import bnw_core.base
 from bnw_core.base import get_db,get_fs
-from bnw_xmpp.command_show import cmd_feed,cmd_today
-from bnw_xmpp.command_clubs import cmd_clubs,cmd_tags
+from bnw_handlers.command_show import cmd_feed,cmd_today
+from bnw_handlers.command_clubs import cmd_clubs,cmd_tags
 
 from base import BnwWebHandler, TwistedHandler, BnwWebRequest
 from auth import LoginHandler, requires_auth, AuthMixin

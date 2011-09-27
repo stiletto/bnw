@@ -1,4 +1,4 @@
-#!/ben/echo tac is a python source file, but should be started via twistd
+#!/bin/echo tac is a python source file, but should be started via twistd
 # coding: utf-8
 import sys
 import config
@@ -22,7 +22,7 @@ import bnw_core.base
 
 bnw_core.base.config.register(config)
 
-import bnw_component
+from bnw_xmpp import bnw_component
 
 application = service.Application("example-echo")
 

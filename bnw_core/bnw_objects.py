@@ -3,8 +3,6 @@ from base import get_db
 from bnw_xmpp.base import send_plain
 from bnw_xmpp import deliver_formatters
 from twisted.internet import defer
-#from bnw_xmpp.parser_redeye import requireAuthRedeye, formatMessage, formatComment
-#from bnw_xmpp.parser_simplified import requireAuthSimplified, formatMessageSimple, formatCommentSimple
 import txmongo,time
 
 class WrappedDict(object):

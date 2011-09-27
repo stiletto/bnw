@@ -10,7 +10,7 @@ class TestImport(unittest.TestCase):
         import bnw_core.post
 
     def test_global(self):
-        import bnw_component
+        import bnw_xmpp.bnw_component
 
     def test_xmpp(self):
         import bnw_xmpp.base

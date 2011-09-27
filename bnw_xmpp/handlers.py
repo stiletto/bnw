@@ -4,27 +4,27 @@
 from parser_redeye import RedEyeParser
 from parser_regex import RegexParser
 
-import command_alias
-import command_bl
-import command_clubs
-import command_delete
-import command_except
-import command_help
-import command_interface
-import command_jids
-import command_login
-import command_onoff
-import command_ping
-import command_pm
-import command_search
-import command_post
-import command_register
-import command_settings
-import command_show
-import command_subscription
-import command_vcard
-import command_userlist
-import command_update
+from bnw_handlers import command_alias
+from bnw_handlers import command_bl
+from bnw_handlers import command_clubs
+from bnw_handlers import command_delete
+from bnw_handlers import command_except
+from bnw_handlers import command_help
+from bnw_handlers import command_interface
+from bnw_handlers import command_jids
+from bnw_handlers import command_login
+from bnw_handlers import command_onoff
+from bnw_handlers import command_ping
+from bnw_handlers import command_pm
+from bnw_handlers import command_search
+from bnw_handlers import command_post
+from bnw_handlers import command_register
+from bnw_handlers import command_settings
+from bnw_handlers import command_show
+from bnw_handlers import command_subscription
+from bnw_handlers import command_vcard
+from bnw_handlers import command_userlist
+from bnw_handlers import command_update
 import formatters_redeye
 import formatters_simple
 

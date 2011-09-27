@@ -1,13 +1,12 @@
 # coding: utf-8
-import bnw_xmpp
-from bnw_xmpp.base import CommandParserException, XmppMessage
-import bnw_core.bnw_objects as objs
-import pymongo
 import traceback
-import bnw_xmpp.handlers
-import bnw_xmpp.iq_handlers
 from twisted.internet import defer
 from twisted.internet.defer import _DefGen_Return
+
+import bnw_core.bnw_objects as objs
+from base import CommandParserException, XmppMessage
+import handlers
+import iq_handlers
 
 @defer.inlineCallbacks
 def idiotic(msg):
@@ -30,7 +29,7 @@ def idiotic(msg):
                 s2s_type = bnw_s2s['type']
             except KeyError:
                 s2s_type = None
-            handler = bnw_xmpp.handlers.s2s_handlers.get(s2s_type)
+            handler = handlers.s2s_handlers.get(s2s_type)
             if not handler:
                 print 'NO HANDLER FOR THIS TYPE (%s)' % (s2s_type)
             else:
@@ -50,7 +49,7 @@ def idiotic(msg):
             if message_user:
                 if 'interface' in message_user:
                     iparser=message_user['interface']
-            defer.returnValue((yield bnw_xmpp.handlers.parsers[iparser].handle(xmsg)))
+            defer.returnValue((yield handlers.parsers[iparser].handle(xmsg)))
         except CommandParserException, exc:
             defer.returnValue((yield exc.args[0]))
         #except pymongo.errors.AutoReconnect:
@@ -73,7 +72,7 @@ def iq(msg):
             iq_user=(yield objs.User.find_one({'jids':iq_bare_from.lower()}))
             if not iq_user:
                 iq_user=(yield objs.User.find_one({'jid':iq_bare_from.lower()}))
-            for handler in bnw_xmpp.iq_handlers.handlers:
+            for handler in iq_handlers.handlers:
                 if (yield handler(msg,iq_user)):
                     defer.returnValue(True)
             else:
