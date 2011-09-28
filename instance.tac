@@ -12,15 +12,18 @@ root=path.abspath(path.dirname(__file__))
 sys.path.append(root)
 sys.path.insert(0,path.join(root,'txWebSocket'))
 
-from twisted.application import service,internet
 
-from twisted.words.protocols.jabber import component
-
-from twisted.web import resource, server, static, xmlrpc
+if True or config.webui_enabled:
+    import tornado.platform.twisted
+    tornado.platform.twisted.install()
 
 import bnw_core.base
-
 bnw_core.base.config.register(config)
+
+from twisted.application import service,internet
+from twisted.words.protocols.jabber import component
+from twisted.web import resource, server, static, xmlrpc
+
 
 from bnw_xmpp import bnw_component
 
@@ -51,6 +54,8 @@ if config.fuck_enabled:
 
 if config.webui_enabled:
     import bnw_web.site
-    internet.TCPServer(config.webui_port, bnw_web.site.get_site(), interface="127.0.0.1"
-                       ).setServiceParent(serviceCollection)                   
-    sm.setServiceParent(serviceCollection)
+    http_server = bnw_web.site.get_site()
+    http_server.listen(config.webui_port,"127.0.0.1")
+    #internet.TCPServer(config.webui_port, bnw_web.site.get_site(), interface="127.0.0.1"
+    #                   ).setServiceParent(serviceCollection)                   
+    #sm.setServiceParent(serviceCollection)

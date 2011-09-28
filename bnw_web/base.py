@@ -70,12 +70,14 @@ class BnwWebHandler(TwistedHandler):
             try:
                 self.render(self.templatename,**text)
             except Exception, e:
+                handlerclass=self.__class__.__name__
                 self.set_status(500)
-                self.render(self.errortemplate,text=traceback.format_exc())
+                self.render(self.errortemplate,text=traceback.format_exc(),handlerclass=handlerclass)
         else:
             super(BnwWebHandler,self).writeandfinish(text)
 
     def errorfinish(self,text):
         text=text.getTraceback()
+        handlerclass=self.__class__.__name__
         self.set_status(500)
-        self.render(self.errortemplate,text=text)
+        self.render(self.errortemplate,text=text,handlerclass=handlerclass)

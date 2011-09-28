@@ -7,7 +7,7 @@ from twisted.web.server import Site, NOT_DONE_YET
 from twisted.web.resource import Resource, NoResource
 
 import tornado.options
-import tornado.twister
+import tornado.httpserver
 import tornado.web
 import tornado.escape
 import logging,traceback
@@ -19,7 +19,7 @@ from widgets import widgets
 import uimodules
 import rss
 import base64
-import websocket_site
+#import websocket_site
 from datetime import datetime
 
 from tornado.options import define, options
@@ -54,24 +54,25 @@ class MessageHandler(BnwWebHandler,AuthMixin):
             'comments': comments,
         })
 
-class MessageWsHandler(websocket_site.RoutedWebSocketHandler):
-    def openSocket(self,msgid):
-        self.etype='comments-'+msgid
-        post.register_listener(self.etype,id(self),self.deliverComment)
-        print 'Opened connection %d' % id(self)
-    def deliverComment(self,comment):
-        print 'Delivered comment.',comment
-        self.write(json.dumps(comment))
-    def connectionLost(self,reason):
-        post.unregister_listener(self.etype,id(self))
-        print 'Closed connection %d' % id(self)
+#class MessageWsHandler(websocket_site.RoutedWebSocketHandler):
+#    def openSocket(self,msgid):
+#        self.etype='comments-'+msgid
+#        post.register_listener(self.etype,id(self),self.deliverComment)
+#        print 'Opened connection %d' % id(self)
+#    def deliverComment(self,comment):
+#        print 'Delivered comment.',comment
+#        self.write(json.dumps(comment))
+#    def connectionLost(self,reason):
+#        post.unregister_listener(self.etype,id(self))
+#        print 'Closed connection %d' % id(self)
 
 
 def get_page(self):
-    ra = self.request.args
+    ra = self.request.arguments
     rv = ra.get('page',['0'])[0]
     if rv.isdigit():
-        return int(rv)
+        rv=int(rv)
+        return rv if isinstance(rv,int) else 0 # no long here
     return 0
 
 class UserHandler(BnwWebHandler,AuthMixin):
@@ -345,6 +346,7 @@ def get_site():
         "xsrf_cookies": True,
         "static_path":  os.path.join(os.path.dirname(__file__), "static"),
         "ui_modules": uimodules,
+        "autoescape": None,
     }
     application = tornado.web.Application([
 #        (r"/posts/(.*)", MessageHandler),
@@ -370,12 +372,15 @@ def get_site():
         (r"/api/([0-9a-z/]*)/?", ApiHandler),
     ],**settings)
 
-    ws_application = websocket_site.WebSocketApplication([
-        (r"/p/([A-Z0-9]+)/?", MessageWsHandler),
-    ])
+    #ws_application = websocket_site.WebSocketApplication([
+    #    (r"/p/([A-Z0-9]+)/?", MessageWsHandler),
+    #])
     #site = tornado.twister.TornadoSite(application)
-    site = websocket_site.CombinedSite(application,ws_application)
-    return site
+    http_server = tornado.httpserver.HTTPServer(application)
+    #http_server.listen(options.port)
+        
+    #site = websocket_site.CombinedSite(application,ws_application)
+    return http_server
 
 def main():
     tornado.options.parse_command_line()
