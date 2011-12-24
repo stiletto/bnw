@@ -158,19 +158,66 @@
                 }
             }
             comment_reply();
-            
-            
+
+
             add_message_actions();
+
+            var favicon_changed = false;
+            $(window).focus(function () {
+                if (favicon_changed) {
+                    favicon.change(webui_base+"favicon.ico");
+                    favicon_changed = false;
+                }
+            });
             
-            var ws = new WebSocket(websocket_base+window.location.pathname);
-            ws.onmessage = function (e) {
-                var d=JSON.parse(e.data);
-                var new_comment=$("<div class='comment'>").text(d.text);
-                var addinfo=$("<div>").text("#"+d['id']+" / @"+d['user']);
-                if (d['replyto'])
-                    addinfo.append(' --> '+d['replyto']);
-                new_comment.append(addinfo);
-                $("div.comments").append($("<div class='outerborder'>").append(new_comment));
-            };
+
+            var ws_addr = websocket_base+window.location.pathname+'/ws';
+            var ws;
+            var ws_double_fail = false
+            function openws() {
+                if ("WebSocket" in window) {
+                    ws = new WebSocket(ws_addr);
+                } else {
+                    ws = new MozWebSocket(ws_addr);
+                }
+
+                ws.onopen = function () {
+                    if (ws_double_fail)
+                        $("#ws_status").text("WS Active (again)");
+                    else
+                        $("#ws_status").text("WS Active");
+                    ws_double_fail = false;
+                }
+                ws.onclose = function () {
+                    $("#ws_status").text("WS Closed");
+                    reopenws();
+                }
+                ws.onerror = function () {
+                    $("#ws_status").text("WS Error");
+                    reopenws();
+                }
+                ws.onmessage = function (e) {
+                    var d=JSON.parse(e.data);
+                    var new_comment=$("<div class='comment'>").text(d.text);
+                    var addinfo=$("<div>").text("#"+d['id']+" / @"+d['user']);
+                    if (d['replyto'])
+                        addinfo.append(' --> '+d['replyto']);
+                    new_comment.append(addinfo);
+                    $("div.comments").append($("<div class='outerborder'>").append(new_comment));
+                    if (!favicon_changed) {
+                        favicon.change(webui_base+"static/favicon-event.ico");
+                        favicon_changed = true;
+                    }
+                }
+                
+                return ws;
+            }
+            function reopenws() {
+                if (!ws_double_fail) {
+                    ws_double_fail = true;
+                    openws();
+                }
+            }
+            openws();
             
         });

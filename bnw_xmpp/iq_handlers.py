@@ -7,6 +7,7 @@ from twisted.internet import defer
 import base64
 from txmongo import gridfs
 import bnw_core.base
+import bnw_core.bnw_mongo
 from bnw_core import bnw_objects as objs
 
 @defer.inlineCallbacks
@@ -29,7 +30,7 @@ def vcard_getav(iq,iq_user):
             defer.returnValue( True )
         if len(decoded)>32768: # check decoded size
             defer.returnValue( True )
-        fs = yield bnw_core.base.get_fs('avatars')
+        fs = yield bnw_core.bnw_mongo.get_fs('avatars')
         extension = mimetype.split('/')[1]
         
         avid=fs.put(decoded,

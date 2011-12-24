@@ -110,7 +110,7 @@ def cmd_today(request):
         result = yield objs.Comment.map_reduce(TODAY_MAP,TODAY_REDUCE,out='today',query={'date':{'$gte':start}})
     if (not rebuild) or result:
         postids = list(x['_id'] for x in (yield objs.Today.find_sort({},[('value',-1)],limit=20)))
-        dbposts = dict((x['id'],x.doc) for x in (yield objs.Message.find({'id':{'$in':postids}})))
+        dbposts = dict((x['id'],x.filter_fields()) for x in (yield objs.Message.find({'id':{'$in':postids}})))
         messages = [dbposts[x] for x in postids]
         messages.reverse()
         defer.returnValue(

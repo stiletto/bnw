@@ -18,7 +18,7 @@ function login_login() {
         dataType:'json',
         success: function (data) { 
             if (data.ok) {
-                 $.cookie("bnw_loginkey",data.desc,{ expires: 30 });
+                 window.location = '/login?key='+data.desc;
                  $("#dlg_outer").css("display","none");
             } else {
                  $("#login_progress").text(data.desc+"\n");

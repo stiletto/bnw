@@ -42,15 +42,18 @@ s = bnw_component.BnwService()
 s.setServiceParent(sm)
 
 import bnw_xmpp.base
+import bnw_xmpp.xmpp_notifier
 bnw_xmpp.base.service.register(s)
+bnw_core.base.notifiers.add(bnw_xmpp.xmpp_notifier.XmppNotifier())
 
 
 serviceCollection = service.IServiceCollection(application)
 
+sm.setServiceParent(serviceCollection)
+
 if config.fuck_enabled:
     internet.TCPServer(config.fuck_port, server.Site(s.getResource()), interface="127.0.0.1"
                        ).setServiceParent(serviceCollection)
-    sm.setServiceParent(serviceCollection)
 
 if config.webui_enabled:
     import bnw_web.site

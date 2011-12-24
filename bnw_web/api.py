@@ -13,7 +13,6 @@ from escape import linkify
 import bnw_core.bnw_objects as objs
 import bnw_core.post as post
 import bnw_core.base
-from bnw_core.base import get_db,get_fs
 from bnw_handlers.command_show import cmd_feed
 
 from base import BnwWebHandler, TwistedHandler, BnwWebRequest
@@ -46,7 +45,7 @@ class ApiHandler(BnwWebHandler):
         if not (cmd_name in api_handlers.handlers):
             defer.returnValue('{ok: False, desc: "command unknown"}')
         handler = api_handlers.handlers[cmd_name]
-        args = dict((utf8(k),_unicode(v[0])) for k,v in self.request.args.iteritems())
+        args = dict((utf8(k),_unicode(v[0])) for k,v in self.request.arguments.iteritems())
         if 'login' in args:
             del args['login']
         req = ApiRequest('',None,user)

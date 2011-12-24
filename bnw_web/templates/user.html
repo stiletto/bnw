@@ -3,6 +3,7 @@
 {% block extrahead %}
     <link rel="alternate" type="application/rss+xml" title="Поток сознания @{{ username }}" href="/u/{{ username }}/?format=rss" />
 {% end %}
+{% block body_extraclass %}hfeed{% end %}
 {% block body %}
 {% if not user %}
     <div id="err_outer">

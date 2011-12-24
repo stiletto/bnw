@@ -4,7 +4,6 @@
 import random
 import datetime
 import bnw_core.base
-gc = bnw_core.base.gc
 
 formatters = {
     'comment': None,
@@ -22,7 +21,7 @@ def format_message(msg,short=False):
              'clubs': ' '.join('!'+tag for tag in msg['clubs']),
              'rc':    msg['replycount'],
              'text':  msg['text'],
-             'web': gc('webui_base'),
+             'web': bnw_core.base.config.webui_base,
            }
     return result
     
@@ -35,7 +34,7 @@ def format_comment(msg,short=False):
               'rc':    msg.get('num',-1),
               'text':  msg['text'],
               'date':  datetime.datetime.utcfromtimestamp(msg['date']).strftime('%d.%m.%Y %H:%M:%S'),
-              'web': gc('webui_base'),
+              'web': bnw_core.base.config.webui_base,
          }
     formatstring=('' if short else 'Reply by ')+ '@%(author)s:\n'
     if not short:

@@ -16,6 +16,7 @@ from bnw_handlers import command_subscription
 from bnw_handlers import command_vcard
 from bnw_handlers import command_userlist
 from bnw_handlers import command_bl
+from bnw_handlers import command_stat
 
 handlers = {
     "register":             command_register.cmd_register,
@@ -40,4 +41,5 @@ handlers = {
     "tags":                 command_clubs.cmd_tags,
     "passlogin":            command_login.cmd_passlogin,
     "blacklist":            command_bl.cmd_blacklist,
+    "stat":                 command_stat.cmd_stat,
 }

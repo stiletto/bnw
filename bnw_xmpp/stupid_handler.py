@@ -49,19 +49,21 @@ def idiotic(msg):
             if message_user:
                 if 'interface' in message_user:
                     iparser=message_user['interface']
-            defer.returnValue((yield handlers.parsers[iparser].handle(xmsg)))
+            result = yield handlers.parsers[iparser].handle(xmsg)
+            print 'Result is',result
         except CommandParserException, exc:
-            defer.returnValue((yield exc.args[0]))
+            result = yield exc.args[0]
         #except pymongo.errors.AutoReconnect:
         #    defer.returnValue((yield 'Sorry, our database is down.'))
-        except _DefGen_Return:
-            raise
+        #except _DefGen_Return:
+        #    raise
         except:
             #raise
             #defer.returnValue((yield "BACKEND (CATCHED) ERROR! IMMEDIATELY REPORT THIS SHIT TO MY STUPID AUTHOR!!!\n\n"+traceback.format_exc()))
             defer.returnValue("BACKEND (CATCHED) ERROR! IMMEDIATELY REPORT THIS SHIT TO MY STUPID AUTHOR!!!\n\n"+\
                 traceback.format_exc()+"\n"+\
                 "Command which caused this exception: "+message_body)
+        defer.returnValue(result)
 
 @defer.inlineCallbacks
 def iq(msg):

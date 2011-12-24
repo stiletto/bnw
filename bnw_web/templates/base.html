@@ -8,6 +8,7 @@
     <script type="text/javascript" src="{{ static_url("jquery.cookie.js") }}"></script>
     <script type="text/javascript" src="{{ static_url("dlgs/login.js") }}"></script>
     <script type="text/javascript">
+            var webui_base = "{{ config.webui_base }}";
             jQuery(window).load(function(){
                 $(".avatar_ps").removeClass('avatar_ps');
                 $(".imgpreview_ps").removeClass('imgpreview_ps');
@@ -24,7 +25,7 @@
     {% end %}
 </head>
 <body>
-<div class='bodyshit'>
+<div class='bodyshit {% block body_extraclass %}{% end %}'>
     <div style='text-align: left; overflow: hidden; width: 100%;'>
         <a href='/' class='tagline'>{{ ranq }}</a>
         <span style='float: right; padding-right: 1em;'>
@@ -48,7 +49,8 @@
         {% end %}
         <div style='float:right;'>
             <a href="http://ipv6-test.com/validate.php?url=referer"><img src="http://ipv6-test.com/button-ipv6-80x15.png" alt="ipv6 ready" title="ipv6 ready" style="border: none; vertical-align: middle;" /></a>
-            <a href="http://bnw.reformal.ru/" class='pagelink'>BnW на Реформале.</a>
+            <a href="http://bitbucket.org/stiletto/bnw-android/downloads" class='pagelink'>BnW для ведрофона</a>
+            <a href="http://bnw.reformal.ru/" class='pagelink'>BnW на Реформале</a>
             <a href="http://hive.blasux.ru/u/Stiletto/bnw" class="pagelink">Викивач</a>
         </div>
     </div>

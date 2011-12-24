@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from twisted.words.xish import domish
 
+from bnw_xmpp.base import send_raw
 from base import *
 import random
 from twisted.internet import defer

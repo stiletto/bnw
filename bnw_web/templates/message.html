@@ -5,6 +5,7 @@
     <script type="text/javascript" src="{{ static_url("web-socket-js/swfobject.js") }}"></script>
     <script type="text/javascript" src="{{ static_url("web-socket-js/FABridge.js") }}"></script>
     <script type="text/javascript" src="{{ static_url("web-socket-js/web_socket.js") }}"></script>
+    <script type="text/javascript" src="{{ static_url("favicon.js") }}"></script>
     
     <script type="text/javascript">
         // Set URL of your WebSocketMain.swf here:
@@ -31,6 +32,7 @@
             
     <script type="text/javascript" src="{{ static_url("tree-comments.js") }}"></script>
 {% end %}
+{% block body_extraclass %}hfeed{% end %}
 {% block body %}
 {% if not msg %}
     <div id="err_outer">
@@ -48,14 +50,14 @@
     <hr/>
     <div class="somenote" style="display: none;"></div>
     <div class="comments rich_comments" style="display: none;"></div> 
-    <div class="comments simple_comments">
+    <div class="comments simple_comments hfeed">
     {% for comment in comments %}
-    <div class='outerborder' id="{{ comment['id'].split('/')[1] }}">
+    <div class='outerborder hentry' id="{{ comment['id'].split('/')[1] }}">
     <div class='comment'>
         <img class='avatar avatar_ps' src='http://fuck.blasux.ru/thumb?max=48&fmt=png&img=http://bnw.im/u/{{ comment['user'] }}/avatar'/>
-        <pre class='comment_body pw'>{{ linkify(comment['text']) }}</pre>
-        <div>
-            {{ w.msgl(comment['id']) }}<span class='cmtb' id='cmtb-{{ comment['id'] }}'></span> / {{ w.userl(comment['user']) }}
+        <div class='comment_body pw entry-content entry-title'>{{ linkify(comment['text']) }}</div>
+        <div class='sign'>
+            {{ w.msgl(comment['id'],True) }}<span class='cmtb' id='cmtb-{{ comment['id'] }}'></span> / {{ w.userl(comment['user']) }}
             {% if comment['replyto'] %} --> <a href="/p/{{ comment['replyto'].replace('/','#') }}" class="msgid">#{{ comment['replyto']}}</a>{% end %}
              / {{ w.time(comment['date']) }}
         </div>
@@ -71,6 +73,7 @@
                 <input type='hidden' name='msg' value='{{ msgid }}'/>
                 <textarea name='text' style='width: 100%;' cols='3' class='blueinput' onkeypress="textarea_press(event)"></textarea>
                 Id комментария: <input name='comment' class='blueinput' size='4'/>
+                <span id='ws_status'></span>
                 <input type='submit' value='[&lt; Комментировать &gt;]' style='float: right;' class='styledbutton'/>
             </form>
         </div>

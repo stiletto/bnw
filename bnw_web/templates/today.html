@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}BnW - Бнвач сегодня{% end %}
+{% block body_extraclass %}hfeed{% end %}
 {% block body %}
 {% if not result['ok'] %}
     <div id="err_outer">

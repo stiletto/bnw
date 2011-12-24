@@ -4,7 +4,9 @@
 import random
 import datetime
 import bnw_core.base
-gc = bnw_core.base.gc
+
+def gc(x):
+    return getattr(bnw_core.base.config,x)
 
 formatters = {
     'comment': None,
@@ -79,6 +81,7 @@ def formatter_comment(request,result):
     return format_comment(result['comment'])
 
 def formatter_search(request,result):
+    print 'search res type',result['result']
     if not result['result']:
         return 'No results.'
     return '\n\n'.join('%s (%d%%): %s' % (x[0],x[1],x[2]) for x in result['result'])

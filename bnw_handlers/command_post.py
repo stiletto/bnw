@@ -3,7 +3,7 @@
 
 from base import *
 import random,time
-from bnw_core.base import gc,BnwResponse
+from bnw_core.base import BnwResponse,config
 import bnw_core.bnw_objects as objs
 
 from twisted.python import log
@@ -38,7 +38,7 @@ def postMessage(request,tags,clubs,text,anon=False,anoncom=False):
             msgid,qn,recepients = rest
             defer.returnValue(
                 dict(ok=True,
-                     desc='Message #%s has been delivered to %d users. $%d. %sp/%s' % (msgid,recepients,qn,gc('webui_base'),msgid),
+                     desc='Message #%s has been delivered to %d users. $%d. %sp/%s' % (msgid,recepients,qn,config.webui_base,msgid),
                      id=msgid)
             )
         else:
@@ -84,7 +84,7 @@ def cmd_comment(request,message="",anonymous="",text=""):
             defer.returnValue(
                 dict(ok=True,
                     desc='Comment #%s (%d) has been delivered to %d users. $%d. %sp/%s' % 
-                        (msgid,num,recepients,qn,gc('webui_base'),msgid.replace('/','#')),
+                        (msgid,num,recepients,qn,config.webui_base,msgid.replace('/','#')),
                     id=msgid,
                     num=num,)
             )

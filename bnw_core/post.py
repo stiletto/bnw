@@ -2,7 +2,8 @@
 """
 """
 import bnw_objects as objs
-from base import genid,cropstring,gc,mongo_errors
+from base import genid,cropstring,config
+from bnw_mongo import mongo_errors
 from twisted.internet import defer, reactor
 import time
 from twisted.python import log
@@ -28,7 +29,7 @@ def subscribe(user,target_type,target,fast=False,sfrom=None):
             tuser = yield objs.User.find_one({'name':target})
             if not tuser:
                 defer.returnValue((False,'No such user.'))
-            _ = yield tuser.send_plain('@%s subscribed to your blog. %su/%s' % (user['name'],gc('webui_base'),user['name']))
+            _ = yield tuser.send_plain('@%s subscribed to your blog. %su/%s' % (user['name'],config.webui_base,user['name']))
             pass
         elif target_type=='sub_message':
             if not fast:
@@ -147,6 +148,7 @@ def postMessage(user,tags,clubs,text,anon=False,anoncom=False,sfrom=None):
     if ('@' in clubs) or (len(clubs)==0):
         queries+=[{'target': 'anonymous' if anon else user['name'], 'type': 'sub_user'}]
     qn,recipients = yield send_to_subscribers(queries,stored_message)
+    publish('messages',stored_message.filter_fields()) # ALARM
     defer.returnValue((True,(message['id'],qn,recipients)))
 
 @defer.inlineCallbacks
@@ -228,7 +230,8 @@ def recommendMessage(user,message_id,comment="",sfrom=None):
     qn,recipients = yield send_to_subscribers(queries,message,user['name'],comment)
 
     tuser=yield objs.User.find_one({'name':message['user']})
-    _ = yield tuser.send_plain('@%s recommended your message #%s, so %d more users received it. %sp/%s' % (user['name'],message_id,recipients,gc('webui_base'),message_id))
+    _ = yield tuser.send_plain('@%s recommended your message #%s, so %d more users received it. %sp/%s' % (
+            user['name'],message_id,recipients,config.webui_base,message_id))
 
     if len(message['recommendations'])<1024:
         _ = (yield objs.Message.mupdate({'id':message_id},{'$addToSet': { 'recommendations': user['name']}}))

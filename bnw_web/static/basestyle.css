@@ -44,13 +44,16 @@
             border: none;
             margin: 0;
             padding: 0;
+            font-size: 1em;
         }
 
         .styledbutton {
             border: none; 
             margin: 0; 
+            color: #000;
             padding: 0;
             background-color: #e5e5e5;
+            font-size: 1em;
         }
         .styledbutton:hover, .styledbutton:focus {
             background-color: #00CDCD;
@@ -129,6 +132,9 @@
             width: 2em; height: 2em;
         }
         
+        .sign { color: #505050; }
+        .sign a { color: #3C4BB0; }
+        .sign a:hover { color: #FFFF00; }
         
         #err_outer {width: 100%; overflow: hidden; position: relative;}
         #err_outer[id] {display: table; position: static;}

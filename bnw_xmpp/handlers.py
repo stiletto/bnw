@@ -82,7 +82,7 @@ redeye_handlers = (
             command_ping.cmd_ping,
         ),
 
-#        ("except", (), , ),
+#        ("except", (), command_except.cmd_except, ),
         ("register", (), command_register.cmd_register, "name", ),
         ("search", (), command_search.cmd_search, "text", ),
         ("interface", (), command_interface.cmd_interface, "iface", ),

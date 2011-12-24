@@ -3,16 +3,19 @@ from datetime import *
 import xapian
 
 import sys
-sys.path.append('..')
-import bnw_shell
+#sys.path.append('..')
+#import bnw_shell
 
 import time
-from twisted.internet.protocol import Protocol, Factory
-from twisted.web import resource
-from twisted.web.static import File
 from twisted.internet import defer, reactor
 
-from bnw_core import base
+try:
+    from bnw_core import base
+except:
+    sys.path.append('..')
+    import bnw_shell
+    from bnw_core import base
+
 from bnw_core import bnw_objects as objs
 import re
 
@@ -34,7 +37,7 @@ def create_document(message):
     for index, term in enumerate(WORD_RE.finditer(text)):
         tg = term.group().encode("utf-8")
         st = stemmer(tg)
-        print tg, st
+        #print tg, st
         doc.add_posting(st, index)
     doc.add_term("A"+message['user'])
     doc.set_data(text)
@@ -66,13 +69,13 @@ def index(db,period,force=False):
             break
 
         for message in messages:
-            print message['id']
+            print 'Indexed',message['id']
             _ = yield objs.Message.mupdate({'id':message['id']},{'$set':{'indexed':1}},safe=True)
             doc, id_term = create_document(message)
             db.replace_document(id_term, doc)
         skip += 20
         break
-    reactor.stop()
+    defer.returnValue(None)
 
 if __name__=="__main__":
     #configfile, dbpath, period = sys.argv[1:]

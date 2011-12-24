@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-from base import get_db
+from bnw_mongo import get_db
 from bnw_xmpp.base import send_plain
-from bnw_xmpp import deliver_formatters
+from base import notifiers
+#from bnw_xmpp import deliver_formatters
 from twisted.internet import defer
 import txmongo,time
 
@@ -137,21 +138,11 @@ class Message(MongoObject):
                                    recocomment=recocomment,
                                    date=time.time()))
             feedel = FeedElement(feedel_val)
-            if recommender:
-                formatter = deliver_formatters.parsers[target.get('interface','redeye')]['recommendation']
-                         
-            else:
-                formatter = deliver_formatters.parsers[target.get('interface','redeye')]['message']
-            formatted = formatter(None,
-                dict(message=self,
-                     recommender=recommender,
-                     recocomment=recocomment)
-            )
             _ = yield feedel.save()
-            if not target.get('off',False):
-                target.send_plain(formatted,sfrom)
-                defer.returnValue(1)
-            defer.returnValue(0)
+            res=0
+            for notifier in notifiers:
+                res+=yield notifier.notify(target,'message',(self,recommender,recocomment,sfrom))
+            defer.returnValue(res)
         else:
             defer.returnValue(0)
 
@@ -172,16 +163,12 @@ class Comment(MongoObject):
         (txmongo.filter.ASCENDING("message"), False, False),
     )
 
+    @defer.inlineCallbacks
     def deliver(self,target,recommender=None,recocomment=None,sfrom=None):
-        if not target.get('off',False):
-            formatter = deliver_formatters.parsers[target.get('interface','redeye')]['comment']
-            formatted = formatter(None,
-                dict(comment=self)
-            )
-            target.send_plain(formatted,sfrom)
-            return 1 #defer.returnValue(1)
-        else:
-            return 0
+        res=0
+        for notifier in notifiers:
+            res+=yield notifier.notify(target,'comment',(self,sfrom))
+        defer.returnValue(res)
 
 class User(MongoObject):
     """ Няшка-пользователь."""
@@ -216,6 +203,16 @@ class GlobalState(MongoObject):
 class Club(MongoObject):
     """ Клуб в выхлопе мап-редьюса."""
     collection = CollectionWrapper("clubs")
+    indexes = ()
+
+class StatMessages(MongoObject):
+    """ Статистика по сообщениям в выхлопе мап-редьюса."""
+    collection = CollectionWrapper("stat_messages")
+    indexes = ()
+
+class StatComments(MongoObject):
+    """ Статистика по комментам в выхлопе мап-редьюса."""
+    collection = CollectionWrapper("stat_comments")
     indexes = ()
 
 class Tag(MongoObject):

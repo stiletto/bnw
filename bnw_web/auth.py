@@ -22,7 +22,6 @@ from tornado.options import define, options
 
 import bnw_core.bnw_objects as objs
 import bnw_core.post as post
-from bnw_core.base import get_db
 from thandler import TwistedHandler
 
 class LoginHandler(TwistedHandler):

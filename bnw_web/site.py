@@ -9,6 +9,7 @@ from twisted.web.resource import Resource, NoResource
 import tornado.options
 import tornado.httpserver
 import tornado.web
+import tornado.websocket
 import tornado.escape
 import logging,traceback
 import simplejson as json
@@ -27,7 +28,7 @@ from tornado.options import define, options
 import bnw_core.bnw_objects as objs
 import bnw_core.post as post
 import bnw_core.base
-from bnw_core.base import get_db,get_fs
+from bnw_core.bnw_mongo import get_db,get_fs
 from bnw_handlers.command_show import cmd_feed,cmd_today
 from bnw_handlers.command_clubs import cmd_clubs,cmd_tags
 
@@ -54,17 +55,31 @@ class MessageHandler(BnwWebHandler,AuthMixin):
             'comments': comments,
         })
 
-#class MessageWsHandler(websocket_site.RoutedWebSocketHandler):
-#    def openSocket(self,msgid):
-#        self.etype='comments-'+msgid
-#        post.register_listener(self.etype,id(self),self.deliverComment)
-#        print 'Opened connection %d' % id(self)
-#    def deliverComment(self,comment):
-#        print 'Delivered comment.',comment
-#        self.write(json.dumps(comment))
-#    def connectionLost(self,reason):
-#        post.unregister_listener(self.etype,id(self))
-#        print 'Closed connection %d' % id(self)
+class MessageWsHandler(tornado.websocket.WebSocketHandler):
+    def open(self,msgid):
+        #msgid = self
+        self.etype='comments-'+msgid
+        post.register_listener(self.etype,id(self),self.deliverComment)
+        print 'Opened connection %d (msg %s)' % (id(self),msgid)
+    def deliverComment(self,comment):
+        print 'Delivered comment.',comment
+        self.write_message(json.dumps(comment))
+    def on_close(self):
+        post.unregister_listener(self.etype,id(self))
+        print 'Closed connection %d' % id(self)
+
+class MainWsHandler(tornado.websocket.WebSocketHandler):
+    def open(self):
+        #msgid = self
+        self.etype='messages'
+        post.register_listener(self.etype,id(self),self.deliverMessage)
+        print 'Opened connection %d (all messages)' % (id(self),)
+    def deliverMessage(self,msg):
+        print 'Delivered message.',msg
+        self.write_message(json.dumps(msg))
+    def on_close(self):
+        post.unregister_listener(self.etype,id(self))
+        print 'Closed connection %d' % id(self)
 
 
 def get_page(self):
@@ -351,6 +366,7 @@ def get_site():
     application = tornado.web.Application([
 #        (r"/posts/(.*)", MessageHandler),
         (r"/p/([A-Z0-9]+)/?", MessageHandler),
+        (r"/p/([A-Z0-9]+)/ws/?", MessageWsHandler),
         #(r"/p/([A-Z0-9]+)/ws", MessageWsHandler),
         (r"/u/([0-9a-z_-]+)/?", UserHandler),
         (r"/u/([0-9a-z_-]+)/recommendations/?", UserRecoHandler),
@@ -358,6 +374,7 @@ def get_site():
         (r"/u/([0-9a-z_-]+)/info/?", UserInfoHandler),
         (r"/u/([0-9a-z_-]+)/t/(.*)/?", UserHandler),
         (r"/", MainHandler),
+        (r"/ws/?", MainWsHandler),
         (r"/t/()(.*)/?", MainHandler),
         (r"/c/(.*)()/?", MainHandler),
         (r"/oexchange.xrd", OexchangeHandler),
