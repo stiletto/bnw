@@ -71,14 +71,14 @@ def formatter_blacklist(request,result):
          for s in result['blacklist']))
 
 def formatter_message(request,result):
-    return format_message(result['message'])
+    return '\n'+format_message(result['message'])
 
 def formatter_recommendation(request,result):
-    return 'Recommended by @%s: %s\n' % (result['recommender'],result['recocomment']) + \
+    return '\nRecommended by @%s: %s\n' % (result['recommender'],result['recocomment']) + \
         format_message(result['message'])
 
 def formatter_comment(request,result):
-    return format_comment(result['comment'])
+    return '\n'+format_comment(result['comment'])
 
 def formatter_search(request,result):
     print 'search res type',result['result']

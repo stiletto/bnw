@@ -10,9 +10,11 @@
     <script language="javascript" type="text/javascript" src="flot/jquery.flot.selection.min.js"></script> 
  </head> 
     <body> 
-    <h1>Статистика, ёба!</h1> 
+    <h1>Статистика, ё!</h1> 
  
     <div id="placeholder1" style="width:600px;height:300px;"></div> 
+    <div id="placeholder2" style="width:600px;height:300px;"></div> 
+    <div id="placeholder3" style="width:600px;height:300px;"></div> 
     <p></p> 
  
 <script type="text/javascript"> 
@@ -39,10 +41,21 @@ $(function () {
                     d2.push([datereconstruct(d._id), d.value]);
             }
 
-            var placeholder = $("#placeholder1")
+            var placeholder = $("#placeholder1");
+            var placeholder1 = $("#placeholder2");
+            var placeholder2 = $("#placeholder3");
             var data = [    {   label: 'Сообщения',
                     data: d1
                 },
+                {   label: 'Комментарии',
+                    data: d2
+                },
+            ];
+            var data1 = [    {   label: 'Сообщения',
+                    data: d1
+                },
+            ];
+            var data2 = [
                 {   label: 'Комментарии',
                     data: d2
                 },
@@ -63,6 +76,8 @@ $(function () {
                     }));
             });
             $.plot(placeholder,  data, options);
+            $.plot(placeholder1,  data1, options);
+            $.plot(placeholder2,  data2, options);
                
             /* $.plot($("#placeholder3"), [ 
                 {   label: 'Комментарии',

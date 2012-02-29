@@ -122,8 +122,8 @@ def postMessage(user,tags,clubs,text,anon=False,anoncom=False,sfrom=None):
     """
     if len(text)==0:
         defer.returnValue((False,'So where is your post?'))
-    if len(text)>4096:
-        defer.returnValue((False,'Message is too long. %d/4096' % (len(text),)))
+    if len(text)>10240:
+        defer.returnValue((False,'Message is too long. %d/10240' % (len(text),)))
     message={ 'user': user['name'],
               'tags': tags,
               'clubs': clubs,
