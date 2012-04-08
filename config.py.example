@@ -48,12 +48,16 @@ webui_base = 'http://bnw.blasux.ru/'
 
 webuiws_base = 'ws://bnw.blasux.ru/'
 
-
 webui_static = 'http://bnw.blasux.ru/static/'
+
+## База данных
+
+database = 'bnw_test'
+database_fs = 'bnw_fs'
 
 ## Fuck
 
-fuck_enabled = True
+fuck_enabled = False
 
 ## Fuck-fuck-fuck
 

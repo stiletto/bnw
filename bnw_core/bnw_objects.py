@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from bnw_mongo import get_db
 from bnw_xmpp.base import send_plain
-from base import notifiers
+from base import notifiers,config
 #from bnw_xmpp import deliver_formatters
 from twisted.internet import defer
 import txmongo,time
@@ -179,6 +179,8 @@ class User(MongoObject):
     )
     
     def send_plain(self,message,sfrom=None):
+        if not sfrom:
+            sfrom = self.get('settings',{}).get('servicejid',None)
         if self['jid']:
             send_plain(self['jid'],sfrom,message)
 
