@@ -1,6 +1,7 @@
 *.py[co]
 .eric4project
 .ropeproject
+.venv
 nbproject
 tornado
 pymongo
