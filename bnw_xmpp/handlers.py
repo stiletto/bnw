@@ -130,6 +130,7 @@ redeye_handlers = (
             (
                 ("c", "usercss", True, u"User CSS."),
                 ("p", "password", True, u"Password."),
+                ("s", "servicejid", False, u"Set service jid."),
             ),
             command_settings.cmd_set,
         ),
