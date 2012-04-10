@@ -14,9 +14,9 @@ def _(s,user):
 @defer.inlineCallbacks
 def cmd_delete(request,message="",last=False):
     """ Удаление
-    
+
     Удаление поста или коммента.
-    
+
     redeye: delete --message=123456, d -m ABCDEF/123, d --last, d -l
     simple: D #123456, D #ABDEF/123, D L"""
     message=canonic_message_comment(message).upper()
@@ -50,7 +50,7 @@ def cmd_delete(request,message="",last=False):
             defer.returnValue(
                 dict(ok=False,desc='No such comment')
             )
-        if comment['user']!=request.user['name'] and post['user']!=request.user['name']:
+        if request.user['name'] not in (comment['user'],post['user'],comment.get('real_user'),post.get('real_user')):
             defer.returnValue(
                 dict(ok=False,desc='Not your comment and not your message.')
             )
@@ -64,7 +64,7 @@ def cmd_delete(request,message="",last=False):
             defer.returnValue(
                 dict(ok=False,desc='No such message.')
             )
-        if post['user']!=request.user['name']:
+        if request.user['name'] not in (post['user'],post.get('real_user')):
             defer.returnValue(
                 dict(ok=False,desc='Not your message.')
             )

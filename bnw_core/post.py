@@ -38,7 +38,7 @@ def subscribe(user,target_type,target,fast=False,sfrom=None):
                     defer.returnValue((False,'No such message.'))
                 else:
                     adddesc=' (%d replies)' % (msg['replycount'],)
-            
+
             feedel_val = dict(user=user['name'],message=target)
             feedel = None if fast else (yield objs.FeedElement.find_one(feedel_val)) 
             if not feedel:
@@ -98,7 +98,7 @@ def send_to_subscribers(queries,message,recommender=None,recocomment=None):
     print recipients
     bl_items = frozenset([('user',message['user'])] + [('tag',x) for x in message.get('tags',[])] +
         [('club',x) for x in message.get('clubs',[])])
-        
+
     for target_name,subscription in recipients.iteritems():
         target=yield objs.User.find_one({'name': target_name})
         qn+=1
@@ -111,7 +111,7 @@ def send_to_subscribers(queries,message,recommender=None,recocomment=None):
     defer.returnValue((qn,reccount))
 
 @defer.inlineCallbacks
-def postMessage(user,tags,clubs,text,anon=False,anoncom=False,sfrom=None):
+def postMessage(user,tags,clubs,text,anon=False,anoncomments=False,sfrom=None):
     """!Это дерьмо создает новое сообщение и рассылает его.
     @param user Объект-пользователь.
     @param tags Список тегов.
@@ -132,7 +132,7 @@ def postMessage(user,tags,clubs,text,anon=False,anoncom=False,sfrom=None):
               'replycount': 0,
               'text': text,
               'anonymous': anon,
-              'anoncomments': anoncom,
+              'anoncomments': anoncomments,
               'recommendations': [],
             }
     if anon:
@@ -140,9 +140,9 @@ def postMessage(user,tags,clubs,text,anon=False,anoncom=False,sfrom=None):
         message['user']='anonymous'
     stored_message = objs.Message(message)
     stored_message_id = yield stored_message.save()
-    
+
     sub_result = yield subscribe(user,'sub_message',message['id'],True,sfrom)
-    
+
     queries=[{'target': tag, 'type': 'sub_tag'} for tag in tags]
     queries+=[{'target': club, 'type': 'sub_club'} for club in clubs]
     if ('@' in clubs) or (len(clubs)==0):
@@ -166,6 +166,8 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
     if len(text)>4096:
         defer.returnValue((False,'Comment is too long. %d/4096' % (len(text),)))
     message=yield objs.Message.find_one({'id': message_id})
+    if message.get('anoncomments'):
+        anon=True
     if comment_id:
         old_comment=yield objs.Comment.find_one({'id': comment_id, 'message': message_id})
     else:
@@ -174,7 +176,7 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
         defer.returnValue((False,'No such comment.'))
     if not message:
         defer.returnValue((False,'No such message.'))
-    
+
     comment={ 'user': user['name'],
               'message': message_id,
               'date': time.time(),
@@ -203,7 +205,7 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
         defer.returnValue((False,'Looks like this message has reached its bumplimit.'))
     sub_result = yield subscribe(user,'sub_message',message_id,False,sfrom)
     _ = (yield objs.Message.mupdate({'id':message_id},{'$inc': { 'replycount': 1}}))
-    
+
     qn,recipients = yield send_to_subscribers([{'target': message_id, 'type': 'sub_message'}],comment)
     publish('comments-'+message_id,comment.filter_fields()) # ALARM
     defer.returnValue((True,(comment['id'],comment['num'],qn,recipients)))
@@ -225,7 +227,7 @@ def recommendMessage(user,message_id,comment="",sfrom=None):
         defer.returnValue((False,'Recommendation is too long. %d/256' % (len(comment),)))
 
     sub_result = yield subscribe(user,'sub_message',message_id,False,sfrom)
-    
+
     queries=[{'target': user['name'], 'type': 'sub_user'}]
     qn,recipients = yield send_to_subscribers(queries,message,user['name'],comment)
 
@@ -263,4 +265,3 @@ def publish(etype,*args,**kwargs):
             for listener in listeners[rtype].itervalues():
                 reactor.callLater(0,listener,*args,**kwargs)
 
-        

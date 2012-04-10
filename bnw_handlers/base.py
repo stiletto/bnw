@@ -38,7 +38,7 @@ def _(s,user):
 def require_auth(fun):
     @defer.inlineCallbacks
     def newfun(request,*args,**kwargs):
-        if request.user is None:
+        if request.user is None or not request.user.get('name'):
             defer.returnValue(
                 dict(ok=False,desc='Only for registered users')
             )

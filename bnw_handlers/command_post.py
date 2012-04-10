@@ -30,9 +30,9 @@ def throttle_update(user,post_throttle):
         defer.returnValue(None)
 
 @defer.inlineCallbacks
-def postMessage(request,tags,clubs,text,anon=False,anoncom=False):
+def postMessage(request,tags,clubs,text,anon=False,anoncomments=False):
         post_throttle=yield throttle_check(request.user['name'])
-        ok,rest = yield bnw_core.post.postMessage(request.user,tags,clubs,text,anon,anoncom,sfrom=request.to)
+        ok,rest = yield bnw_core.post.postMessage(request.user,tags,clubs,text,anon,anoncomments,sfrom=request.to)
         _ = yield throttle_update(request.user['name'],post_throttle)
         if ok:
             msgid,qn,recepients = rest
@@ -48,14 +48,14 @@ def postMessage(request,tags,clubs,text,anon=False,anoncom=False):
 
 @require_auth
 @defer.inlineCallbacks
-def cmd_post(request,tags="",clubs="",anonymous="",text=""):
+def cmd_post(request,tags="",clubs="",anonymous="",anoncomments="",text=""):
         """ Отправка псто """
         tags=tags.split(',')[:5]
         clubs=clubs.split(',')[:5]
         tags=filter(None,set([x.lower().strip().replace('\n',' ')[:256] for x in tags]))
         clubs=filter(None,set([x.lower().strip().replace('\n',' ')[:256] for x in clubs]))
         defer.returnValue(
-            (yield postMessage(request,tags,clubs,text,anonymous,False)))
+            (yield postMessage(request,tags,clubs,text,anonymous,anoncomments)))
 
 
 @defer.inlineCallbacks

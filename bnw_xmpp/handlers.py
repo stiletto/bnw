@@ -54,7 +54,7 @@ post_args = (
                 ("t", "tags", True, u"Mark post with this tag(s) (comma-separated)."),
                 ("c", "clubs", True, u"Post to this club(s) (comma-separated)."),
                 ("a", "anonymous", False, u"Anonymous post."),
-                ("q", "anonymous-comments", False, u"Make all comments to this post anonymous (doesn''t work at all yet)."),
+                ("q", "anoncomments", False, u"Make all comments to this post anonymous."),
             )
 comment_args = (
                 ("m", "message", True, u"Message to comment."),
