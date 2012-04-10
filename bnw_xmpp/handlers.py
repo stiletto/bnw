@@ -206,6 +206,12 @@ simple_handlers = (
         (ur'JID -(?P<delete>\S+)',command_jids.cmd_jids),
         (ur'JID !(?P<select>\S+)',command_jids.cmd_jids),
         (ur'JID',command_jids.cmd_jids),
+
+        (ur'[sS][eE][tT] +[uU][sS][eE][rR][cC][sS][sS] +(?P<usercss>\S+)',command_settings.cmd_set),
+        (ur'[sS][eE][tT] +[pP][aA][sS][sS][wW][oO][rR][dD] +(?P<password>\S+)',command_settings.cmd_set),
+        (ur'[sS][eE][tT] +[sS][eE][rR][vV][iI][cC][eE][jJ][iI][dD](?P<servicejid> *)',command_settings.cmd_set),
+        (ur'[sS][eE][tT].*',command_settings.cmd_set),
+
         (ur'(?:TODAY|today|Today)',command_show.cmd_today),
         (ur'[#№]',command_show.cmd_feed),
         (ur'[#№]\+',command_show.cmd_show),
@@ -238,6 +244,7 @@ simple_formatters = {
     'blacklist': formatters_redeye.formatter_blacklist,
     'search': formatters_redeye.formatter_search,
     'userlist': formatters_simple.formatter_userlist,
+    'settings': formatters_redeye.formatter_settings,
     'jids': formatters_redeye.formatter_jids,
 }
 
