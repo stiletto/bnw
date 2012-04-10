@@ -91,7 +91,7 @@ def send_to_subscribers(queries,message,recommender=None,recocomment=None):
     for query in queries:
         qn+=1
         for result in (yield objs.Subscription.find(query,fields=['user','from'])):
-            if result['user']==message['user']:
+            if result['user']==message['user'] or result['user']==message.get('real_user'):
                 continue
             recipients[result['user']]=result
     reccount=0
