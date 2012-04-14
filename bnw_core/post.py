@@ -166,8 +166,6 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
     if len(text)>4096:
         defer.returnValue((False,'Comment is too long. %d/4096' % (len(text),)))
     message=yield objs.Message.find_one({'id': message_id})
-    if message.get('anoncomments'):
-        anon=True
     if comment_id:
         old_comment=yield objs.Comment.find_one({'id': comment_id, 'message': message_id})
     else:
@@ -176,6 +174,8 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
         defer.returnValue((False,'No such comment.'))
     if not message:
         defer.returnValue((False,'No such message.'))
+    if message.get('anoncomments'):
+        anon=True
 
     comment={ 'user': user['name'],
               'message': message_id,
