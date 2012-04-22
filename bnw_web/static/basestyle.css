@@ -7,6 +7,7 @@
 
         body, .pw, .blueinput, .styledbutton {
             font-family: Unifont, Monaco, Terminus, Consolas, monospace;
+            font-size: 1em;
         }
 
         .bodyshit {
@@ -90,6 +91,9 @@
             background-color: #0000CD;
             text-decoration: none;
         }
+        .imgpreviews {
+            float: left;
+        }
         .imgpreview {
             border: none;
             max-height: 4em;
@@ -147,6 +151,9 @@
             white-space: pre-wrap;
             padding-bottom: 0.5em;
             margin: 0;
+        }
+        .hasthumbs {
+            min-height: 3em;
         }
 
         #dlg_outer { left: 0; top: 0; height: 100%; display: none; overflow: hidden; position: absolute; width: 100%; background-color: transparent;}

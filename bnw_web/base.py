@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import random,time
-import escape
+import linkify
 from widgets import widgets
 import traceback
 from twisted.internet import defer
@@ -32,7 +32,8 @@ ranq=(
 
 def get_defargs():
         return {
-            'linkify': escape.linkify,
+            'linkify': linkify.linkify,
+            'thumbify': linkify.thumbify,
             'ranq': ranq[int(time.time()) / 10 % len(ranq)],
             'config': bnw_core.base.config,
             'display_appeal': random.random(),
