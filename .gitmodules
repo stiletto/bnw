@@ -1,3 +1,6 @@
 [submodule "txWebSocket"]
 	path = txWebSocket
 	url = https://github.com/rlotun/txWebSocket.git
+[submodule "bnw_web/linkshit"]
+	path = bnw_web/linkshit
+	url = git://github.com/stiletto/linkshit.git
