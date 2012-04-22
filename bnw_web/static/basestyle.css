@@ -153,7 +153,7 @@
             margin: 0;
         }
         .hasthumbs {
-            min-height: 3em;
+            min-height: 4em;
         }
 
         #dlg_outer { left: 0; top: 0; height: 100%; display: none; overflow: hidden; position: absolute; width: 100%; background-color: transparent;}
