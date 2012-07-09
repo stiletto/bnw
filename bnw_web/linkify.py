@@ -62,9 +62,9 @@ def thumbify(text,permitted_protocols = ['http','https']):
                     tp = stack.index(m[0])
                     for uptag in stack[:tp+1]:
                         texta.append(formatting_tags[uptag][1])
-                    del stack[tp]
-                    for uptag in stack[tp-1::-1]:
+                    for uptag in reversed(stack[:tp]):
                         texta.append(formatting_tags[uptag][0])
+                    del stack[tp]
             elif m[0]=='msg':
                 texta.append('<a href="/p/%s">%s</a>' % (m[2].replace('/','#'),m[1]))
             elif m[0]=='user':
@@ -86,6 +86,8 @@ if __name__=="__main__":
 	    'test <i>test test</i> test <b>test test</b> test'),
 	('''test //test **test// test** test''',
 	    'test <i>test <b>test</b></i><b> test</b> test'),
+	(u'''Test *жирный* **жирный** ***жирный*** //курсив **жирный курсив**//''',
+	    u'Test *жирный* <b>жирный</b> <b>*жирный</b>* <i>курсив <b>жирный курсив</b></i>'),
 	('**test',
 	    '<b>test</b>'),
 	(u'''Обычный Советский Дурдом: http://allin777.livejournal.com/152675.html
