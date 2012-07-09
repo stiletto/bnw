@@ -7,13 +7,13 @@ if [ -d "$PROGDIR/.venv" ]; then
     #exit 1
 else
     mkdir "$VENV"
-    virtualenv "$VENV"
+    virtualenv -p python2 "$VENV"
 fi
 PIP="$VENV/bin/pip"
 
-$PIP install simplejson
-$PIP install twisted
-$PIP install tornado
-$PIP install PyRSS2Gen
+$PIP install simplejson && \
+$PIP install twisted && \
+$PIP install tornado && \
+$PIP install PyRSS2Gen && \
 $PIP install 'git+git://github.com/fiorix/mongo-async-python-driver.git'
 
