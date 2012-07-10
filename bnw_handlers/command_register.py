@@ -36,6 +36,7 @@ def cmd_register(request,name=""):
                    'regdate': int(time.time()),
                    'jid': request.bare_jid,
                    'interface': 'redeye',
+                   'settings.servicejid': request.to.split('/',1)[0],
                  })
             if not (yield objs.User.find_one({'name':name})):
                 _ = yield user.save()
