@@ -7,8 +7,6 @@ import bnw_core.bnw_objects as objs
 from twisted.web.xmlrpc import Proxy
 
 
-import simplejson as json
-
 #@require_auth
 def cmd_search(request,text):
     """ Поиск """

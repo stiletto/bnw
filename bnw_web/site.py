@@ -12,7 +12,7 @@ import tornado.web
 import tornado.websocket
 import tornado.escape
 import logging,traceback
-import simplejson as json
+import json
 import txmongo
 import os,random,time
 import escape
