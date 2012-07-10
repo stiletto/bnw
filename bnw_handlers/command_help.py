@@ -86,7 +86,7 @@ LOGIN - получить ссылку для входа на сайт."""
 def de_yo(s):
     return s.replace('ё','е')+'\n\n@l29ah - лох :3'
 
-HELP_BASE='http://hive.blasux.ru/u/Stiletto/bnw/help/'
+HELP_BASE='http://hive.blasux.ru/u/Stiletto/BnW/help_'
 def formatCommand(command):
         defer.returnValue(command+':\n'+'\n'.join( (("-"+arg[0]).rjust(4)+(' ARG' if arg[2] else '    ') + \
           ("--"+arg[1]).rjust(10)+('=ARG' if arg[2] else '    ') + \
