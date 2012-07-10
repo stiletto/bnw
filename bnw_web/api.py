@@ -3,7 +3,7 @@
 
 import os,random,time
 import escape
-import simplejson as json
+import json
 from twisted.internet import defer
 from widgets import widgets
 from datetime import datetime

@@ -11,7 +11,6 @@ else
 fi
 PIP="$VENV/bin/pip"
 
-$PIP install simplejson && \
 $PIP install twisted && \
 $PIP install tornado && \
 $PIP install PyRSS2Gen && \
