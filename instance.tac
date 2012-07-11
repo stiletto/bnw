@@ -1,7 +1,6 @@
 #!/bin/echo tac is a python source file, but should be started via twistd
 # coding: utf-8
 import sys
-import config
 try:
     sys.setappdefaultencoding('utf-8')
 except:
@@ -11,6 +10,7 @@ import os.path as path
 root=path.abspath(path.dirname(__file__))
 sys.path.append(root)
 sys.path.insert(0,path.join(root,'txWebSocket'))
+import config
 
 
 if True or config.webui_enabled:
