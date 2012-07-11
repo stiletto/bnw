@@ -38,9 +38,9 @@ def thumbify(text,permitted_protocols = ['http','https']):
             if m[0] in ('url','namedlink'):
                 print m
                 up = _URL_RE.match(m[2])
-                url = up.group(1)
-                proto = up.group(2)
-                if proto not in permitted_protocols:
+                url = m[2] if up is None else up.group(1)
+                proto = None if up is None else up.group(2)
+                if proto and proto not in permitted_protocols:
                     texta.append('%s<!-- proto! -->' % (m[1],))
                 else:
                     if not proto:
@@ -95,11 +95,17 @@ if __name__=="__main__":
 "ИЗ РЕЧИ НИКОЛАЯ ЕЖОВА НА ПЛЕНУМЕ ЦК ВКП(б)
 1 марта 1937 г.
 ЕЖОВ. #ABCDEF Здесь заодно, товарищи разрешите сказать о таких умонастроениях, таких некоторых хозяйственников''',
-	u'''Обычный Советский Дурдом: <a href="http://allin777.livejournal.com/152675.html">http://allin777.livejournal.com/152675.html</a>
+	    u'''Обычный Советский Дурдом: <a href="http://allin777.livejournal.com/152675.html">http://allin777.livejournal.com/152675.html</a>
 <a href="http://allin777.livejournal.com/152675.html">Обычный Советский Дурдом</a>
 &quot;ИЗ РЕЧИ НИКОЛАЯ ЕЖОВА НА ПЛЕНУМЕ ЦК ВКП(б)
 1 марта 1937 г.
 ЕЖОВ. <a href="/p/ABCDEF">#ABCDEF</a> Здесь заодно, товарищи разрешите сказать о таких умонастроениях, таких некоторых хозяйственников'''),
+        (u'''Wiki-разметка для ссылок (я про [[URL | text]] сейчас), как по мне, выглядит убого. Может, конвертировать её в что-то типа примечаний[1] или сносок[2]?
+ 1. http://dic.academic.ru/dic.nsf/ushakov/973938
+ 2. https://ru.wikipedia.org/wiki/Сноска''',
+            u'''Wiki-разметка для ссылок (я про <a href="http://URL">text</a> сейчас), как по мне, выглядит убого. Может, конвертировать её в что-то типа примечаний[1] или сносок[2]?
+ 1. <a href="http://dic.academic.ru/dic.nsf/ushakov/973938">http://dic.academic.ru/dic.nsf/ushakov/973938</a>
+ 2. <a href="https://ru.wikipedia.org/wiki/Сноска">https://ru.wikipedia.org/wiki/Сноска</a>'''),
     )
     for i,x in enumerate(txs):
 	print
