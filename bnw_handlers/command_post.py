@@ -32,15 +32,17 @@ def throttle_update(user,post_throttle):
 @defer.inlineCallbacks
 def postMessage(request,tags,clubs,text,anon=False,anoncomments=False):
         post_throttle=yield throttle_check(request.user['name'])
-        ok,rest = yield bnw_core.post.postMessage(request.user,tags,clubs,text,anon,anoncomments,sfrom=request.to)
+        ok,rest = yield bnw_core.post.postMessage(
+            request.user,tags,clubs,text,anon,anoncomments,sfrom=request.to)
         _ = yield throttle_update(request.user['name'],post_throttle)
         if ok:
             msgid,qn,recepients = rest
             defer.returnValue(
                 dict(ok=True,
-                     desc='Message #%s has been delivered to %d users. $%d. %sp/%s' % (msgid,recepients,qn,config.webui_base,msgid),
-                     id=msgid)
-            )
+                     desc='Message #%s has been delivered '
+                          'to %d users. %sp/%s' % (
+                            msgid,recepients,config.webui_base,msgid),
+                     id=msgid))
         else:
             defer.returnValue(
                 dict(ok=False,desc=rest)
@@ -77,17 +79,19 @@ def cmd_comment(request,message="",anonymous="",text=""):
         message_id=message.split('/')[0]
         comment_id=message if '/' in message else None
         post_throttle=yield throttle_check(request.user['name'])
-        ok,rest = yield bnw_core.post.postComment(message_id,comment_id,text,request.user,anonymous,sfrom=request.to)
+        ok,rest = yield bnw_core.post.postComment(
+            message_id,comment_id,text,request.user,anonymous,sfrom=request.to)
         _ = yield throttle_update(request.user['name'],post_throttle)
         if ok:
             msgid,num,qn,recepients = rest
             defer.returnValue(
                 dict(ok=True,
-                    desc='Comment #%s (%d) has been delivered to %d users. $%d. %sp/%s' % 
-                        (msgid,num,recepients,qn,config.webui_base,msgid.replace('/','#')),
-                    id=msgid,
-                    num=num,)
-            )
+                     desc='Comment #%s (%d) has been delivered '
+                          'to %d users. %sp/%s' % (
+                            msgid,num,recepients,config.webui_base,
+                            msgid.replace('/','#')),
+                     id=msgid,
+                     num=num))
         else:
             defer.returnValue(
                 dict(ok=False,desc=rest)
