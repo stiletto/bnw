@@ -38,7 +38,7 @@ def get_webui_base(user):
             return get_http_webui_base()
         elif baseurl == 'https':
             return get_https_webui_base()
-        elif baseurl:
+        else:
             return baseurl
 
 def get_https_webui_base():
