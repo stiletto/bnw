@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-#from twisted.words.xish import domish
-
+import random
 from base import *
 from bnw_core.base import config
-import random
-
 import bnw_core.bnw_objects as objs
 
 class SimpleSetting(object):
@@ -47,7 +43,6 @@ optionnames = {
 @require_auth
 @defer.inlineCallbacks
 def cmd_set(request, **kwargs):
-    """ Настройки """
     if not kwargs:
         # Show current settings.
         current = {}

@@ -13,7 +13,7 @@
         // Set this to dump debug message from Flash to console.log:
         //    WEB_SOCKET_DEBUG = true;
 
-        var websocket_base = "{{ config.webui_wsbase }}";
+        var websocket_base = "{{ config.webui_wsbase }}/";
         var message_id = "{{ msgid }}";
         var comment_count = {{ len(comments) }};        
         var comment_info = {
