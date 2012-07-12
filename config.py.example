@@ -57,6 +57,10 @@ webui_base = 'localhost:7808'
 
 webui_wsbase = 'ws://localhost'
 
+## Хостнейм.
+
+hostname = 'localhost'
+
 ## Fuck
 
 fuck_enabled = False

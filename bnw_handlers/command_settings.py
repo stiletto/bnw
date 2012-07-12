@@ -26,18 +26,11 @@ class ServiceJidSetting(SimpleSetting):
     def write(self,request,name,value):
         return SimpleSetting.write(self,request,name,request.to)
 
-class HttpsLinksSetting(SimpleSetting):
-    def write(self, request, name, value):
-        if value not in ['on', 'off']:
-            return (False, ("Value can only be 'on' or 'off'"))
-        else:
-            return super(HttpsLinksSetting, self).write(request, name, value)
-
 optionnames = {
     'usercss': SimpleSetting(),
     'password': SimpleSetting(),
     'servicejid': ServiceJidSetting(),
-    'httpslinks': HttpsLinksSetting('off'),
+    'baseurl': SimpleSetting(),
 }
 
 @require_auth

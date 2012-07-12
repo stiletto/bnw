@@ -23,14 +23,23 @@ class BnwResponse(Exception): # we do it idiotic way!
 config = DelayedGlobal('config')
 
 def get_webui_base(user):
-    """Get http or https base address for links in accordance with
-    httpslinks user setting.
+    """Get base url for links in accordance with baseurl user setting.
+    baseurl can be one of:
+        "http": return http base url
+        "https": return https base url
+        "random string": return this string
+        None: return http base url
     """
-    if ('httpslinks' in user['settings'] and
-        user['settings']['httpslinks'] == 'on'):
-            return get_https_webui_base()
-    else:
+    if 'baseurl' in user['settings']:
+        baseurl = user['settings']['baseurl']
+        if baseurl == 'http':
             return get_http_webui_base()
+        elif baseurl == 'https':
+            return get_https_webui_base()
+        else:
+            return baseurl
+    else:
+        return get_http_webui_base()
 
 def get_https_webui_base():
     return "https://" + config.webui_base

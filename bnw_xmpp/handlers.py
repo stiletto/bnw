@@ -130,7 +130,7 @@ redeye_handlers = (
                 ("c", "usercss", True, u"User CSS."),
                 ("p", "password", True, u"Password."),
                 ("s", "servicejid", True, u"Set service's jid."),
-                ("h", "httpslinks", True, u"Request https links."),
+                ("b", "baseurl", True, u"Set base url for links."),
             ),
             command_settings.cmd_set,
         ),
