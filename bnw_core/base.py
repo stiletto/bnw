@@ -30,16 +30,16 @@ def get_webui_base(user):
         "random string": return this string
         None: return http base url
     """
-    if 'baseurl' in user['settings']:
-        baseurl = user['settings']['baseurl']
+    baseurl = user.get('settings',{}).get('baseurl',None)
+    if not baseurl:
+        return get_http_webui_base()
+    else:
         if baseurl == 'http':
             return get_http_webui_base()
         elif baseurl == 'https':
             return get_https_webui_base()
-        else:
+        elif baseurl:
             return baseurl
-    else:
-        return get_http_webui_base()
 
 def get_https_webui_base():
     return "https://" + config.webui_base
