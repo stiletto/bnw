@@ -23,22 +23,31 @@ uninstall-deb:
 	rm -rfv linkshit
 	sudo apt-get autoremove $(DEBIAN_DEPS)
 
+PIP=.venv/bin/pip
+
 install-venv:
 	sudo apt-get install $(VENV_DEPS)
 	virtualenv .venv
-	source .venv/bin/activate
-	pip install twisted tornado PyRSS2Gen
-	pip install -e git+https://github.com/fiorix/mongo-async-python-driver.git#egg=txmongo
+	$(PIP) install twisted tornado PyRSS2Gen
+	$(PIP) install -e git+https://github.com/fiorix/mongo-async-python-driver.git#egg=txmongo
 	git clone https://github.com/stiletto/linkshit.git
 
 uninstall-venv:
-	deactivate
-	rm -rfv .venv
+	rm -rfv .venv linkshit
 	sudo apt-get autoremove $(VENV_DEPS)
+
+rm-venv:
+	rm -rfv .venv
+
+reinstall-venv: rm-venv install-venv
 
 config:
 	cp -i config.py.example config.py
 	$(EDITOR) config.py
 
+RUN_CMD=twistd -ny instance.tac
+
 run:
-	twistd -ny instance.tac
+	test -d .venv &&\
+		bash -c "source .venv/bin/activate; $(RUN_CMD)" ||\
+		$(RUN_CMD)

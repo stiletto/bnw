@@ -3,18 +3,16 @@
 ### Copy this file to config.py and edit it in according with
 ### your preferences.
 
+
 ## BnW's XMPP address. With default settings you should add
 ## 'bnw.localhost' contact to the roster (or 'bnw@bnw.localhost'
-## if your XMPP client complains about wrong jid.)
-
+## if your XMPP client complains about wrong jid).
 srvc_name = 'bnw.localhost'
 
 ## BnW's XMPP component port.
-
 srvc_port = 5347
 
 ## Password used for component authorization.
-
 srvc_pwd = 'surelythisissecureenough'
 
 ## XMPP servers configuration for default variant of settings:
@@ -39,32 +37,26 @@ srvc_pwd = 'surelythisissecureenough'
 ##     component_secret = "surelythisissecureenough"
 
 ## MongoDB's databases names which will be created and used by BnW.
-
 database = 'bnw'
 database_fs = 'bnw_fs'
 
 ## Is BnW's web interface should be enabled. In case of default
 ## settings it can be reached on http://localhost:7808
-
 webui_enabled = True
 
 ## BnW's web interface port.
-
 webui_port = 7808
 
 ## Web base URL, used for http links producing.
 ## In case of public service you should write here domain name:
 ## webui_base = 'example.com'
-
 webui_base = 'localhost:7808'
 
 ## Websockets base URL.
 ## In case of public service you should write here domain name:
 ## webui_wsbase = 'example.com'
-
 webui_wsbase = 'localhost:7808'
 
 ## Don't touch this, this settings should be rewritten and refactored.
-
 fuck_enabled = False
 fuck_port = 8081
