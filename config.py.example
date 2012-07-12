@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+### Copy this file to config.py and edit it in according with
+### your preferences.
+
 ## BnW's XMPP address. With default settings you should add
 ## 'bnw.localhost' contact to the roster (or 'bnw@bnw.localhost'
 ## if your XMPP client complains about wrong jid.)
