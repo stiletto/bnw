@@ -323,24 +323,6 @@ class CommentHandler(BnwWebHandler,AuthMixin):
         else:
             defer.returnValue({'error':result})
 
-class OexchangeHandler(BnwWebHandler):
-    templatename='oexchange.xrd'
-    @defer.inlineCallbacks
-    def respond(self):
-        self.set_header("Cache-Control", "max-age=1000000")
-        self.set_header("Content-Type", "application/xrd+xml")
-        defer.returnValue({})
-        yield
-
-class HostMetaHandler(BnwWebHandler):
-    templatename='oexchange-host-meta'
-    @defer.inlineCallbacks
-    def respond(self):
-        self.set_header("Cache-Control", "max-age=1000000")
-        self.set_header("Content-Type", "application/xrd+xml")
-        defer.returnValue({})
-        yield
-
 emptypng=base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAAXNSR0IDN8dNUwAAAANQTFRF////p8QbyAAAAAlwSFlzAAAPYQAAD2EBqD+naQAAABZ6VFh0YXV0aG9yAAB42gtOLUpPrQQACDECcKiD3nQAAAAKSURBVAjXY2AAAAACAAHiIbwzAAAAAElFTkSuQmCC')
 
 class AvatarHandler(BnwWebHandler):
@@ -382,8 +364,6 @@ def get_site():
         (r"/ws/?", MainWsHandler),
         (r"/t/()(.*)/?", MainHandler),
         (r"/c/(.*)()/?", MainHandler),
-        (r"/oexchange.xrd", OexchangeHandler),
-        (r"/.well-known/host-meta", HostMetaHandler),
         (r"/login", LoginHandler),
         (r"/post", PostHandler),
         (r"/feed", FeedHandler),
