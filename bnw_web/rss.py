@@ -76,5 +76,5 @@ def message_feed(messages,link,title,*args,**kwargs):
                         docs=None,
                         items=rss_items,
                         *args,**kwargs)
-    rss_feed.selflink=link+'?format=rss'
+    rss_feed.selflink=link+'/?format=rss'
     return rss_feed.to_xml(encoding='utf-8')

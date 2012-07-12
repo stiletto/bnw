@@ -1,3 +1,4 @@
+# TODO: Update and refactor it.
 # Зависимости составлялись для попсоубунты 10.10.
 # Тут, к примеру из коробки есть python-twisted-core
 
@@ -6,8 +7,10 @@ DEPS=	python-pyrss2gen\
 	python-twisted-words\
 	mongodb-server
 
-run: config.py tornado txWebSocket mongo-async-python-driver
+run:
 	twistd -ny instance.tac
+
+install: config.py tornado txWebSocket mongo-async-python-driver
 
 config.py:
 	cp config.py.example config.py
@@ -27,4 +30,3 @@ install-deb:
 
 uninstall-deb:
 	sudo aptitude remove $(DEPS)
-

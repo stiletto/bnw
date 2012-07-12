@@ -2,15 +2,18 @@
 #from twisted.words.xish import domish
 
 from base import *
-import bnw_core.base
+from bnw_core.base import get_webui_base
 import bnw_core.bnw_objects as objs
 from twisted.internet import defer
 
 @require_auth
 def cmd_login(request):
     """ Логин-ссылка """
-    return dict(ok=True,
-             desc=bnw_core.base.config.webui_base+'login?key='+request.user.get('login_key',''))
+    return dict(
+        ok=True,
+        desc='%s/login?key=%s' % (
+            get_webui_base(request.user),
+            request.user.get('login_key', '')))
 
 @defer.inlineCallbacks
 def cmd_passlogin(request,user,password):

@@ -1,5 +1,5 @@
 #!/bin/echo tac is a python source file, but should be started via twistd
-# coding: utf-8
+
 import sys
 try:
     sys.setappdefaultencoding('utf-8')
@@ -8,14 +8,12 @@ except:
     sys.setdefaultencoding('utf-8')
 import os.path as path
 root=path.abspath(path.dirname(__file__))
-sys.path.append(root)
+sys.path.insert(0,root)
 sys.path.insert(0,path.join(root,'txWebSocket'))
 import config
 
-
-if True or config.webui_enabled:
-    import tornado.platform.twisted
-    tornado.platform.twisted.install()
+import tornado.platform.twisted
+tornado.platform.twisted.install()
 
 import bnw_core.base
 bnw_core.base.config.register(config)
@@ -29,15 +27,15 @@ from bnw_xmpp import bnw_component
 
 application = service.Application("example-echo")
 
-# set up Jabber Component
-sm = component.buildServiceManager(config.srvc_name, config.srvc_pwd,
-                    ('tcp:127.0.0.1:' + str(config.srvc_port) ))
+# Set up XMPP component.
+sm = component.buildServiceManager(
+    config.srvc_name, config.srvc_pwd,
+    ('tcp:127.0.0.1:%i' % config.srvc_port))
 
-
-# Turn on verbose mode
+# Turn on verbose mode.
 bnw_component.LogService().setServiceParent(sm)
 
-# set up our example Service
+# Set up our service.
 s = bnw_component.BnwService()
 s.setServiceParent(sm)
 
