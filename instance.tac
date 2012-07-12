@@ -9,7 +9,6 @@ except:
 import os.path as path
 root=path.abspath(path.dirname(__file__))
 sys.path.insert(0,root)
-sys.path.insert(0,path.join(root,'txWebSocket'))
 import config
 
 import tornado.platform.twisted

@@ -10,23 +10,20 @@ DEPS=	python-pyrss2gen\
 run:
 	twistd -ny instance.tac
 
-install: config.py tornado txWebSocket mongo-async-python-driver
+install: config.py tornado mongo-async-python-driver
 
 config.py:
-	cp config.py.example config.py
+	cp -i config.py.example config.py
 	/usr/bin/editor config.py
 
 tornado:
-	git clone https://github.com/dustin/tornado.git tornado
+	git clone https://github.com/dustin/tornado.git
 
 mongo-async-python-driver:
-	git clone https://github.com/fiorix/mongo-async-python-driver.git mongo-async-python-driver
-
-txWebSocket:
-	git clone https://github.com/rlotun/txWebSocket.git txWebSocket
+	git clone https://github.com/fiorix/mongo-async-python-driver.git
 
 install-deb:
-	sudo aptitude install $(DEPS)
+	sudo apt-get install $(DEPS)
 
 uninstall-deb:
-	sudo aptitude remove $(DEPS)
+	sudo apt-get autoremove $(DEPS)
