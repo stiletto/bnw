@@ -1,59 +1,65 @@
 # -*- coding: utf-8 -*-
 
-## Адрес сервера, где работает этот трактор с костылями.
-## Для колыбели блекджекошлюхуйка было бы правильно написать:
-# hostname='blasux.ru'
+## XMPP-адрес сервиса. С настройками по умолчанию в клиенты надо
+## добавлять контакт bnw.localhost или bnw@bnw.localhost, если
+## клиент ругается на неправильный jid.
 
-hostname = 'bnw.blasux.ru'
+srvc_name = 'bnw.localhost'
 
-## Порт, по которому работает xmpp-сервис bnw. Просто оставь как есть.
+## Порт, на котором работает XMPP-компонент BnW.
 
-srvc_port = 6591
+srvc_port = 5347
 
-## Так твой бээнвач известен первому встречному.
-## Это имя будет участвовать в названии сервиса, так что добавлять в ростер надо
-## будет bnw.localhost или icanhasnigrapack@bnw.localhost если прыщеклиент не
-## сможет добавить в ростер просто сервис без ника. Empathy, например, не смог.
-
-srvc_name = 'bnw.blasux.ru'
-
-## Пароль от сервиса. Указывается не от балды, а из конфига ejabberd-сервера,
-## которого там, кстати говоря, нет. MWAHAHA ENJOY YOUR AIDS! Надо открыть
-## /etc/ejabberd/ejabberd.cfg, отыскать ejabberd_service и где-нибудь около
-## ICQ-транспорта добавить свой сервис:
-## 
-##  %% Blackjack 'n Whores
-##  {6591, ejabberd_service, [
-##                            {ip, {127, 0, 0, 1}},
-##                            {access, all},
-##                            {shaper_rule, fast},
-##                            {host, "bnw.localhost", [{password, "surelythisissecureenough"}]}
-##                            ]},
+## Пароль для авторизации компонента.
 
 srvc_pwd = 'surelythisissecureenough'
 
-## Надо ли запускать веб-интерфейс к бнвачу. Это как http://bnw.blasux.ru,
-## только свой собственный. Если брать все значения по умолчанию, то открывать
-## надо http://localhost:7808
+## * Соответствующая конфигурация ejabberd в случае настроек по умолчанию:
+## Открыть /etc/ejabberd/ejabberd.cfg, отыскать ejabberd_service и
+## где-нибудь около ICQ-транспорта добавить:
+##
+## %% Blackjack'n'Whores
+## {5347, ejabberd_service, [
+##                           {ip, {127, 0, 0, 1}},
+##                           {access, all},
+##                           {shaper_rule, fast},
+##                           {host, "bnw.localhost", [{password, "surelythisissecureenough"}]}
+##                           ]},
+##
+## * Конфигурация prosody:
+## Открыть /etc/prosody/conf.avail/localhost.cfg.lua и дописать в конец:
+##
+## Component "bnw.localhost"
+##     component_secret = "surelythisissecureenough"
+
+## Названия баз данных MongoDB, которые создаст BnW для своего пользования.
+
+database = 'bnw'
+database_fs = 'bnw_fs'
+
+## Надо ли запускать веб-интерфейс к бнвачу. Это как <http://bnw.im/>,
+## только свой собственный. В случае настроек по умолчанию, он будет
+## располагаться по адресу http://localhost:7808
 
 webui_enabled = True
 
-## Порт веб-интерфейса
+## Порт веб-интерфейса.
 
 webui_port = 7808
 
-## Базовый URL
+## Базовая часть URL веб-интерфейса, используется для формирования http-ссылок.
+## В случае публичного сервиса, например, bnw.im, следует использовать:
+## webui_base = 'bnw.im'
 
-webui_base = 'http://bnw.blasux.ru/'
+webui_base = 'localhost:7808'
 
-webuiws_base = 'ws://bnw.blasux.ru/'
+## Базовый адрес для вебсокетов.
 
-webui_static = 'http://bnw.blasux.ru/static/'
+webui_wsbase = 'ws://localhost'
 
-## База данных
+## Хостнейм.
 
-database = 'bnw_test'
-database_fs = 'bnw_fs'
+hostname = 'localhost'
 
 ## Fuck
 

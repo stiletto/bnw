@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0">
-    <Subject>{{ config.webui_base }}</Subject>
-    
+    <Subject>{{ config.hostname }}</Subject>
+
     <!-- 
         A set of Property elements define OExchange-specific attributes of this Target.
     -->
@@ -13,24 +13,24 @@
     <!-- 
         The Target's icon is expressed as a Link of a defined relation.
     -->
-    <Link 
-        rel= "icon" 
-        href="{{ config.webui_base }}static/logo_16x16.png"
-        type="image/png" 
+    <Link
+        rel= "icon"
+        href="/static/logo_16x16.png"
+        type="image/png"
         />
-    <Link 
-        rel= "icon32" 
-        href="{{ config.webui_base }}static/logo_32x32.png"
-        type="image/png" 
+    <Link
+        rel= "icon32"
+        href="/static/logo_32x32.png"
+        type="image/png"
         />
-    
+
     <!-- 
         The individual OExchange protocol endpoints are expressed as Links of a
         defined relation type.
     -->
-    <Link 
-        rel= "http://www.oexchange.org/spec/0.8/rel/offer" 
-        href="{{ config.webui_base }}post"
-        type="text/html" 
+    <Link
+        rel= "http://www.oexchange.org/spec/0.8/rel/offer"
+        href="/post"
+        type="text/html"
         />
 </XRD>

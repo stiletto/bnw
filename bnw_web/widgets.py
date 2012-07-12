@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import tornado.escape
 import datetime
-import bnw_core.base
 
 def runums(n,d1,d2,d5):
     l=n%10
@@ -35,9 +34,11 @@ class Widgets(object):
     def tags(self,tags,clubs,user=None):
         return '<div class="tags"> '+' '.join(self.club(c,user) for c in clubs)+' '+' '.join(self.tag(t,user) for t in tags)+' </div>'
     def user_url(self,name):
-        return bnw_core.base.config.webui_base+'u/%(u)s' % {'u':name}
+        # TODO: Full path?
+        return '/u/%(u)s' % {'u':name}
     def post_url(self,name):
-        return bnw_core.base.config.webui_base+'p/%(u)s' % {'u':name}
+        # TODO: Full path?
+        return '/p/%(u)s' % {'u':name}
     def userl(self,name):
         #return '<a href="/u/%(u)s" class="usrid"><img style="border: none; height: 0.5em;" src="/u/%(u)s/avatar"/>%(u)s</a>' % {'u':name}
         #return '<a href="/u/%(u)s" class="usrid"><img style="border: none; height: 0.5em;" src="http://huynya2.blasux.ru/cgi-bin/identicon.sh?id=%(u)s&s=16"/>%(u)s</a>' % {'u':name}

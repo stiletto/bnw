@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-#from twisted.words.xish import domish
 
 from base import *
 import random,time
-from bnw_core.base import BnwResponse,config
+from bnw_core.base import BnwResponse,get_webui_base
 import bnw_core.bnw_objects as objs
 
 from twisted.python import log
@@ -18,7 +17,7 @@ def throttle_check(user):
     if post_throttle and post_throttle['time']>=(time.time()-5):
         raise BnwResponse('You are sending messages too fast!')
     defer.returnValue(post_throttle)
-    
+
 @defer.inlineCallbacks
 def throttle_update(user,post_throttle):
         throttledoc={'user':user,'time':time.time()}
@@ -32,15 +31,18 @@ def throttle_update(user,post_throttle):
 @defer.inlineCallbacks
 def postMessage(request,tags,clubs,text,anon=False,anoncomments=False):
         post_throttle=yield throttle_check(request.user['name'])
-        ok,rest = yield bnw_core.post.postMessage(request.user,tags,clubs,text,anon,anoncomments,sfrom=request.to)
+        ok,rest = yield bnw_core.post.postMessage(
+            request.user,tags,clubs,text,anon,anoncomments,sfrom=request.to)
         _ = yield throttle_update(request.user['name'],post_throttle)
         if ok:
             msgid,qn,recepients = rest
             defer.returnValue(
                 dict(ok=True,
-                     desc='Message #%s has been delivered to %d users. $%d. %sp/%s' % (msgid,recepients,qn,config.webui_base,msgid),
-                     id=msgid)
-            )
+                     desc='Message #%s has been delivered '
+                          'to %d users. %s/p/%s' % (
+                            msgid,recepients,get_webui_base(request.user),
+                            msgid),
+                     id=msgid))
         else:
             defer.returnValue(
                 dict(ok=False,desc=rest)
@@ -56,7 +58,6 @@ def cmd_post(request,tags="",clubs="",anonymous="",anoncomments="",text=""):
         clubs=filter(None,set([x.lower().strip().replace('\n',' ')[:256] for x in clubs]))
         defer.returnValue(
             (yield postMessage(request,tags,clubs,text,anonymous,anoncomments)))
-
 
 @defer.inlineCallbacks
 def cmd_post_simple(request,text,tag1=None,tag2=None,tag3=None,tag4=None,tag5=None):
@@ -77,17 +78,19 @@ def cmd_comment(request,message="",anonymous="",text=""):
         message_id=message.split('/')[0]
         comment_id=message if '/' in message else None
         post_throttle=yield throttle_check(request.user['name'])
-        ok,rest = yield bnw_core.post.postComment(message_id,comment_id,text,request.user,anonymous,sfrom=request.to)
+        ok,rest = yield bnw_core.post.postComment(
+            message_id,comment_id,text,request.user,anonymous,sfrom=request.to)
         _ = yield throttle_update(request.user['name'],post_throttle)
         if ok:
             msgid,num,qn,recepients = rest
             defer.returnValue(
                 dict(ok=True,
-                    desc='Comment #%s (%d) has been delivered to %d users. $%d. %sp/%s' % 
-                        (msgid,num,recepients,qn,config.webui_base,msgid.replace('/','#')),
-                    id=msgid,
-                    num=num,)
-            )
+                     desc='Comment #%s (%d) has been delivered '
+                          'to %d users. %s/p/%s' % (
+                            msgid,num,recepients,get_webui_base(request.user),
+                            msgid.replace('/','#')),
+                     id=msgid,
+                     num=num))
         else:
             defer.returnValue(
                 dict(ok=False,desc=rest)
