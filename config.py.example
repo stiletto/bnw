@@ -42,17 +42,14 @@ webui_enabled = True
 
 webui_port = 7808
 
-## Базовый URL
+## Базовые URL
 
-webui_base = 'http://bnw.blasux.ru/'
-
+webui_base = 'bnw.blasux.ru'
 webuiws_base = 'ws://bnw.blasux.ru/'
-
-webui_static = 'http://bnw.blasux.ru/static/'
 
 ## База данных
 
-database = 'bnw_test'
+database = 'bnw'
 database_fs = 'bnw_fs'
 
 ## Fuck

@@ -9,8 +9,7 @@ import bnw_core.bnw_objects as objs
 
 class SimpleSetting(object):
     def __init__(self,default=None):
-        self.default=None
-        pass
+        self.default = default
 
     def get(self,request,name):
         setts = request.user.get('settings',{})
@@ -31,35 +30,46 @@ class ServiceJidSetting(SimpleSetting):
     def write(self,request,name,value):
         return SimpleSetting.write(self,request,name,request.to)
 
-optionnames = { 'usercss': SimpleSetting(''),
-                'password': SimpleSetting(None),
-                'servicejid': ServiceJidSetting(),
-              }
+class HttpsLinksSetting(SimpleSetting):
+    def write(self, request, name, value):
+        if value not in ['on', 'off']:
+            return (False, ("Value can only be 'on' or 'off'"))
+        else:
+            return super(HttpsLinksSetting, self).write(request, name, value)
+
+optionnames = {
+    'usercss': SimpleSetting(),
+    'password': SimpleSetting(),
+    'servicejid': ServiceJidSetting(),
+    'httpslinks': HttpsLinksSetting('off'),
+}
 
 @require_auth
 @defer.inlineCallbacks
-def cmd_set(request,**kwargs):
+def cmd_set(request, **kwargs):
     """ Настройки """
     if not kwargs:
+        # Show current settings.
         current = {}
         for n,v in optionnames.iteritems():
             current[n]=v.get(request,n)
         defer.returnValue(
-            dict(ok=True,format='settings',settings=current)
-        )
+            dict(ok=True,format='settings',settings=current))
     else:
-        for n,v in kwargs.iteritems():
-            on = optionnames.get(n,None)
-            if not on:
+        if 'name' in kwargs:
+            # Simplified interface.
+            name, value = kwargs['name'], kwargs['value']
+        else:
+            # Redeye interface.
+            name, value = kwargs.items()[0]
+        if not name in optionnames:
+            defer.returnValue(
+                dict(ok=False,desc='Unknown setting: %s' % kwargs['name']))
+        else:
+            res = yield optionnames[name].write(request, name, value)
+            if not res[0]:
                 defer.returnValue(
-                    dict(ok=False,desc='Unknown setting: %s' % (n,))
+                    dict(ok=False,desc=res[1])
                 )
-            else:
-                res = yield on.write(request,n,v)
-                if not res[0]:
-                    defer.returnValue(
-                        dict(ok=False,desc=res[1])
-                    )
         defer.returnValue(
-            dict(ok=True,desc='Settings updated.')
-        )
+            dict(ok=True,desc='Settings updated.'))

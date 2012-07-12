@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
-#from twisted.words.xish import domish
-
-import random
 import datetime
-import bnw_core.base
+from bnw_core.base import get_webui_base
 
 formatters = {
     'comment': None,
@@ -13,19 +9,19 @@ formatters = {
     'messages': None,
 }
 
-def format_message(msg,short=False):
-    result=('@%(author)s: %(tags)s %(clubs)s\n%(text)s\n'+('\n' if not short else '')+'#%(id)s (%(rc)d) %(web)sp/%(id)s') % \
+def format_message(request,msg,short=False):
+    result=('@%(author)s: %(tags)s %(clubs)s\n%(text)s\n'+('\n' if not short else '')+'#%(id)s (%(rc)d) %(web)s/p/%(id)s') % \
            { 'id':    msg['id'].upper(),
              'author':msg['user'],
              'tags':  ' '.join('*'+tag for tag in msg['tags']),
              'clubs': ' '.join('!'+tag for tag in msg['clubs']),
              'rc':    msg['replycount'],
              'text':  msg['text'],
-             'web': bnw_core.base.config.webui_base,
+             'web': get_webui_base(request.user),
            }
     return result
     
-def format_comment(msg,short=False):
+def format_comment(request,msg,short=False):
     args={    'id':    msg['id'].split('/')[1].upper(),
               'author':msg['user'],
               'message':msg['message'].upper(),
@@ -34,7 +30,7 @@ def format_comment(msg,short=False):
               'rc':    msg.get('num',-1),
               'text':  msg['text'],
               'date':  datetime.datetime.utcfromtimestamp(msg['date']).strftime('%d.%m.%Y %H:%M:%S'),
-              'web': bnw_core.base.config.webui_base,
+              'web': get_webui_base(request.user),
          }
     formatstring=('' if short else 'Reply by ')+ '@%(author)s:\n'
     if not short:
@@ -44,28 +40,28 @@ def format_comment(msg,short=False):
         formatstring+='\n'
     formatstring+='#%(message)s/%(id)s (%(rc)d)'
     if not short:
-        formatstring+=' %(web)sp/%(message)s#%(id)s'
+        formatstring+=' %(web)s/p/%(message)s#%(id)s'
     return formatstring % args
 
 def formatter_messages(request,result):
-    return 'Search results:\n'+'\n\n'.join((format_message(msg,True) for msg in result['messages']))
+    return 'Search results:\n'+'\n\n'.join((format_message(request,msg,True) for msg in result['messages']))
 
 def formatter_message_with_replies(request,result):
-    return format_message(result['message']) + '\n' + \
-            '\n\n'.join((format_comment(c,True) for c in result['replies']))
+    return format_message(request,result['message']) + '\n' + \
+            '\n\n'.join((format_comment(request,c,True) for c in result['replies']))
 
 def formatter_subscriptions(request,result):
     return 'Your subscriptions:\n'+'\n'.join((s['type'][4:].ljust(5)+s['target'] for s in result['subscriptions']))
 
 def formatter_message(request,result):
-    return format_message(result['message'])
+    return format_message(request,result['message'])
 
 def formatter_recommendation(request,result):
     return 'Recommended by @%s: %s\n' % (result['recommender'],result['recocomment']) + \
-        format_message(result['message'])
+        format_message(request,result['message'])
 
 def formatter_comment(request,result):
-    return format_comment(result['comment'])
+    return format_comment(request,result['comment'])
 
 def formatter_userlist(request,result):
     if not result['users']:

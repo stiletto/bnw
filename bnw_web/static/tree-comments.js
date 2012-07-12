@@ -165,7 +165,7 @@
             var favicon_changed = false;
             $(window).focus(function () {
                 if (favicon_changed) {
-                    favicon.change(webui_base+"favicon.ico");
+                    favicon.change("/favicon.ico");
                     favicon_changed = false;
                 }
             });
@@ -205,7 +205,7 @@
                     new_comment.append(addinfo);
                     $("div.comments").append($("<div class='outerborder'>").append(new_comment));
                     if (!favicon_changed) {
-                        favicon.change(webui_base+"static/favicon-event.ico");
+                        favicon.change("/static/favicon-event.ico");
                         favicon_changed = true;
                     }
                 }

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-#from twisted.words.xish import domish
 
 from parser_redeye import RedEyeParser
 from parser_regex import RegexParser
@@ -130,7 +129,8 @@ redeye_handlers = (
             (
                 ("c", "usercss", True, u"User CSS."),
                 ("p", "password", True, u"Password."),
-                ("s", "servicejid", False, u"Set service jid."),
+                ("s", "servicejid", True, u"Set service's jid."),
+                ("h", "httpslinks", True, u"Request https links."),
             ),
             command_settings.cmd_set,
         ),
@@ -207,10 +207,8 @@ simple_handlers = (
         (ur'JID !(?P<select>\S+)',command_jids.cmd_jids),
         (ur'JID',command_jids.cmd_jids),
 
-        (ur'[sS][eE][tT] +[uU][sS][eE][rR][cC][sS][sS] +(?P<usercss>\S+)',command_settings.cmd_set),
-        (ur'[sS][eE][tT] +[pP][aA][sS][sS][wW][oO][rR][dD] +(?P<password>\S+)',command_settings.cmd_set),
-        (ur'[sS][eE][tT] +[sS][eE][rR][vV][iI][cC][eE][jJ][iI][dD](?P<servicejid> *)',command_settings.cmd_set),
-        (ur'[sS][eE][tT].*',command_settings.cmd_set),
+        (ur'[sS][eE][tT]',command_settings.cmd_set),
+        (ur'[sS][eE][tT] +(?P<name>\w+) +(?P<value>\S+)',command_settings.cmd_set),
 
         (ur'(?:TODAY|today|Today)',command_show.cmd_today),
         (ur'[#№]',command_show.cmd_feed),

@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-#from twisted.words.xish import domish
 
 from base import *
 import random,time
-from bnw_core.base import BnwResponse,config
+from bnw_core.base import BnwResponse,get_webui_base
 import bnw_core.bnw_objects as objs
 
 from twisted.python import log
@@ -18,7 +17,7 @@ def throttle_check(user):
     if post_throttle and post_throttle['time']>=(time.time()-5):
         raise BnwResponse('You are sending messages too fast!')
     defer.returnValue(post_throttle)
-    
+
 @defer.inlineCallbacks
 def throttle_update(user,post_throttle):
         throttledoc={'user':user,'time':time.time()}
@@ -40,8 +39,9 @@ def postMessage(request,tags,clubs,text,anon=False,anoncomments=False):
             defer.returnValue(
                 dict(ok=True,
                      desc='Message #%s has been delivered '
-                          'to %d users. %sp/%s' % (
-                            msgid,recepients,config.webui_base,msgid),
+                          'to %d users. %s/p/%s' % (
+                            msgid,recepients,get_webui_base(request.user),
+                            msgid),
                      id=msgid))
         else:
             defer.returnValue(
@@ -58,7 +58,6 @@ def cmd_post(request,tags="",clubs="",anonymous="",anoncomments="",text=""):
         clubs=filter(None,set([x.lower().strip().replace('\n',' ')[:256] for x in clubs]))
         defer.returnValue(
             (yield postMessage(request,tags,clubs,text,anonymous,anoncomments)))
-
 
 @defer.inlineCallbacks
 def cmd_post_simple(request,text,tag1=None,tag2=None,tag3=None,tag4=None,tag5=None):
@@ -87,8 +86,8 @@ def cmd_comment(request,message="",anonymous="",text=""):
             defer.returnValue(
                 dict(ok=True,
                      desc='Comment #%s (%d) has been delivered '
-                          'to %d users. %sp/%s' % (
-                            msgid,num,recepients,config.webui_base,
+                          'to %d users. %s/p/%s' % (
+                            msgid,num,recepients,get_webui_base(request.user),
                             msgid.replace('/','#')),
                      id=msgid,
                      num=num))

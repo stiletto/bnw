@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}BnW - {{ msg.get('user','None') if msg else 'None' }}: {{ w.shorttext(msg['text']) if msg else 'None' }}{% end %}
 {% block extrahead %}
-    <link rel="canonical" href="{{ config.webui_base }}p/{{ msgid }}" />
+    <link rel="canonical" href="/p/{{ msgid }}" />
     <script type="text/javascript" src="{{ static_url("web-socket-js/swfobject.js") }}"></script>
     <script type="text/javascript" src="{{ static_url("web-socket-js/FABridge.js") }}"></script>
     <script type="text/javascript" src="{{ static_url("web-socket-js/web_socket.js") }}"></script>

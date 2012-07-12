@@ -203,9 +203,14 @@ class MainHandler(BnwWebHandler,AuthMixin):
         self.set_header("Cache-Control", "max-age=1")
         if format=='rss':
             self.set_header("Content-Type", 'application/rss+xml; charset=UTF-8')
-            defer.returnValue(rss.message_feed(messages,
-                        link=bnw_core.base.config.webui_base,
-                        title='Коллективное бессознательное BnW'))
+            if self.request.protocol == "https":
+                base = bnw_core.base.get_https_webui_base()
+            else:
+                base = bnw_core.base.get_http_webui_base()
+            defer.returnValue(
+                rss.message_feed(
+                    messages,link=base,
+                    title='Коллективное бессознательное BnW'))
 
         elif format=='json':
             json_messages=[message.filter_fields() for message in messages]
