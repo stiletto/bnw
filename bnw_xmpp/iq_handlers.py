@@ -41,17 +41,10 @@ def vcard_getav(iq,iq_user):
         _ = yield objs.User.mupdate({'name':iq_user['name']},
                           {'$set':{'avatar':[avid,mimetype]}})
         defer.returnValue( True )
-    pass
 
+VERSION_XMLNS = 'jabber:iq:version'
 def version(iq,iq_user):
-    #2010-12-10 21:55:29+0300 [XmlStream,client] 1292007329.38 - RECV: 
-    #<iq from='blasux@blasux.ru/Gajim' to='bnw.blasux.ru' xml:lang='ru' type='get' id='496'>
-    #   <query xmlns='jabber:iq:version'/>
-    #</iq>
-    
-    if iq.query:
-        if not 'jabber:iq:version' in iq.query.toXml(): # какого-то хуя не работает iq.query.getAttribute('xmlns','')
-            return False
+    if iq.query and iq.query.uri == VERSION_XMLNS:
         reply = domish.Element((None,'iq'))
         reply['type'] = 'result'
         if iq.getAttribute('id',None):
@@ -63,13 +56,10 @@ def version(iq,iq_user):
         reply.query.addElement('os',content='OS/360')
         send_raw(iq['from'],iq['to'],reply)
         return True
-    pass
 
-DISCO_ITEMS_XMLNS="http://jabber.org/protocol/disco#items"
+DISCO_ITEMS_XMLNS = 'http://jabber.org/protocol/disco#items'
 def disco_items(iq,iq_user):
-    if iq.query:
-        if not DISCO_ITEMS_XMLNS in iq.query.toXml():
-            return False
+    if iq.query and iq.query.uri == DISCO_ITEMS_XMLNS:
         reply = domish.Element((None,'iq'))
         reply['type'] = 'result'
         if iq.getAttribute('id',None):
@@ -79,7 +69,7 @@ def disco_items(iq,iq_user):
         send_raw(iq['from'],iq['to'],reply)
         return True
 
-DISCO_INFO_XMLNS="http://jabber.org/protocol/disco#info"
+DISCO_INFO_XMLNS = 'http://jabber.org/protocol/disco#info'
 FEATURES = ('jabber:iq:version',
             'http://jabber.org/protocol/chatstates',
             'http://jabber.org/protocol/disco#info',
@@ -87,9 +77,7 @@ FEATURES = ('jabber:iq:version',
             'urn:xmpp:receipts',
 )
 def disco_info(iq,iq_user):
-    if iq.query:
-        if not DISCO_INFO_XMLNS in iq.query.toXml():
-            return False
+    if iq.query and iq.query.uri == DISCO_INFO_XMLNS:
         reply = domish.Element((None,'iq'))
         reply['type'] = 'result'
         if iq.getAttribute('id',None):
