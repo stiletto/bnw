@@ -2,13 +2,11 @@
 #epollreactor.install()
 
 import os,random,time
-import escape
 import json
 from twisted.internet import defer
 from widgets import widgets
 from datetime import datetime
 from tornado.escape import utf8,_unicode
-from escape import linkify
 
 import bnw_core.bnw_objects as objs
 import bnw_core.post as post

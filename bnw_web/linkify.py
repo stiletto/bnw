@@ -119,4 +119,3 @@ if __name__=="__main__":
 	    print '*** FAILED ***'
 	    print 'E:',x[1]
 	    raise AssertionError
-

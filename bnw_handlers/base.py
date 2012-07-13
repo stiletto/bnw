@@ -5,10 +5,9 @@ import bnw_core.base
 
 USER_RE=ur'[0-9A-Za-z_-]+'
 
-FUCK = 'http://bnw.im/' 
-MESSAGE_RE=ur'(?:#|'+FUCK+ur'p/)?([0-9A-Za-z]+)'
-COMMENT_RE=ur'(?:#|'+FUCK+ur'p/)?([0-9A-Za-z]+(?:#|/)[0-9A-Za-z]+)'
-MESSAGE_COMMENT_RE=ur'(?:#|'+FUCK+ur'p/)?([0-9A-Za-z]+(?:(?:#|/)[0-9A-Za-z]+)?)'
+MESSAGE_RE=r'#?([0-9A-Za-z]+)'
+COMMENT_RE=r'#?([0-9A-Za-z]+(?:#|/)[0-9A-Za-z]+)'
+MESSAGE_COMMENT_RE=r'#?([0-9A-Za-z]+(?:(?:#|/)[0-9A-Za-z]+)?)'
 
 MESSAGE_REC = re.compile(MESSAGE_RE)
 COMMENT_REC = re.compile(COMMENT_RE)

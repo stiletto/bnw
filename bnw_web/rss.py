@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-#epollreactor.install()
 
 import os,random,time
-import escape
 from widgets import widgets
 import PyRSS2Gen
 from datetime import datetime
-from escape import linkify
+from linkify import linkify
 
 from xml.sax import saxutils
 
@@ -68,7 +66,7 @@ def message_feed(messages,link,title,*args,**kwargs):
                         pubDate=datetime.utcfromtimestamp(msg['date']),
                         categories=set(msg['tags'])|set(msg['clubs']),
                         title='@%s: #%s' % (msg['user'],msg['id']),
-                        description=BnwDescription(linkify(msg['text'],shorten=False).replace('\n','<br/>'))) for msg in messages]
+                        description=BnwDescription(linkify(msg['text']).replace('\n','<br/>'))) for msg in messages]
 
     rss_feed=BnwRSSFeed(title=title,
                         link=link,
