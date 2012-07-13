@@ -15,7 +15,6 @@ import logging,traceback
 import json
 import txmongo
 import os,random,time
-import escape
 from widgets import widgets
 import uimodules
 import rss
@@ -101,7 +100,6 @@ class UserHandler(BnwWebHandler,AuthMixin):
         if tag:
             tag = tornado.escape.url_unescape(tag)
             qdict['tags'] = tag
-        print qdict
         messages=(yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page))
 
         format=self.get_argument("format","")

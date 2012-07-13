@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-#epollreactor.install()
 
 import os,random,time
-import escape
 from widgets import widgets
 import PyRSS2Gen
 from datetime import datetime
-from escape import linkify
+from linkify import linkify
 
 from xml.sax import saxutils
 

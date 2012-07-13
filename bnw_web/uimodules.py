@@ -1,5 +1,4 @@
 import tornado.web
-import escape
 import base
 from widgets import widgets
 
