@@ -1,24 +1,27 @@
 # -*- coding: utf-8 -*-
 
-## XMPP-адрес сервиса. С настройками по умолчанию в клиенты надо
-## добавлять контакт bnw.localhost или bnw@bnw.localhost, если
-## клиент ругается на неправильный jid.
+### Copy this file to config.py and edit it in accordance with
+### your preferences.
 
+
+## BnW's XMPP address. With default settings you should add
+## 'bnw.localhost' contact to the roster (or 'bnw@bnw.localhost'
+## if your XMPP client complains about wrong jid).
 srvc_name = 'bnw.localhost'
 
-## Порт, на котором работает XMPP-компонент BnW.
-
+## BnW's XMPP component port.
 srvc_port = 5347
 
-## Пароль для авторизации компонента.
-
+## Password used for component authorization.
 srvc_pwd = 'surelythisissecureenough'
 
-## * Соответствующая конфигурация ejabberd в случае настроек по умолчанию:
-## Открыть /etc/ejabberd/ejabberd.cfg, отыскать ejabberd_service и
-## где-нибудь около ICQ-транспорта добавить:
+## XMPP servers configuration for default variant of settings:
 ##
-## %% Blackjack'n'Whores
+## * ejabberd
+## Open /etc/ejabberd/ejabberd.cfg and somewhere near the ICQ transport
+## configuration add:
+##
+## %% BnW component
 ## {5347, ejabberd_service, [
 ##                           {ip, {127, 0, 0, 1}},
 ##                           {access, all},
@@ -26,45 +29,34 @@ srvc_pwd = 'surelythisissecureenough'
 ##                           {host, "bnw.localhost", [{password, "surelythisissecureenough"}]}
 ##                           ]},
 ##
-## * Конфигурация prosody:
-## Открыть /etc/prosody/conf.avail/localhost.cfg.lua и дописать в конец:
+## * prosody
+## Open /etc/prosody/conf.avail/localhost.cfg.lua and add this
+## lines to the end:
 ##
 ## Component "bnw.localhost"
 ##     component_secret = "surelythisissecureenough"
 
-## Названия баз данных MongoDB, которые создаст BnW для своего пользования.
-
+## MongoDB's databases names which will be created and used by BnW.
 database = 'bnw'
 database_fs = 'bnw_fs'
 
-## Надо ли запускать веб-интерфейс к бнвачу. Это как <http://bnw.im/>,
-## только свой собственный. В случае настроек по умолчанию, он будет
-## располагаться по адресу http://localhost:7808
-
+## Is BnW's web interface should be enabled. In case of default
+## settings it can be reached on http://localhost:7808
 webui_enabled = True
 
-## Порт веб-интерфейса.
-
+## BnW's web interface port.
 webui_port = 7808
 
-## Базовая часть URL веб-интерфейса, используется для формирования http-ссылок.
-## В случае публичного сервиса, например, bnw.im, следует использовать:
-## webui_base = 'bnw.im'
-
+## Web base URL, used for http links producing.
+## In case of public service you should write here domain name:
+## webui_base = 'example.com'
 webui_base = 'localhost:7808'
 
-## Базовый адрес для вебсокетов.
+## Websockets base URL.
+## In case of public service you should write here domain name:
+## webui_wsbase = 'example.com'
+webui_wsbase = 'localhost:7808'
 
-webui_wsbase = 'ws://localhost'
-
-## Хостнейм.
-
-hostname = 'localhost'
-
-## Fuck
-
+## Don't touch this, this settings should be rewritten and refactored.
 fuck_enabled = False
-
-## Fuck-fuck-fuck
-
 fuck_port = 8081
