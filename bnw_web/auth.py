@@ -5,16 +5,12 @@ from twisted.web.server import Site, NOT_DONE_YET
 from twisted.web.resource import Resource, NoResource
 
 import tornado.options
-#import tornado.twister
 import tornado.web
-#import tornado.escape
 import logging,traceback
 import txmongo
 import os,random,time
-import escape
 from widgets import widgets
 import PyRSS2Gen
-#import websocket_site
 from datetime import datetime
 
 from tornado.options import define, options

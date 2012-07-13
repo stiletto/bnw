@@ -15,12 +15,10 @@ import logging,traceback
 import json
 import txmongo
 import os,random,time
-import escape
 from widgets import widgets
 import uimodules
 import rss
 import base64
-#import websocket_site
 from datetime import datetime
 
 from tornado.options import define, options
@@ -102,7 +100,6 @@ class UserHandler(BnwWebHandler,AuthMixin):
         if tag:
             tag = tornado.escape.url_unescape(tag)
             qdict['tags'] = tag
-        print qdict
         messages=(yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page))
 
         format=self.get_argument("format","")
@@ -374,15 +371,7 @@ def get_site():
         (r"/api/([0-9a-z/]*)/?", ApiHandler),
     ],**settings)
 
-    #ws_application = websocket_site.WebSocketApplication([
-    #    (r"/p/([A-Z0-9]+)/?", MessageWsHandler),
-    #])
-    #site = tornado.twister.TornadoSite(application)
-    http_server = tornado.httpserver.HTTPServer(application)
-    #http_server.listen(options.port)
-        
-    #site = websocket_site.CombinedSite(application,ws_application)
-    return http_server
+    return tornado.httpserver.HTTPServer(application)
 
 def main():
     tornado.options.parse_command_line()

@@ -27,21 +27,14 @@ class Widgets(object):
         pars = {'tu': tornado.escape.url_escape(club),
                 't':  tornado.escape.xhtml_escape(club[:32]),
                 'u':  user, }
-        #if user:
-        #    return '<a href="/u/%(u)s/c/%(tu)s" class="tag">%(t)s</a>' % pars
-        #else:
         return '<a href="/c/%(tu)s" class="club">%(t)s</a>' % pars
     def tags(self,tags,clubs,user=None):
         return '<div class="tags"> '+' '.join(self.club(c,user) for c in clubs)+' '+' '.join(self.tag(t,user) for t in tags)+' </div>'
     def user_url(self,name):
-        # TODO: Full path?
         return '/u/%(u)s' % {'u':name}
     def post_url(self,name):
-        # TODO: Full path?
         return '/p/%(u)s' % {'u':name}
     def userl(self,name):
-        #return '<a href="/u/%(u)s" class="usrid"><img style="border: none; height: 0.5em;" src="/u/%(u)s/avatar"/>%(u)s</a>' % {'u':name}
-        #return '<a href="/u/%(u)s" class="usrid"><img style="border: none; height: 0.5em;" src="http://huynya2.blasux.ru/cgi-bin/identicon.sh?id=%(u)s&s=16"/>%(u)s</a>' % {'u':name}
         return '<a href="/u/%(u)s" class="usrid">@%(u)s</a>' % {'u':name}
     def msgl(self,msg,bookmark=False):
         bm = ' rel="bookmark"' if bookmark else ''

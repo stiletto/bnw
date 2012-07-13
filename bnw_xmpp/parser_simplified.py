@@ -16,36 +16,6 @@ def requireAuthSimplified(fun):
             return fun(self,command,msg,parameters)
     return newfun
 
-def formatMessageSimple(msg,short=False):
-       return '\n@%(author)s: %(tags)s %(clubs)s\n%(text)s\n\n#%(id)s http://bnw.blasux.ru/p/%(id)s' % \
-            { 'id':    msg['id'].upper(),
-              'author':msg['user'],
-              'tags':  ' '.join('*'+tag for tag in msg['tags']),
-              'clubs': ' '.join('!'+tag for tag in msg['clubs']),
-              'text':  msg['text'],
-              'date':  datetime.datetime.utcfromtimestamp(msg['date']).strftime('%d.%m.%Y %H:%M:%S')
-            }
-
-def formatCommentSimple(msg,short=False):
-    args={    'id':    msg['id'].split('/')[1].upper(),
-              'author':msg['user'],
-              'message':msg['message'].upper(),
-              'replyto': msg['replyto'],
-              'replytotext': msg['replytotext'],
-              'text':  msg['text'],
-              'date':  datetime.datetime.utcfromtimestamp(msg['date']).strftime('%d.%m.%Y %H:%M:%S')
-         }
-    formatstring=('\n' if short else '\nReply by ')+ '@%(author)s:\n'
-    if not short:
-        formatstring+='>%(replytotext)s\n\n'
-    formatstring+='%(text)s\n'
-    if not short:
-        formatstring+='\n'
-    formatstring+='#%(message)s/%(id)s'
-    if not short:
-        formatstring+=' http://bnw.blasux.ru/p/%(message)s#%(id)s'
-    return formatstring % args
-
 class SimplifiedParser(BaseParser):
     SHOW_RE=re.compile(ur'^#([0-9A-Za-z]+)(/[0-9A-Za-z]+)?(\+)?$')
     SHOW_USER_RE=re.compile(ur'^@([0-9A-Za-z_-]+)(\+)?$')

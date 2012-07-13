@@ -55,7 +55,7 @@ def formatter_message_with_replies(request,result):
 
 def formatter_subscriptions(request,result):
     return 'Your subscriptions:\n'+'\n'.join(
-        (s['type'][4:].ljust(5)+s['target'].rjust(10)+' '+s.get('from','bnw.im')
+        (s['type'][4:].ljust(5)+s['target'].rjust(10)+' '+s.get('from','')
          for s in result['subscriptions']))
 
 def formatter_blacklist(request,result):
