@@ -43,7 +43,7 @@ reinstall-venv: rm-venv install-venv
 
 config:
 	cp -i config.py.example config.py
-	$(EDITOR) config.py
+	test $(EDITOR) && $(EDITOR) config.py || editor config.py
 
 RUN_CMD=twistd -ny instance.tac
 

@@ -12,12 +12,13 @@
 
 set -e
 NAME=bnw
-BNW_VENV_PATH=$HOME/bnw
+BNW_PATH=$HOME/bnw
+BNW_VENV_PATH=$BNW_PATH/.venv
 DAEMON=$BNW_VENV_PATH/bin/twistd
 PIDFILE=/tmp/bnw.pid
 DAEMON_OPTS="--pidfile=$PIDFILE
              --logfile=/tmp/bnw.log
-             --python=$BNW_VENV_PATH/src/bnw/instance.tac"
+             --python=$BNW_PATH/instance.tac"
 USER=bnw
 GROUP=bnw
 source $BNW_VENV_PATH/bin/activate

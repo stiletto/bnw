@@ -1,7 +1,8 @@
-Install necessary dependencies and debian verions of python libraries:
+Install necessary dependencies and python libraries from packages
+(for Debian):
 % make install-deb
 
-Alternatively, you can install BnW in virtualenv:
+Alternatively, you can install BnW in virtualenv (for Debian):
 % make install-venv
 
 Create config file from stub and open it for editing:
