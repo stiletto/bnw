@@ -4,28 +4,25 @@ import sys
 try:
     sys.setappdefaultencoding('utf-8')
 except:
-    sys=reload(sys)
+    sys = reload(sys)
     sys.setdefaultencoding('utf-8')
-import os.path as path
-root=path.abspath(path.dirname(__file__))
-sys.path.insert(0,root)
-sys.path.insert(0,path.join(root,'txWebSocket'))
-import config
+import os.path
+root = os.path.abspath(os.path.dirname(__file__))
+sys.path.insert(0, root)
 
 import tornado.platform.twisted
 tornado.platform.twisted.install()
 
-import bnw_core.base
-bnw_core.base.config.register(config)
-
-from twisted.application import service,internet
+from twisted.application import service, internet
 from twisted.words.protocols.jabber import component
-from twisted.web import resource, server, static, xmlrpc
+from twisted.web import server
+import config
+import bnw_core.base
+import bnw_xmpp.base
+from bnw_xmpp import bnw_component, xmpp_notifier
 
-
-from bnw_xmpp import bnw_component
-
-application = service.Application("example-echo")
+bnw_core.base.config.register(config)
+application = service.Application("BnW")
 
 # Set up XMPP component.
 sm = component.buildServiceManager(
@@ -39,24 +36,18 @@ bnw_component.LogService().setServiceParent(sm)
 s = bnw_component.BnwService()
 s.setServiceParent(sm)
 
-import bnw_xmpp.base
-import bnw_xmpp.xmpp_notifier
 bnw_xmpp.base.service.register(s)
-bnw_core.base.notifiers.add(bnw_xmpp.xmpp_notifier.XmppNotifier())
-
+bnw_core.base.notifiers.add(xmpp_notifier.XmppNotifier())
 
 serviceCollection = service.IServiceCollection(application)
-
 sm.setServiceParent(serviceCollection)
 
 if config.fuck_enabled:
-    internet.TCPServer(config.fuck_port, server.Site(s.getResource()), interface="127.0.0.1"
-                       ).setServiceParent(serviceCollection)
+    internet.TCPServer(
+        config.fuck_port, server.Site(s.getResource()),
+        interface="127.0.0.1").setServiceParent(serviceCollection)
 
 if config.webui_enabled:
     import bnw_web.site
     http_server = bnw_web.site.get_site()
-    http_server.listen(config.webui_port,"127.0.0.1")
-    #internet.TCPServer(config.webui_port, bnw_web.site.get_site(), interface="127.0.0.1"
-    #                   ).setServiceParent(serviceCollection)                   
-    #sm.setServiceParent(serviceCollection)
+    http_server.listen(config.webui_port, "127.0.0.1")

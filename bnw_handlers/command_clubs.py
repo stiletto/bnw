@@ -14,15 +14,15 @@ REBUILD_PERIOD = 3600*6 # Период ребилда
 # TODO: Херни понаписал. Чини блджад.
 @defer.inlineCallbacks
 def cmd_clubs(request):
-    """ Список клубов
-    
+    """Список клубов
+
     Вывод топа клубов с количеством сообщений в них
 
     redeye: clubs
-     """
+    """
+    global LAST_REBUILD
     rebuild = time.time() > LAST_REBUILD+REBUILD_PERIOD
     if rebuild:
-        global LAST_REBUILD
         LAST_REBUILD = time.time()
         result = yield objs.Message.map_reduce(CLUBS_MAP,CLUBS_REDUCE,out='clubs')
     if (not rebuild) or result:
@@ -36,15 +36,15 @@ TAGS_MAP = 'function() { this.tags.forEach(function(z) { emit(z, 1);}); }'
 # TODO: deduplicate code
 @defer.inlineCallbacks
 def cmd_tags(request):
-    """ Список тегов
-    
+    """Список тегов
+
     Вывод топа клубов с количеством сообщений для каждого
 
     redeye: tags
-     """
+    """
+    global LAST_REBUILD
     rebuild = time.time() > LAST_REBUILD+REBUILD_PERIOD
     if rebuild:
-        global LAST_REBUILD
         LAST_REBUILD = time.time()
         result = yield objs.Message.map_reduce(TAGS_MAP,CLUBS_REDUCE,out='tags')
     if (not rebuild) or result:

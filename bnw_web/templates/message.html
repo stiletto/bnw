@@ -3,7 +3,6 @@
 {% block extrahead %}
     <link rel="canonical" href="http://{{ config.webui_base }}/p/{{ msgid }}" />
     <script type="text/javascript" src="{{ static_url("web-socket-js/swfobject.js") }}"></script>
-    <script type="text/javascript" src="{{ static_url("web-socket-js/FABridge.js") }}"></script>
     <script type="text/javascript" src="{{ static_url("web-socket-js/web_socket.js") }}"></script>
     <script type="text/javascript" src="{{ static_url("favicon.js") }}"></script>
     
@@ -13,7 +12,7 @@
         // Set this to dump debug message from Flash to console.log:
         //    WEB_SOCKET_DEBUG = true;
 
-        var websocket_base = "{{ config.webui_wsbase }}/";
+        var websocket_base = "{{ config.webui_wsbase }}";
         var message_id = "{{ msgid }}";
         var comment_count = {{ len(comments) }};        
         var comment_info = {
