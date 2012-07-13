@@ -14,7 +14,6 @@ import os,random,time
 import escape
 from widgets import widgets
 import PyRSS2Gen
-#import websocket_site
 from datetime import datetime
 
 from tornado.options import define, options
