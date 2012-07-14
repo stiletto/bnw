@@ -172,6 +172,7 @@ class UserInfoHandler(BnwWebHandler,AuthMixin):
             'subscribers': subscribers_only,
             'subscriptions': subscriptions_only,
             'friends': friends,
+            'vcard': user.get('vcard', {}),
         })
 
 

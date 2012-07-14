@@ -44,9 +44,10 @@ def vcard(iq, iq_user):
     if not iq_user:
         # User which have been sent IQ not registered.
         defer.returnValue(True)
+    v = iq.vCard
     # Update avatar info.
     av_info = iq_user.get('avatar')
-    if iq.vCard.PHOTO:
+    if v.PHOTO:
         res = yield deferToThread(get_and_resize_avatar, iq)
         if res:
             avatar, mimetype, thumb = res
@@ -80,6 +81,15 @@ def vcard(iq, iq_user):
         yield objs.User.mupdate(
             {'name': iq_user['name']},
             {'$unset': {'avatar': 1}})
+    # Update additional fields.
+    vcard = {}
+    if v.N and v.N.GIVEN and v.N.FAMILY:
+        vcard['fullname'] = '%s %s' % (v.N.GIVEN, v.N.FAMILY)
+    if v.URL: vcard['url'] = str(v.URL)
+    if v.DESC: vcard['desc'] = str(v.DESC)
+    yield objs.User.mupdate(
+        {'name': iq_user['name']},
+        {'$set': {'vcard': vcard}})
     defer.returnValue(True)
 
 VERSION_XMLNS = 'jabber:iq:version'
