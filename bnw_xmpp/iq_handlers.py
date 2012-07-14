@@ -33,7 +33,7 @@ def get_and_resize_avatar(iq):
         im.thumbnail((48, 48), Image.ANTIALIAS)
         thumb_f = StringIO.StringIO()
         im.save(thumb_f, 'png')
-    except IOError as e:
+    except IOError:
         return
     return avatar, mimetype, thumb_f.getvalue()
 
