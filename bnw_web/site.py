@@ -325,18 +325,17 @@ emptypng=base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAAXNSR
 class AvatarHandler(BnwWebHandler):
     @defer.inlineCallbacks
     def respond(self,username):
-        user=(yield objs.User.find_one({'name': username}))
-        self.set_header("Cache-Control", "max-age=36000, public")
-        self.set_header("Vary", "Accept-Encoding")
-        if not (user and user.get('avatar',None)):
-            self.set_header("Content-Type", "image/png")
+        self.set_header('Cache-Control', 'max-age=36000, public')
+        self.set_header('Vary', 'Accept-Encoding')
+        self.set_header('Content-Type', 'image/png')
+        user = yield objs.User.find_one({'name': username})
+        if not (user and user.get('avatar')):
             defer.returnValue(emptypng)
-        fs = (yield get_fs('avatars'))
+        fs = yield get_fs('avatars')
         # воркэраунд недопила в txmongo. TODO: зарепортить или починить
-        doc = yield fs._GridFS__files.find_one({'_id':user['avatar'][0]})
+        doc = yield fs._GridFS__files.find_one({'_id': user['avatar'][2]})
         avatar = yield fs.get(doc)
         avatar_data = yield avatar.read()
-        self.set_header("Content-Type", user['avatar'][1])
         defer.returnValue(avatar_data)
 
 def get_site():

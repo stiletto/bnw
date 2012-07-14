@@ -1,8 +1,11 @@
 import base64
+import StringIO
 
-from twisted.internet import defer
 from twisted.words.xish import domish
+from twisted.internet import defer
+from twisted.internet.threads import deferToThread
 from txmongo import gridfs
+import Image
 
 from base import send_raw
 import bnw_core.base
@@ -10,7 +13,7 @@ import bnw_core.bnw_mongo
 from bnw_core import bnw_objects as objs
 
 
-def get_avatar(iq):
+def get_and_resize_avatar(iq):
     mimetype = str(iq.vCard.PHOTO.TYPE)
     if mimetype not in ('image/png', 'image/jpeg', 'image/gif'):
         return
@@ -19,14 +22,20 @@ def get_avatar(iq):
         return
     filedata = str(filedata)
     if len(filedata) > 32768:
-        # XEP-0153 says 8KB (4*8KB for Base64).
+        # XEP-0153 says what image should be 8KB max (4*8KB for Base64).
         return
     try:
-        decoded = base64.b64decode(filedata) # TODO: deferToThread
+        avatar = base64.b64decode(filedata)
     except TypeError:
         return
-    else:
-        return mimetype, decoded
+    try:
+        im = Image.open(StringIO.StringIO(avatar))
+        im.thumbnail((48, 48), Image.ANTIALIAS)
+        thumb_f = StringIO.StringIO()
+        im.save(thumb_f, 'png')
+    except IOError as e:
+        return
+    return avatar, mimetype, thumb_f.getvalue()
 
 @defer.inlineCallbacks
 def vcard(iq, iq_user):
@@ -35,20 +44,42 @@ def vcard(iq, iq_user):
     if not iq_user:
         # User which have been sent IQ not registered.
         defer.returnValue(True)
+    # Update avatar info.
+    av_info = iq_user.get('avatar')
     if iq.vCard.PHOTO:
-        av = get_avatar(iq)
-        if av:
-            mimetype, decoded = av
+        res = yield deferToThread(get_and_resize_avatar, iq)
+        if res:
+            avatar, mimetype, thumb = res
             fs = yield bnw_core.bnw_mongo.get_fs('avatars')
-            extension = mimetype.split('/')[1]
-            avid = fs.put(
-                decoded, filename=iq_user['name']+'.'+extension,
-                contentType=mimetype)
-            if iq_user.get('avatar', None):
-                fs.delete(iq_user['avatar'][0])
-            _ = yield objs.User.mupdate(
-                {'name': iq_user['name']},
-                {'$set': {'avatar': [avid,mimetype]}})
+            update_needed = True
+            if av_info:
+                # TODO: Fix fs.get/GridOut.__init__ in txmongo
+                doc = yield fs._GridFS__files.find_one({'_id': av_info[0]})
+                f = yield fs.get(doc)
+                old_avatar = yield f.read()
+                if old_avatar == avatar:
+                    update_needed = False
+                else:
+                    fs.delete(av_info[0])
+                    fs.delete(av_info[2])
+            if update_needed:
+                extension = mimetype.split('/')[1]
+                avid = fs.put(
+                    avatar, filename=iq_user['name']+'.'+extension,
+                    contentType=mimetype)
+                thumbid = fs.put(
+                    thumb, filename=iq_user['name']+'_thumb.png',
+                    contentType='image/png')
+                yield objs.User.mupdate(
+                    {'name': iq_user['name']},
+                    {'$set': {'avatar': [avid, mimetype, thumbid]}})
+    elif av_info:
+        fs = yield bnw_core.bnw_mongo.get_fs('avatars')
+        fs.delete(av_info[0])
+        fs.delete(av_info[2])
+        yield objs.User.mupdate(
+            {'name': iq_user['name']},
+            {'$unset': {'avatar': 1}})
     defer.returnValue(True)
 
 VERSION_XMLNS = 'jabber:iq:version'

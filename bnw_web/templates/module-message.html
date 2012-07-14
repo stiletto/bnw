@@ -1,6 +1,6 @@
 <div class='outerborder hentry' id='{{ msg['id'] }}'>
     <div class='msg'>
-        <img class='avatar avatar_ps' alt='' src='http://fuck.blasux.ru/thumb?max=48&fmt=png&img=http://bnw.im/u/{{ msg['user'] }}/avatar'/>
+        <img class='avatar avatar_ps' alt='avatar' src='/u/{{ msg['user'] }}/avatar' />
         {{ w.tags(msg['tags'],msg['clubs'],username) }}
         {% set linkified, thumbs = thumbify(msg['text']) %}
         {% if thumbs %}<div class="imgpreviews">
