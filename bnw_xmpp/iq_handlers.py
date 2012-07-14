@@ -84,10 +84,10 @@ def vcard(iq, iq_user):
             {'$unset': {'avatar': 1}})
     # Update additional fields.
     vcard = {}
-    if v.N and v.N.GIVEN and v.N.FAMILY:
+    if v.N and v.N.GIVEN and str(v.N.GIVEN) and v.N.FAMILY and str(v.N.FAMILY):
         vcard['fullname'] = '%s %s' % (v.N.GIVEN, v.N.FAMILY)
-    if v.URL: vcard['url'] = str(v.URL)
-    if v.DESC: vcard['desc'] = str(v.DESC)
+    if v.URL and str(v.URL): vcard['url'] = str(v.URL)
+    if v.DESC and str(v.DESC): vcard['desc'] = str(v.DESC)
     yield objs.User.mupdate(
         {'name': iq_user['name']},
         {'$set': {'vcard': vcard}})
