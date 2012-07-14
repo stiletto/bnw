@@ -171,7 +171,7 @@
             });
 
 
-            var ws_addr = 'ws://'+websocket_base+'/'+window.location.pathname+'/ws';
+            var ws_addr = 'ws://'+websocket_base+window.location.pathname+'/ws';
             var ws;
             var ws_double_fail = false
             function openws() {
