@@ -14,12 +14,12 @@
     </div>
 {% else %}
     <div class='outerborder'>
-        <div class='msg' style='display: table; width: 100%;'>
+        <div class='msg' style='display: table'>
             <div style='display: table-cell;'>
-                <img src="/u/{{ username }}/avatar" class="avatar avatar_ps">
+                <img src='/u/{{ username }}/avatar' alt='avatar' class='avatar_big' />
             </div>
             <div style='display: table-cell; vertical-align: top; padding-left: 1em;'>
-                Пользователь {{ w.userl(user['name']) }} - няшка. Он зарегистрировался здесь {{ regdate }}
+                Пользователь {{ w.userl(user['name']) }} — няшка. Он зарегистрировался здесь {{ w.time(regdate) }}
                  и написал с тех пор <a href="/u/{{ username }}/">{{ messages_count }} сообщений</a> и {{ comments_count }} комментариев.
             </div>
         </div>

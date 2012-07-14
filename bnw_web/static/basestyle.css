@@ -13,14 +13,14 @@
         .bodyshit {
             padding: 1em;
         }
-        
+
         .tagline {
-            color: #B80049; 
-            text-decoration: none; 
+            color: #B80049;
+            text-decoration: none;
             margin-left: 1em;
             float: left;
         }
-        
+
         .outerborder {
             background-color: #e5e5e5;
             /*padding-left: 1em;
@@ -49,8 +49,8 @@
         }
 
         .styledbutton {
-            border: none; 
-            margin: 0; 
+            border: none;
+            margin: 0;
             color: #000;
             padding: 0;
             background-color: #e5e5e5;
@@ -103,14 +103,14 @@
             height: 3em;
             width: 4em;
         }
-        
+
         .tag {
             color: #CD0000;
         }
         .club {
             color: #00CD00;
         }
-        
+
         .friendstable {
             color: #000;
         }
@@ -123,28 +123,31 @@
         .friendstable td:first-child {
             border-left: none;
         }
-        
+
         .friendstable td {
             padding-left: 0.5em;
             padding-right: 0.5em;
         }
-        
+
         .avatar {
             max-height: 2em; max-width: 6em; float: right; border: none;
         }
         .avatar_ps {
             width: 2em; height: 2em;
         }
-        
+		.avatar_big {
+			max-width: 150px; max-height: 150px;
+		}
+
         .sign { color: #505050; }
         .sign a { color: #3C4BB0; }
         .sign a:hover { color: #FFFF00; }
-        
+
         #err_outer {width: 100%; overflow: hidden; position: relative;}
         #err_outer[id] {display: table; position: static;}
         #err_middle {position: absolute; top: 50%;} /* for explorer only*/
         #err_middle[id] {display: table-cell; vertical-align: middle; width: 100%;}
-        #err_inner { background-color: #CD0000; padding: 1em; width: 40em; margin-left: auto; margin-right: auto; position: relative; top: -50%} /* for explorer only */        
+        #err_inner { background-color: #CD0000; padding: 1em; width: 40em; margin-left: auto; margin-right: auto; position: relative; top: -50%} /* for explorer only */
         #err_inner2 { padding: 1em; border: thin solid white; text-align: center; }
 
         .pw {
@@ -166,4 +169,3 @@
         #dlg_inner { padding: 1em; background-color: #E5E5E5; width: 50%; margin-left: auto; margin-right: auto;} /* for all browsers*/
         #dlg_inner2 { color: #000; font-family: monospace; border: thin solid black; padding: 1em; overflow: hidden; } /* for all browsers*/
         /* optional: #inner[id] {position: static;} */
-     

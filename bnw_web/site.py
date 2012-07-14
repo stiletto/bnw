@@ -14,12 +14,11 @@ import tornado.escape
 import logging,traceback
 import json
 import txmongo
-import os,random,time
+import os
 from widgets import widgets
 import uimodules
 import rss
 import base64
-from datetime import datetime
 
 from tornado.options import define, options
 
@@ -167,7 +166,7 @@ class UserInfoHandler(BnwWebHandler,AuthMixin):
         defer.returnValue({
             'username': username,
             'user': user,
-            'regdate': time.ctime(user['regdate']) if user else '',
+            'regdate': user.get('regdate', 0),
             'messages_count': messages_count,
             'comments_count': comments_count,
             'subscribers': subscribers_only,
@@ -324,18 +323,25 @@ emptypng=base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAAXNSR
 
 class AvatarHandler(BnwWebHandler):
     @defer.inlineCallbacks
-    def respond(self,username):
+    def respond(self, username, thumb=''):
         self.set_header('Cache-Control', 'max-age=36000, public')
         self.set_header('Vary', 'Accept-Encoding')
-        self.set_header('Content-Type', 'image/png')
         user = yield objs.User.find_one({'name': username})
         if not (user and user.get('avatar')):
+            self.set_header('Content-Type', 'image/png')
             defer.returnValue(emptypng)
+        if thumb:
+            av_id = user['avatar'][2]
+            mimetype = 'image/png'
+        else:
+            av_id = user['avatar'][0]
+            mimetype = user['avatar'][1]
         fs = yield get_fs('avatars')
         # воркэраунд недопила в txmongo. TODO: зарепортить или починить
-        doc = yield fs._GridFS__files.find_one({'_id': user['avatar'][2]})
+        doc = yield fs._GridFS__files.find_one({'_id': av_id})
         avatar = yield fs.get(doc)
         avatar_data = yield avatar.read()
+        self.set_header('Content-Type', mimetype)
         defer.returnValue(avatar_data)
 
 def get_site():
@@ -347,13 +353,11 @@ def get_site():
         "autoescape": None,
     }
     application = tornado.web.Application([
-#        (r"/posts/(.*)", MessageHandler),
         (r"/p/([A-Z0-9]+)/?", MessageHandler),
         (r"/p/([A-Z0-9]+)/ws/?", MessageWsHandler),
-        #(r"/p/([A-Z0-9]+)/ws", MessageWsHandler),
         (r"/u/([0-9a-z_-]+)/?", UserHandler),
         (r"/u/([0-9a-z_-]+)/recommendations/?", UserRecoHandler),
-        (r"/u/([0-9a-z_-]+)/avatar/?", AvatarHandler),
+        (r"/u/([0-9a-z_-]+)/avatar(/thumb)?/?", AvatarHandler),
         (r"/u/([0-9a-z_-]+)/info/?", UserInfoHandler),
         (r"/u/([0-9a-z_-]+)/t/(.*)/?", UserHandler),
         (r"/", MainHandler),
