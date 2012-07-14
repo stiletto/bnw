@@ -22,7 +22,8 @@ def get_and_resize_avatar(iq):
         return
     filedata = str(filedata)
     if len(filedata) > 32768:
-        # XEP-0153 says what image should be 8KB max (4*8KB for Base64).
+        # XEP-0153 says what image SHOULD be 8KB max,
+        # let's approve up to 32KB.
         return
     try:
         avatar = base64.b64decode(filedata)
