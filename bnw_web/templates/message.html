@@ -53,7 +53,7 @@
     {% for comment in comments %}
     <div class='outerborder hentry' id="{{ comment['id'].split('/')[1] }}">
     <div class='comment'>
-        <img class='avatar avatar_ps' src='http://fuck.blasux.ru/thumb?max=48&fmt=png&img=http://bnw.im/u/{{ comment['user'] }}/avatar'/>
+        <img class='avatar avatar_ps' alt='avatar' src='/u/{{ comment['user'] }}/avatar/thumb' />
         {% set linkified, thumbs = thumbify(comment['text']) %}
         {% if thumbs %}<div class="imgpreviews">
             {% for thumb in thumbs %}<a class="imglink" href="{{ thumb[0] }}">

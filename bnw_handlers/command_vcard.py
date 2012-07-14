@@ -1,17 +1,15 @@
-# -*- coding: utf-8 -*-
 from twisted.words.xish import domish
 
+from base import require_auth
 from bnw_xmpp.base import send_raw
-from base import *
-import random
-from twisted.internet import defer
+
 
 @require_auth
-def cmd_vcard(request,safe=None):
-    """ Запрос вкарда """
-    vreq = domish.Element((None, "iq"))
-    vreq['type']='get'
-    vreq.addChild(domish.Element((None,'vCard')))
-    vreq.vCard['xmlns']='vcard-temp'
-    send_raw(request.user['jid'],None,vreq)
-    return dict(ok=True,desc='vCard has been requested.')
+def cmd_vcard(request, safe=None):
+    """Request user's vCard."""
+    reply = domish.Element((None, 'iq'))
+    reply.addUniqueId()
+    reply['type'] = 'get'
+    reply.addElement('vCard', 'vcard-temp')
+    send_raw(request.user['jid'], None, reply)
+    return dict(ok=True, desc='vCard has been requested.')
