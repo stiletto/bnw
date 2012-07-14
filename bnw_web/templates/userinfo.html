@@ -30,17 +30,17 @@
     <table class='friendstable'>
         {% if 'fullname' in vcard %}
         <tr><td> Полное имя: </td>
-            <td>{{ vcard['fullname'] }}</td>
+            <td>{{ escape(vcard['fullname']) }}</td>
         </tr>
         {% end %}
         {% if 'url' in vcard %}
         <tr><td> Домашняя страничка: </td>
-            <td><a href="{{ vcard['url'] }}">{{ vcard['url'] }}</a></td>
+            <td><a href="{{ escape(vcard['url']) }}">{{ escape(vcard['url']) }}</a></td>
         </tr>
         {% end %}
         {% if 'desc' in vcard %}
         <tr><td> О себе: </td>
-            <td>{{ vcard['desc'] }}</td>
+            <td>{{ escape(vcard['desc']) }}</td>
         </tr>
         {% end %}
         <tr><td> Подписки:</td>
