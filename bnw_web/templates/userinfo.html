@@ -14,12 +14,12 @@
     </div>
 {% else %}
     <div class='outerborder'>
-        <div class='msg' style='display: table; width: 100%;'>
+        <div class='msg'>
             <div style='display: table-cell;'>
-                <img src="/u/{{ username }}/avatar" class="avatar avatar_ps">
+                <img src='/u/{{ username }}/avatar' alt='avatar' class='avatar_big' />
             </div>
             <div style='display: table-cell; vertical-align: top; padding-left: 1em;'>
-                Пользователь {{ w.userl(user['name']) }} - няшка. Он зарегистрировался здесь {{ regdate }}
+                Пользователь {{ w.userl(user['name']) }} — няшка. Он зарегистрировался здесь {{ w.time(regdate) }}
                  и написал с тех пор <a href="/u/{{ username }}/">{{ messages_count }} сообщений</a> и {{ comments_count }} комментариев.
             </div>
         </div>
@@ -28,6 +28,21 @@
     <div class='outerborder'>
     <div class='msg' id="none">
     <table class='friendstable'>
+        {% if 'fullname' in vcard %}
+        <tr><td> Полное имя: </td>
+            <td>{{ escape(vcard['fullname']) }}</td>
+        </tr>
+        {% end %}
+        {% if 'url' in vcard %}
+        <tr><td> Домашняя страничка: </td>
+            <td><a href="{{ escape(vcard['url']) }}">{{ escape(vcard['url']) }}</a></td>
+        </tr>
+        {% end %}
+        {% if 'desc' in vcard %}
+        <tr><td> О себе: </td>
+            <td>{{ escape(vcard['desc']) }}</td>
+        </tr>
+        {% end %}
         <tr><td> Подписки:</td>
             <td>{% for sub in subscriptions %}{{ w.userl(sub) }} {% end %}</td>
         </tr>
