@@ -67,22 +67,16 @@ def idiotic(msg):
 
 @defer.inlineCallbacks
 def iq(msg):
-        """Suck some cocks."""
-                                                                                                    
-        try:
-            iq_bare_from=msg['from'].split('/',1)[0]
-            iq_user=(yield objs.User.find_one({'jids':iq_bare_from.lower()}))
-            if not iq_user:
-                iq_user=(yield objs.User.find_one({'jid':iq_bare_from.lower()}))
-            for handler in iq_handlers.handlers:
-                if (yield handler(msg,iq_user)):
-                    defer.returnValue(True)
-            else:
-                defer.returnValue(False)
-        except Exception:
-            raise
-            print ("Error while processing iq:\n\n"+\
-                traceback.format_exc()+"\n"+\
-                "Command which caused this exception: "+iq)
-
-
+    """Process incoming IQ stanza."""
+    try:
+        iq_bare_from=msg['from'].split('/',1)[0]
+        iq_user=yield objs.User.find_one({'jid':iq_bare_from.lower()})
+        for handler in iq_handlers.handlers:
+            if (yield handler(msg,iq_user)):
+                defer.returnValue(True)
+        defer.returnValue(False)
+    except Exception:
+        raise
+        print ("Error while processing iq:\n\n"+\
+            traceback.format_exc()+"\n"+\
+            "Command which caused this exception: "+iq)

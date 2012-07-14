@@ -1,24 +1,14 @@
-# -*- coding: utf8 -*-
-"""
- Example component service.
-
-"""
 import time
-from twisted.python import log
-from twisted.words.xish import domish
-
-
-from twisted.words.protocols.jabber.ijabber import IService
-from twisted.words.protocols.jabber import component
 
 from zope.interface import Interface, implements
-
-
+from twisted.python import log
+from twisted.words.xish import domish
+from twisted.words.protocols.jabber.ijabber import IService
+from twisted.words.protocols.jabber import component
 from twisted.python.util import println
 from twisted.web import resource, server, static, xmlrpc
 
 import bnw_core.bnw_objects as objs
-
 import stupid_handler
 
 PRESENCE = '/presence'  # this is an global xpath query to use in an observer
@@ -115,17 +105,6 @@ class BnwService(component.Service):
         content["from"] = self.jabberId if (src is None) else src
         self.xmlstream.send(content)
 
-    def callbackMessage(self, result, jid, stime, src, body):
-        if result:
-            etime = time.time() - stime
-            println('result:', result)
-            self.send_plain(jid, src, str(result))
-            t = objs.Timing({'date': stime, 'time': etime, 'command': unicode(body), 'jid': jid})
-            t.save().addCallback(lambda x: None)
-            log.msg("%s - PROCESSING TIME (from %s): %f" % (str(time.time()), jid, etime))
-            if jid.startswith('stiletto@stiletto.name'):
-                self.send_plain(jid, src, 'I did it in %f seconds.' % (etime, ))
-
     def callbackIq(self, result, original):
         if not (result or original['type'] == 'error'):
             elem = original
@@ -138,8 +117,23 @@ class BnwService(component.Service):
             elem.error.addElement('feature-not-implemented')
             self.xmlstream.send(elem)
 
+    def onIq(self, iq):
+        """Process IQ stanza."""
+        gp = stupid_handler.iq(iq)
+        gp.addCallback(self.callbackIq, original=iq)
+
+    def callbackMessage(self, result, jid, stime, src, body):
+        if result:
+            etime = time.time() - stime
+            println('result:', result)
+            self.send_plain(jid, src, str(result))
+            t = objs.Timing({'date': stime, 'time': etime, 'command': unicode(body), 'jid': jid})
+            t.save().addCallback(lambda x: None)
+            log.msg("%s - PROCESSING TIME (from %s): %f" % (str(time.time()), jid, etime))
+            if jid.startswith('stiletto@stiletto.name'):
+                self.send_plain(jid, src, 'I did it in %f seconds.' % (etime, ))
+
     def errbackMessage(self, result, jid, src):
-        #println('error:',result)
         self.send_plain(jid, src, 'Early error: ' + str(result))
 
     def onMessage(self, msg):
@@ -177,14 +171,6 @@ class BnwService(component.Service):
         #gp=getPage('http://localhost:8080/xmpp_rpc/message', method='POST',postdata=msg.toXml().encode('utf-8','replace'),headers={'Content-Type':'application/octet-stream'})
         gp.addCallback(self.callbackMessage, jid=msg['from'], stime=stime, src=msg['to'], body=msg.body)
         gp.addErrback(self.errbackMessage, jid=msg['from'], src=msg['to'])
-
-    def onIq(self, iq):
-        """
-        Act on the iq stanza that has just been received.
-
-        """
-        gp = stupid_handler.iq(iq)
-        gp.addCallback(self.callbackIq, original=iq)
 
     def onPresence(self, prs):
         """
