@@ -174,7 +174,7 @@
 
             var ws_addr = 'ws://'+websocket_base+window.location.pathname+'/ws';
             var ws;
-            var ws_double_fail = false
+            var ws_double_fail = false;
             function openws() {
                 if ("WebSocket" in window) {
                     ws = new WebSocket(ws_addr);
@@ -200,7 +200,7 @@
                 ws.onmessage = function (e) {
                     var d = JSON.parse(e.data);
                     var short_id = d.id.split('/')[1];
-                    var outerbox = $("<div class='outerborder hentry ajax' id='"+short_id+"'>")
+                    var outerbox = $("<div class='outerborder hentry ajax' id='"+short_id+"'>");
                     var comment = $("<div class='comment'>");
                     comment.append("<img class='avatar' alt='avatar' "+
                                    "src='/u/"+d.user+"/avatar/thumb' />");
@@ -215,7 +215,7 @@
                     }
                     var pre = $("<pre class='comment_body pw entry-title entry-content'>");
                     if (d.thumbs.length) {
-                        pre.addClass("hasthumbs")
+                        pre.addClass("hasthumbs");
                     }
                     pre.append(d.linkified);
                     var sign = $("<div class='sign'>");
@@ -236,7 +236,7 @@
                         favicon.change("/static/favicon-event.ico");
                         favicon_changed = true;
                         if (timeout_id != undefined) {
-                            clearTimeout(timeout_id)
+                            clearTimeout(timeout_id);
                             timeout_id = undefined;
                         }
                         if (document.hasFocus()) {
