@@ -53,19 +53,24 @@ class MessageHandler(BnwWebHandler,AuthMixin):
         })
 
 class MessageWsHandler(tornado.websocket.WebSocketHandler):
-    def open(self,msgid):
-        #msgid = self
-        self.etype='comments-'+msgid
-        post.register_listener(self.etype,id(self),self.deliverComment)
-        print 'Opened connection %d (msg %s)' % (id(self),msgid)
-    def deliverComment(self,comment):
-        print 'Delivered comment.',comment
+    """Deliver new comments on message page via websockets."""
+
+    def open(self, msgid):
+        self.etype = 'comments-' + msgid
+        post.register_listener(self.etype, id(self), self.deliverComment)
+        print 'Opened connection %d (msg %s)' % (id(self), msgid)
+
+    def deliverComment(self, comment):
+        print 'Delivered comment:', comment
+        # TODO: thumbify, linkify
         self.write_message(json.dumps(comment))
+
     def on_close(self):
-        post.unregister_listener(self.etype,id(self))
+        post.unregister_listener(self.etype, id(self))
         print 'Closed connection %d' % id(self)
 
 class MainWsHandler(tornado.websocket.WebSocketHandler):
+    # TODO: Write JS wrapper.
     def open(self):
         #msgid = self
         self.etype='messages'

@@ -197,17 +197,46 @@
                     reopenws();
                 }
                 ws.onmessage = function (e) {
-                    var d=JSON.parse(e.data);
-                    var new_comment=$("<div class='comment'>").text(d.text);
-                    var addinfo=$("<div>").text("#"+d['id']+" / @"+d['user']);
-                    if (d['replyto'])
-                        addinfo.append(' --> '+d['replyto']);
-                    new_comment.append(addinfo);
-                    $("div.comments").append($("<div class='outerborder'>").append(new_comment));
+                    var d = JSON.parse(e.data);
+                    var short_id = d.id.split('/')[1]
+                    var outerbox = $("<div class='outerborder hentry' id='"+short_id+"' "+
+                                     "style='margin-left: 0em;'>")
+                    var comment = $("<div class='comment'>")
+                    comment.append("<img class='avatar' alt='avatar' "+
+                                   "src='/u/"+d.user+"/avatar/thumb' />")
+                    // TODO: thumbify, linkify
+                    var pre = $("<pre class='comment_body pw entry-title entry-content'>")
+                    pre.text(d.text)
+                    var sign = $("<div class='sign'>")
+                    sign.append("<a class='msgid' rel='bookmark' href='/p/"+d.id+
+                                "'>#"+d.id+"</a>")
+                    sign.append("<span id='cmtb-"+d.id+"' class='cmtb'> </span> / ")
+                    sign.append("<a class='usrid' href='/u/"+d.user+"'>@"+d.user+"</a>")
+                    if (d.replyto)
+                        sign.append(" --&gt; <a class='usrid' "+
+                                    "href='/p/"+d.replyto.replace('/', '#')+"'>#"+
+                                    d.replyto+"</a>")
+                    comment.append(pre)
+                    comment.append(sign)
+                    outerbox.append(comment)
                     if (!favicon_changed) {
                         favicon.change("/static/favicon-event.ico");
                         favicon_changed = true;
                     }
+                    outerbox.hide().appendTo($("div.comments")).show("slow")
+/*
+<div class='outerborder hentry' id="{{ comment['id'].split('/')[1] }}">
+<div class='comment'>
+    <img class='avatar avatar_ps' alt='avatar' src='/u/{{ comment['user'] }}/avatar/thumb' />
+    {% set linkified, thumbs = thumbify(comment['text']) %}
+    {% if thumbs %}<div class="imgpreviews">
+        {% for thumb in thumbs %}<a class="imglink" href="{{ thumb[0] }}">
+            <img class="imgpreview imgpreview_ps" src="{{ thumb[1] }}"/>
+        </a>{% end %}
+        </div>{% end %}
+</div>
+</div>
+*/
                 }
 
                 return ws;
