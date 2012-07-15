@@ -20,6 +20,7 @@ from linkify import thumbify
 import uimodules
 import rss
 import base64
+import math
 
 from tornado.options import define, options
 
@@ -93,6 +94,16 @@ def get_page(self):
         return rv if isinstance(rv,int) else 0 # no long here
     return 0
 
+
+@defer.inlineCallbacks
+def is_hasmes(qdict, page):
+    """Return True if summary page count bigger than given
+    (given page numbering starting from 0).
+    """
+    count = yield objs.Message.count(qdict)
+    defer.returnValue(int(math.ceil(count/20.0)) > page+1)
+
+
 class UserHandler(BnwWebHandler,AuthMixin):
     templatename='user.html'
     @defer.inlineCallbacks
@@ -106,6 +117,7 @@ class UserHandler(BnwWebHandler,AuthMixin):
             tag = tornado.escape.url_unescape(tag)
             qdict['tags'] = tag
         messages=(yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page))
+        hasmes = yield is_hasmes(qdict, page)
 
         format=self.get_argument("format","")
         if format=='rss':
@@ -124,6 +136,7 @@ class UserHandler(BnwWebHandler,AuthMixin):
                 'messages': messages,
                 'page': page,
                 'tag' : tag,
+                'hasmes': hasmes,
             })
 
 class UserRecoHandler(BnwWebHandler,AuthMixin):
@@ -139,6 +152,7 @@ class UserRecoHandler(BnwWebHandler,AuthMixin):
             tag = tornado.escape.url_unescape(tag)
             qdict['tags'] = tag
         messages=(yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page))
+        hasmes = yield is_hasmes(qdict, page)
 
         self.set_header("Cache-Control", "max-age=1")
         defer.returnValue({
@@ -147,6 +161,7 @@ class UserRecoHandler(BnwWebHandler,AuthMixin):
                 'messages': messages,
                 'page': page,
                 'tag' : tag,
+                'hasmes': hasmes,
             })
 
 
@@ -200,6 +215,7 @@ class MainHandler(BnwWebHandler,AuthMixin):
             qdict['clubs'] = club
 
         messages=(yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page))
+        hasmes = yield is_hasmes(qdict, page)
         uc=(yield objs.User.count())
         format=self.get_argument("format","")
 
@@ -230,6 +246,7 @@ class MainHandler(BnwWebHandler,AuthMixin):
                 'page': page,
                 'tag': tag,
                 'club': club,
+                'hasmes': hasmes,
             })
 
 class FeedHandler(BnwWebHandler,AuthMixin):

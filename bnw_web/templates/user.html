@@ -25,11 +25,9 @@
         </div>
     </div>
     <hr/>
-    {% set hasmes = False %}
     {% for msg in messages %}
-        {% set hasmes = True %}
         {{ modules.Message(msg,username=username) }}
     {% end %}
-    {% if page>0 %}<a class='pagelink' href='?page={{ page-1 }}' rel='prev'>&lt;&lt; Позже</a> -- {% end %}{% if hasmes %}<a class='pagelink' href='?page={{ page+1 }}' rel='next'> Раньше &gt;&gt;</a>{% end %}
 {% end %}
 {% end %}
+{% block footerrow %}{% include "pagination.html" %}{% end %}
