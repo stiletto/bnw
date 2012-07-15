@@ -163,6 +163,7 @@
             add_message_actions();
 
             var favicon_changed = false;
+            var timeout_id;
             $(window).focus(function () {
                 if (favicon_changed) {
                     favicon.change("/favicon.ico");
@@ -198,45 +199,53 @@
                 }
                 ws.onmessage = function (e) {
                     var d = JSON.parse(e.data);
-                    var short_id = d.id.split('/')[1]
-                    var outerbox = $("<div class='outerborder hentry' id='"+short_id+"' "+
-                                     "style='margin-left: 0em;'>")
-                    var comment = $("<div class='comment'>")
+                    var short_id = d.id.split('/')[1];
+                    var outerbox = $("<div class='outerborder hentry ajax' id='"+short_id+"'>")
+                    var comment = $("<div class='comment'>");
                     comment.append("<img class='avatar' alt='avatar' "+
-                                   "src='/u/"+d.user+"/avatar/thumb' />")
-                    // TODO: thumbify, linkify
-                    var pre = $("<pre class='comment_body pw entry-title entry-content'>")
-                    pre.text(d.text)
-                    var sign = $("<div class='sign'>")
+                                   "src='/u/"+d.user+"/avatar/thumb' />");
+                    if (d.thumbs.length) {
+                        var previews = $("<div class='imgpreviews'>");
+                        d.thumbs.forEach(function(thumb) {
+                            previews.append("<a class='imglink' href='"+thumb[0]+"'>"+
+                                            "<img class='imgpreview ajax' src='"+thumb[1]+
+                                            "' /></a>")
+                        })
+                        comment.append(previews);
+                    }
+                    var pre = $("<pre class='comment_body pw entry-title entry-content'>");
+                    if (d.thumbs.length) {
+                        pre.addClass("hasthumbs")
+                    }
+                    pre.append(d.linkified);
+                    var sign = $("<div class='sign'>");
                     sign.append("<a class='msgid' rel='bookmark' href='/p/"+d.id+
-                                "'>#"+d.id+"</a>")
-                    sign.append("<span id='cmtb-"+d.id+"' class='cmtb'> </span> / ")
-                    sign.append("<a class='usrid' href='/u/"+d.user+"'>@"+d.user+"</a>")
-                    if (d.replyto)
+                                "'>#"+d.id+"</a>");
+                    sign.append("<span id='cmtb-"+d.id+"' class='cmtb'> </span> / ");
+                    sign.append("<a class='usrid' href='/u/"+d.user+"'>@"+d.user+"</a>");
+                    if (d.replyto) {
                         sign.append(" --&gt; <a class='usrid' "+
                                     "href='/p/"+d.replyto.replace('/', '#')+"'>#"+
-                                    d.replyto+"</a>")
-                    comment.append(pre)
-                    comment.append(sign)
-                    outerbox.append(comment)
+                                    d.replyto+"</a>");
+                    }
+                    comment.append(pre);
+                    comment.append(sign);
+                    outerbox.append(comment);
+                    outerbox.appendTo($("div.comments")).show("slow");
                     if (!favicon_changed) {
                         favicon.change("/static/favicon-event.ico");
                         favicon_changed = true;
+                        if (timeout_id != undefined) {
+                            clearTimeout(timeout_id)
+                            timeout_id = undefined;
+                        }
+                        if (document.hasFocus()) {
+                            timeout_id = setTimeout(function() {
+                                favicon.change("/favicon.ico");
+                                favicon_changed = false;
+                            }, 2000);
+                        }
                     }
-                    outerbox.hide().appendTo($("div.comments")).show("slow")
-/*
-<div class='outerborder hentry' id="{{ comment['id'].split('/')[1] }}">
-<div class='comment'>
-    <img class='avatar avatar_ps' alt='avatar' src='/u/{{ comment['user'] }}/avatar/thumb' />
-    {% set linkified, thumbs = thumbify(comment['text']) %}
-    {% if thumbs %}<div class="imgpreviews">
-        {% for thumb in thumbs %}<a class="imglink" href="{{ thumb[0] }}">
-            <img class="imgpreview imgpreview_ps" src="{{ thumb[1] }}"/>
-        </a>{% end %}
-        </div>{% end %}
-</div>
-</div>
-*/
                 }
 
                 return ws;

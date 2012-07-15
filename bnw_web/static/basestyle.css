@@ -84,7 +84,6 @@
             padding-bottom: 0.5em;
 
             border: thin solid black;
-            background-color: #e5e5e5;
         }
         .pagelink {
             color: #FFFF00;
@@ -95,9 +94,20 @@
             float: left;
         }
         .imgpreview {
-            border: none;
+            float: left;
+            border: 2px solid #E5E5E5;
             max-height: 4em;
             margin-right: 1em;
+        }
+        .imgpreview:hover {
+            border-color: #0000CD;
+        }
+        div.ajax {
+            display: none;
+            background-color: #D5D5D5;
+        }
+        img.ajax {
+            border-color: #D5D5D5;
         }
         .imgpreview_ps {
             height: 3em;

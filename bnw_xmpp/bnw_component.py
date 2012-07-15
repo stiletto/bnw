@@ -125,7 +125,6 @@ class BnwService(component.Service):
     def callbackMessage(self, result, jid, stime, src, body):
         if result:
             etime = time.time() - stime
-            println('result:', result)
             self.send_plain(jid, src, str(result))
             t = objs.Timing({'date': stime, 'time': etime, 'command': unicode(body), 'jid': jid})
             t.save().addCallback(lambda x: None)

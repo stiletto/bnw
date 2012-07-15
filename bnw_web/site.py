@@ -16,6 +16,7 @@ import json
 import txmongo
 import os
 from widgets import widgets
+from linkify import thumbify
 import uimodules
 import rss
 import base64
@@ -61,8 +62,8 @@ class MessageWsHandler(tornado.websocket.WebSocketHandler):
         print 'Opened connection %d (msg %s)' % (id(self), msgid)
 
     def deliverComment(self, comment):
-        print 'Delivered comment:', comment
-        # TODO: thumbify, linkify
+        comment = comment.copy()
+        comment['linkified'], comment['thumbs'] = thumbify(comment['text'])
         self.write_message(json.dumps(comment))
 
     def on_close(self):
