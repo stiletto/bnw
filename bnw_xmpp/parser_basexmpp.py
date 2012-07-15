@@ -21,6 +21,6 @@ class BaseXmppParser(base.BaseParser):
                         return formatter(request,result)
                 desc = result.get('desc','')
                 if ok:
-                    return 'OK. '+desc
+                    return desc
                 else:
                     return 'ERROR. '+desc
