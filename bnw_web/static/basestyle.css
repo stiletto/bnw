@@ -73,7 +73,6 @@
             padding-bottom: 0.5em;
 
             border: thin solid black;
-            background-color: #e5e5e5;
         }
         .comment {
             color: #000;
@@ -146,7 +145,7 @@
             width: 2em; height: 2em;
         }
 		.avatar_big {
-			max-width: 150px; max-height: 150px;
+			max-width: 200px; max-height: 200px;
 		}
 
         .sign { color: #505050; }

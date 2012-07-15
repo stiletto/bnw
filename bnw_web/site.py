@@ -72,17 +72,22 @@ class MessageWsHandler(tornado.websocket.WebSocketHandler):
         print 'Closed connection %d' % id(self)
 
 class MainWsHandler(tornado.websocket.WebSocketHandler):
-    # TODO: Write JS wrapper.
+    """Deliver new messages on main page via websockets."""
+
     def open(self):
-        #msgid = self
-        self.etype='messages'
-        post.register_listener(self.etype,id(self),self.deliverMessage)
-        print 'Opened connection %d (all messages)' % (id(self),)
-    def deliverMessage(self,msg):
-        print 'Delivered message.',msg
+        self.etype = 'messages'
+        post.register_listener(self.etype, id(self), self.deliverMessage)
+        print 'Opened connection %d (all messages)' % id(self)
+
+    def deliverMessage(self, msg):
+        msg = msg.copy()
+        # TODO: Should we do it in native javascript?
+        msg['linkified'], msg['thumbs'] = thumbify(msg['text'])
+        msg['wtags'] = widgets.tags(msg['tags'], msg['clubs'], msg['user'])
         self.write_message(json.dumps(msg))
+
     def on_close(self):
-        post.unregister_listener(self.etype,id(self))
+        post.unregister_listener(self.etype, id(self))
         print 'Closed connection %d' % id(self)
 
 
