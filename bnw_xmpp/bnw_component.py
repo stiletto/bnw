@@ -9,6 +9,7 @@ from twisted.python.util import println
 from twisted.web import resource, server, static, xmlrpc
 
 import bnw_core.bnw_objects as objs
+from bnw_core.base import config
 import stupid_handler
 
 PRESENCE = '/presence'  # this is an global xpath query to use in an observer
@@ -129,7 +130,7 @@ class BnwService(component.Service):
             t = objs.Timing({'date': stime, 'time': etime, 'command': unicode(body), 'jid': jid})
             t.save().addCallback(lambda x: None)
             log.msg("%s - PROCESSING TIME (from %s): %f" % (str(time.time()), jid, etime))
-            if jid.startswith('stiletto@stiletto.name'):
+            if jid.split('/',1)[0] == config.admin_jid:
                 self.send_plain(jid, src, 'I did it in %f seconds.' % (etime, ))
 
     def errbackMessage(self, result, jid, src):
