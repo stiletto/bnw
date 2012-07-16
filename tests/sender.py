@@ -65,7 +65,7 @@ def now_s():
 
 
 def message_handler(cl, msg):
-    print "[%s] RECV: %s" % (now_s(), msg.getBody())
+    print "[%s] RECV: <<<%s>>>" % (now_s(), msg.getBody())
 
 
 def send(cl, bnw_jid, args):
@@ -74,15 +74,18 @@ def send(cl, bnw_jid, args):
         msg = args.to + " "
     if args.msg_type == "rnd":
         if not args.no_rnd_tags:
-            msg += " ".join(get_random_tags())
-            msg += "\n"
+            tags = " ".join(get_random_tags())
+            if tags:
+                msg += tags + "\n"
         msg += " ".join(get_random_words())
         if not args.no_rnd_imgs:
-            msg += "\n" + "\n".join(get_random_images())
+            imgs = "\n".join(get_random_images())
+            if imgs:
+                msg += "\n" + imgs
     else:
         msg += args.msg
     cl.send(xmpp.Message(to=bnw_jid, typ="chat", body=msg))
-    print "[%s] SEND: %s" % (now_s(), msg)
+    print "[%s] SEND: <<<%s>>>" % (now_s(), msg)
 
 
 def main(bot_jid, bot_password, bnw_jid, args):
@@ -118,10 +121,10 @@ def main(bot_jid, bot_password, bnw_jid, args):
             cl.Process(0.01)
         # Process remained data.
         while True:
-            # Holy crap. Why '0'???
-            if cl.Process(0.1) == '0':
-                break
             time.sleep(0.1)
+            # Holy crap. Why '0'???
+            if cl.Process(0.01) == '0':
+                break
     finally:
         cl.sendPresence(typ="unavailable")
         cl.disconnect()
