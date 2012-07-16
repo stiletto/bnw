@@ -212,37 +212,39 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
     defer.returnValue((True,(comment['id'],comment['num'],qn,recipients)))
 
 @defer.inlineCallbacks
-def recommendMessage(user,message_id,comment="",sfrom=None):
-    """!Это дерьмо рекоммендует сообщение и рассылает его.
-    @param user Объект-пользователь.
-    @param message id сообщения.
-    @param comment Коммент к рекоммендации.
+def recommendMessage(user, message, comment="", sfrom=None):
+    """Add message to user's recommendations list and send it to subscribers.
+    @param user User object.
+    @param message Message object.
+    @param comment Recommendation comment (optional).
     """
-
-    message=yield objs.Message.find_one({'id': message_id})
-    if message==None:
-        defer.returnValue((False,'No such message.'))
     if not comment:
-        comment=""
-    if len(comment)>256:
-        defer.returnValue((False,'Recommendation is too long. %d/256' % (len(comment),)))
+        comment = ""
+    if len(comment) > 256:
+        defer.returnValue(
+            (False, 'Recommendation is too long. %d/256' % len(comment)))
 
-    sub_result = yield subscribe(user,'sub_message',message_id,False,sfrom)
+    # TODO: Message will be queried once more by its id.
+    sub_result = yield subscribe(
+        user, 'sub_message', message['id'], False, sfrom)
 
-    queries=[{'target': user['name'], 'type': 'sub_user'}]
-    qn,recipients = yield send_to_subscribers(queries,message,user['name'],comment)
+    queries = [{'target': user['name'], 'type': 'sub_user'}]
+    qn, recipients = yield send_to_subscribers(
+        queries, message, user['name'], comment)
 
-    tuser=yield objs.User.find_one({'name':message['user']})
-    _ = yield tuser.send_plain(
+    tuser = yield objs.User.find_one({'name': message['user']})
+    yield tuser.send_plain(
         '@%s recommended your message #%s, '
         'so %d more users received it. %s/p/%s' % (
-            user['name'],message_id,recipients,get_webui_base(tuser),message_id))
+            user['name'], message['id'], recipients,
+            get_webui_base(tuser), message['id']))
 
-    if len(message['recommendations'])<1024:
-        _ = (yield objs.Message.mupdate({'id':message_id},{'$addToSet': { 'recommendations': user['name']}}))
+    if len(message['recommendations']) < 1024:
+        yield objs.Message.mupdate(
+            {'id': message['id']},
+            {'$addToSet': {'recommendations': user['name']}})
 
-    defer.returnValue((True,(qn,recipients,message['replycount'])))
-
+    defer.returnValue((True, (qn, recipients, message['replycount'])))
 
 listenerscount=0
 def register_listener(etype,name,handler):
@@ -267,4 +269,3 @@ def publish(etype,*args,**kwargs):
         if rtype in listeners:
             for listener in listeners[rtype].itervalues():
                 reactor.callLater(0,listener,*args,**kwargs)
-

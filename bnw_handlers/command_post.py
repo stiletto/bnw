@@ -100,20 +100,37 @@ def cmd_comment(request,message="",anonymous="",text=""):
 @require_auth
 @check_arg(message=MESSAGE_RE)
 @defer.inlineCallbacks
-def cmd_recommend(request,message="",comment=""):
-        """ Рекомендация псто """
-        message=canonic_message(message).upper()
-        post_throttle=yield throttle_check(request.user['name'])
-        ok,rest = yield bnw_core.post.recommendMessage(request.user,message,comment)
-        _ = yield throttle_update(request.user['name'],post_throttle)
+def cmd_recommend(request, message="", comment=""):
+        """Recommend or unrecommend message."""
+        message_id = canonic_message(message).upper()
+        message_obj = yield objs.Message.find_one({'id': message_id})
+        if not message_obj:
+            defer.returnValue(dict(
+                ok=False,
+                desc='No such message.'))
+        if request.user['name'] in message_obj['recommendations']:
+            yield objs.Message.mupdate(
+                {'id': message_id},
+                {'$pull': {'recommendations': request.user['name']}})
+            defer.returnValue(dict(
+                ok=True,
+                desc='Message deleted from your recommendations.'))
+        if request.user['name'] == message_obj['user']:
+            defer.returnValue(dict(
+                ok=False,
+                desc='You can\'t recommend your messages.'))
+
+        post_throttle = yield throttle_check(request.user['name'])
+        ok, rest = yield bnw_core.post.recommendMessage(
+            request.user, message_obj, comment)
+        yield throttle_update(request.user['name'], post_throttle)
         if ok:
-            qn,recepients,replies = rest
-            defer.returnValue(
-                dict(ok=True,
-                     desc='Recommended and delivered to %d users (%d replies).' % (recepients,replies,))
-            )
+            qn, recepients, replies = rest
+            defer.returnValue(dict(
+                ok=True,
+                desc='Recommended and delivered to %d users (%d replies).' % (
+                    recepients,replies)))
         else:
-            defer.returnValue(
-                dict(ok=False,
-                     desc=rest)
-            )
+            defer.returnValue(dict(
+                ok=False,
+                desc=rest))
