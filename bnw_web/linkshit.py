@@ -3,12 +3,13 @@
 #
 # Licensed under the MIT License.
 #
-# coding: utf-8
+
 import re
+from bnw_handlers.base import USER_RE
 
 
 _URL_RE = re.compile(ur"""\b((?:([\w-]+):(/{1,3})|www[.])(?:(?:(?:[^\s&()]|&amp;|&quot;)*(?:[^!"#$%&'()*+,.:;<=>?@\[\]^`{|}~\s]))|(?:\((?:[^\s&()]|&amp;|&quot;)*\)))+)""")
-_USER_RE = re.compile(ur"""(?:(?<=[\s\W])|^)@([0-9A-Za-z-]+)""")
+_USER_RE = re.compile(ur"""(?:(?<=[\s\W])|^)@(%s)""" % USER_RE)
 _MSG_RE = re.compile(ur"""(?:(?<=[\s\W])|^)#([0-9A-Za-z]+(?:/[0-9A-Za-z]+)?)""")
 
 def url_handler(match):

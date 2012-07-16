@@ -10,7 +10,7 @@ import unittest
 
 class LinkShitTest(unittest.TestCase):
     def test_linkshit(self):
-        a = linkparse(u'Ololo lololo #67AB3D fyuck http://bnw.im/u/lol http://ompldr.org/vZGZ1aw damn #ABCDEF/XYZ shit-@govnoeb')
+        a = linkparse(u'Ololo lololo #67AB3D fyuck http://bnw.im/u/lol http://ompldr.org/vZGZ1aw damn #ABCDEF/XYZ shit-@govnoeb @user_with_undescores')
         assert a.next() == 'Ololo lololo '
         assert a.next() == ('msg','#67AB3D','67AB3D')
         assert a.next() == ' fyuck '
@@ -21,6 +21,8 @@ class LinkShitTest(unittest.TestCase):
         assert a.next() == ('msg','#ABCDEF/XYZ','ABCDEF/XYZ')
         assert a.next() == ' shit-'
         assert a.next() == ('user','@govnoeb','govnoeb')
+        assert a.next() == ' '
+        assert a.next() == ('user','@user_with_undescores','user_with_undescores')
         pass
 
 
