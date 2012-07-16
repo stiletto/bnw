@@ -19,8 +19,11 @@
                 <img src='/u/{{ username }}/avatar' alt='avatar' class='avatar_big' />
             </div>
             <div style='display: table-cell; vertical-align: top; padding-left: 1em;'>
-                Пользователь {{ w.userl(user['name']) }} — няшка. Он зарегистрировался здесь {{ w.time(regdate) }}
-                 и написал с тех пор <a href="/u/{{ username }}/">{{ messages_count }} сообщений</a> и {{ comments_count }} комментариев.
+                Пользователь {{ w.userl(user['name']) }} — няшка.
+                Он зарегистрировался здесь {{ w.time(regdate) }} и написал с тех пор
+                <a href="/u/{{ username }}/">{{ messages_count }}
+                {{ w.messages(messages_count) }}</a>
+                и {{ comments_count }} {{ w.comments(comments_count) }}.
             </div>
         </div>
     </div>
@@ -29,27 +32,27 @@
     <div class='msg' id="none">
     <table class='friendstable'>
         {% if 'fullname' in vcard %}
-        <tr><td> Полное имя: </td>
+        <tr><td>Полное имя:</td>
             <td>{{ escape(vcard['fullname']) }}</td>
         </tr>
         {% end %}
         {% if 'url' in vcard %}
-        <tr><td> Домашняя страничка: </td>
+        <tr><td>Домашняя страница:</td>
             <td><a href="{{ escape(vcard['url']) }}">{{ escape(vcard['url']) }}</a></td>
         </tr>
         {% end %}
         {% if 'desc' in vcard %}
-        <tr><td> О себе: </td>
+        <tr><td>О себе:</td>
             <td>{{ escape(vcard['desc']) }}</td>
         </tr>
         {% end %}
-        <tr><td> Подписки:</td>
+        <tr><td>Подписки:</td>
             <td>{% for sub in subscriptions %}{{ w.userl(sub) }} {% end %}</td>
         </tr>
-        <tr><td> Взаимные подписки:</td>
+        <tr><td>Взаимные подписки:</td>
             <td> {% for sub in friends %}{{ w.userl(sub) }} {% end %} </td>
         </tr>
-        <tr><td> Читатели: </td>
+        <tr><td>Читатели:</td>
             <td>{% for sub in subscribers %}{{ w.userl(sub) }} {% end %}</td>
         </tr>
     </table>

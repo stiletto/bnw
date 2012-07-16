@@ -2,13 +2,11 @@
 import tornado.escape
 import datetime
 
-def runums(n,d1,d2,d5):
-    l=n%10
-    if 10<n<15:
-        return d5
-    elif l==1:
+def runums(n, d1, d2, d5):
+    l = n % 10
+    if l == 1:
         return d1
-    elif 1<l<5:
+    elif 1 < l < 5:
         return d2
     else:
         return d5
@@ -28,17 +26,23 @@ class Widgets(object):
                 't':  tornado.escape.xhtml_escape(club[:32]),
                 'u':  user, }
         return '<a href="/c/%(tu)s" class="club">%(t)s</a>' % pars
+
     def tags(self,tags,clubs,user=None):
         return '<div class="tags"> '+' '.join(self.club(c,user) for c in clubs)+' '+' '.join(self.tag(t,user) for t in tags)+' </div>'
+
     def user_url(self,name):
         return '/u/%(u)s' % {'u':name}
+
     def post_url(self,name):
         return '/p/%(u)s' % {'u':name}
+
     def userl(self,name):
         return '<a href="/u/%(u)s" class="usrid">@%(u)s</a>' % {'u':name}
+
     def msgl(self,msg,bookmark=False):
         bm = ' rel="bookmark"' if bookmark else ''
         return '<a href="/p/%(u)s"%(bm)s class="msgid">#%(n)s</a>' % {'u':msg.replace('/','#'),'n':msg, 'bm': bm, }
+
     def time(self,timestamp):
         dn=datetime.datetime.utcnow()
         dt=datetime.datetime.utcfromtimestamp(timestamp)
@@ -56,8 +60,13 @@ class Widgets(object):
             else:
                 res=str(dd.seconds)+' '+runums(dd.seconds,'секунду','секунды','секунд')
         return '<abbr class="published" title="'+dt.strftime('%Y-%m-%dT%H:%M:%S+0000')+'">'+res+' назад</abbr>'
-        #.strftime('%d.%m.%Y %H:%M:%S')
-    #SHORTENER_RE=re.compile(ur'((?:.+\s+){1,7})',re.U|re.I)
+
+    def messages(self, count):
+        return runums(count, u"сообщение", u"сообщения", u"сообщений")
+
+    def comments(self, count):
+        return runums(count, u"комментарий", u"комментария", u"комментариев")
+
     def shorttext(self,txt,maxwords=7,maxlen=70,ellipsis="..."):
         words=0
         pos=0
@@ -76,4 +85,5 @@ class Widgets(object):
             return txt[:pos]+ellipsis
         else:
             return txt[:pos]
+
 widgets=Widgets()

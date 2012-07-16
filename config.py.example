@@ -15,6 +15,9 @@ srvc_port = 5347
 ## Password used for component authorization.
 srvc_pwd = 'surelythisissecureenough'
 
+## Admin jid. For now used only for sending statistics in each bot answer.
+admin_jid = 'admin@localhost'
+
 ## XMPP servers configuration for default variant of settings:
 ##
 ## * ejabberd
