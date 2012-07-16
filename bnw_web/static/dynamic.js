@@ -39,6 +39,7 @@ function reopenws() {
 
 var favicon_changed = false;
 var timeout_id;
+
 $(window).focus(function () {
     if (favicon_changed) {
         favicon.change("/favicon.ico");
@@ -46,7 +47,7 @@ $(window).focus(function () {
     }
 });
 
-function event_favicon() {
+function change_favicon() {
     if (!favicon_changed) {
         favicon.change("/static/favicon-event.ico");
         favicon_changed = true;
@@ -58,6 +59,7 @@ function event_favicon() {
             timeout_id = setTimeout(function() {
                 favicon.change("/favicon.ico");
                 favicon_changed = false;
+                timeout_id = undefined;
             }, 2000);
         }
     }
@@ -96,7 +98,7 @@ function main_onmessage(e) {
     msg.append(sign);
     outerbox.append(msg);
     outerbox.prependTo($("div.messages")).show("slow");
-    event_favicon();
+    change_favicon();
 }
 
 function message_onmessage(e) {
@@ -134,7 +136,7 @@ function message_onmessage(e) {
     comment.append(sign);
     outerbox.append(comment);
     outerbox.appendTo($("div.comments")).show("slow");
-    event_favicon();
+    change_favicon();
 }
 
 switch (page_type) {
