@@ -41,6 +41,8 @@ def get_webui_base(user):
         else:
             return baseurl
 
+online = 0
+
 def get_https_webui_base():
     return "https://" + config.webui_base
 
