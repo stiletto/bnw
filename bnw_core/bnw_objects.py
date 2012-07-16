@@ -122,12 +122,18 @@ class Message(MongoObject):
     indexes = MongoObject.indexes + (
         (txmongo.filter.DESCENDING("date"), False, False), 
         
-        (txmongo.filter.DESCENDING("user") + txmongo.filter.DESCENDING("tags") + txmongo.filter.DESCENDING("date"),
+        (txmongo.filter.ASCENDING("user") + txmongo.filter.ASCENDING("tags") + txmongo.filter.DESCENDING("date"),
             False, False),
-        (txmongo.filter.DESCENDING("user") + txmongo.filter.DESCENDING("date"), False, False),
-        (txmongo.filter.DESCENDING("user") + txmongo.filter.DESCENDING("clubs") + txmongo.filter.DESCENDING("date"), False, False),
+        (txmongo.filter.ASCENDING("user") + txmongo.filter.DESCENDING("date"), False, False),
+        (txmongo.filter.ASCENDING("user") + txmongo.filter.ASCENDING("clubs") + txmongo.filter.DESCENDING("date"), False, False),
+        (txmongo.filter.ASCENDING("clubs") + txmongo.filter.DESCENDING("date"), False, False),
+        (txmongo.filter.ASCENDING("tags") + txmongo.filter.DESCENDING("date"), False, False),
         (txmongo.filter.DESCENDING("date") + txmongo.filter.DESCENDING("recommendations"), False, False),
     )
+
+    def save(self,safe=True):
+        print "+MESSAGE:",self.doc
+        return super(Message,self).save(safe=safe)
 
     @defer.inlineCallbacks
     def deliver(self,target,recommender=None,recocomment=None,sfrom=None):
@@ -152,7 +158,8 @@ class FeedElement(MongoObject):
         user: пользователь-обладатель ленты."""
     collection = CollectionWrapper("feeds")
     indexes = (
-        (txmongo.filter.ASCENDING("message")+txmongo.filter.ASCENDING("user"), False, False),
+        (txmongo.filter.ASCENDING("message")+txmongo.filter.ASCENDING("user"), True, False),
+        (txmongo.filter.ASCENDING("user")+txmongo.filter.DESCENDING("_id"), True, False),
     )
 
 class Comment(MongoObject):
@@ -162,6 +169,10 @@ class Comment(MongoObject):
     indexes = MongoObject.indexes + (
         (txmongo.filter.ASCENDING("message"), False, False),
     )
+
+    def save(self,safe=True):
+        print "+COMMENT:",self.doc
+        return super(Comment,self).save(safe=safe)
 
     @defer.inlineCallbacks
     def deliver(self,target,recommender=None,recocomment=None,sfrom=None):
@@ -226,6 +237,24 @@ class Today(MongoObject):
     """ Обсуждаемый сегодня пост в выхлопе мап-редьюса."""
     collection = CollectionWrapper("today")
     indexes = ()
+
+class Notify(MongoObject):
+    """ Нотифай. """
+    collection = CollectionWrapper("notifies")
+    indexes = ()
+    @classmethod
+    @defer.inlineCallbacks
+    def notify(cls, user, data):
+        nf = cls()
+        nf.update(data)
+        nf['receiver'] = user
+        #nf['time'] = time
+        key = data['key']
+        yield cls.mupdate({'receiver':user,'key':key}, data, True)
+        toremove = yield cls.find_sort({'receiver':user}, txmongo.filter.DESCENDING("_id"), skip=10)
+        for x in toremove:
+            cls.remove({'receiver':user,'key':x['key']})
+
 
 class Timing(MongoObject):
     """ Время выполнения."""
