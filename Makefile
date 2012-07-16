@@ -19,11 +19,9 @@ VENV_DEPS=\
 install-deb:
 	sudo apt-get install $(DEBIAN_DEPS)
 	sudo pip install 'git+https://github.com/fiorix/mongo-async-python-driver.git#egg=txmongo'
-	git clone https://github.com/stiletto/linkshit.git
 
 uninstall-deb:
 	sudo pip uninstall txmongo
-	rm -rfv linkshit
 	sudo apt-get autoremove $(DEBIAN_DEPS)
 
 PIP=.venv/bin/pip
@@ -39,10 +37,9 @@ install-venv:
 	virtualenv .venv
 	$(PIP) install twisted tornado PyRSS2Gen PIL
 	$(PIP) install -e 'git+https://github.com/fiorix/mongo-async-python-driver.git#egg=txmongo'
-	git clone https://github.com/stiletto/linkshit.git
 
 uninstall-venv:
-	rm -rfv .venv linkshit
+	rm -rfv .venv
 	sudo apt-get autoremove $(VENV_DEPS)
 
 rm-venv:

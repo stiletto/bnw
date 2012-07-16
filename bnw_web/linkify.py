@@ -1,7 +1,7 @@
 # coding: utf-8
 import re
 from re import compile as rec
-from linkshit.linkshit import LinkParser, _URL_RE, shittypes
+from bnw_web.linkshit import LinkParser, _URL_RE, shittypes
 from tornado.escape import _unicode,xhtml_escape,url_escape
 
 linkhostings = [
