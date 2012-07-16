@@ -50,7 +50,6 @@ def idiotic(msg):
                 if 'interface' in message_user:
                     iparser=message_user['interface']
             result = yield handlers.parsers[iparser].handle(xmsg)
-            print 'Result is',result
         except CommandParserException, exc:
             result = yield exc.args[0]
         #except pymongo.errors.AutoReconnect:
