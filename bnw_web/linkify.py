@@ -36,7 +36,6 @@ def thumbify(text,permitted_protocols = ['http','https']):
     for m in parser.parse(text):
         if isinstance(m,tuple):
             if m[0] in ('url','namedlink'):
-                print m
                 up = _URL_RE.match(m[2])
                 url = m[2] if up is None else up.group(1)
                 proto = None if up is None else up.group(2)

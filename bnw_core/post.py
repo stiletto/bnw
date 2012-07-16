@@ -95,7 +95,6 @@ def send_to_subscribers(queries,message,recommender=None,recocomment=None):
                 continue
             recipients[result['user']]=result
     reccount=0
-    print recipients
     bl_items = frozenset([('user',message['user'])] + [('tag',x) for x in message.get('tags',[])] +
         [('club',x) for x in message.get('clubs',[])])
 
