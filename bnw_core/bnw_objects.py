@@ -131,6 +131,10 @@ class Message(MongoObject):
         (txmongo.filter.DESCENDING("date") + txmongo.filter.DESCENDING("recommendations"), False, False),
     )
 
+    def save(self,safe=True):
+        print "+MESSAGE:",self.doc
+        return super(Message,self).save(safe=safe)
+
     @defer.inlineCallbacks
     def deliver(self,target,recommender=None,recocomment=None,sfrom=None):
         feedel_val = dict(user=target['name'],message=self['id'])
@@ -165,6 +169,10 @@ class Comment(MongoObject):
     indexes = MongoObject.indexes + (
         (txmongo.filter.ASCENDING("message"), False, False),
     )
+
+    def save(self,safe=True):
+        print "+COMMENT:",self.doc
+        return super(Comment,self).save(safe=safe)
 
     @defer.inlineCallbacks
     def deliver(self,target,recommender=None,recocomment=None,sfrom=None):
