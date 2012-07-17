@@ -144,11 +144,11 @@ switch (page_type) {
     case "main":
         ws_addr = (secure_connection ? "wss" : "ws" ) + "://" + websocket_base + "/ws";
         onmessage = main_onmessage;
+        openws();
         break;
     case "message":
         ws_addr = (secure_connection ? "wss" : "ws" ) + "://" + websocket_base + window.location.pathname + "/ws";
         onmessage = message_onmessage;
+        openws();
         break;
 }
-
-openws();
