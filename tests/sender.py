@@ -73,7 +73,7 @@ def send(cl, bnw_jid, args):
     msg = ""
     if args.to:
         msg = args.to + " "
-    if args.msg_type == "rnd":
+    if not args.msg:
         if not args.no_rnd_tags:
             tags = " ".join(get_random_tags())
             if tags:
@@ -137,10 +137,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--to", help="destination")
-    parser.add_argument("-c", "--count", type=int, default=0,
+    parser.add_argument("-c", "--count", type=int, default=1,
                         help="how many messages send; 0 for infinity")
-    parser.add_argument("-mt", "--msg-type", default="rnd",
-                        choices=["rnd", "user"], help="messages type")
     parser.add_argument("-ni", "--no-rnd-imgs", action="store_true",
                         help="no random images")
     parser.add_argument("-ic", "--imgs-count", type=int,
