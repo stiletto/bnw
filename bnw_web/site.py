@@ -84,6 +84,8 @@ class MainWsHandler(WsHandler):
         return (
             ('new_message', self.new_message),
             ('del_message', self.del_message),
+            ('upd_comments_count', self.upd_comments_count),
+            ('upd_recommendations_count', self.upd_recommendations_count),
         )
 
     def new_message(self, msg):
@@ -92,6 +94,14 @@ class MainWsHandler(WsHandler):
 
     def del_message(self, msg_id):
         self.write_message(json.dumps({'type': 'del_message', 'id': msg_id}))
+
+    def upd_comments_count(self, msg_id, num):
+        self.write_message(json.dumps({
+            'type': 'upd_comments_count', 'id': msg_id, 'num': num}))
+
+    def upd_recommendations_count(self, msg_id, num):
+        self.write_message(json.dumps({
+            'type': 'upd_recommendations_count', 'id': msg_id, 'num': num}))
 
 
 class MessageWsHandler(WsHandler):

@@ -209,6 +209,7 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
 
     qn,recipients = yield send_to_subscribers([{'target': message_id, 'type': 'sub_message'}],comment)
     publish('new_comment_in_'+message_id,comment.filter_fields()) # ALARM
+    publish('upd_comments_count', message_id, comment['num'])
     defer.returnValue((True,(comment['id'],comment['num'],qn,recipients)))
 
 @defer.inlineCallbacks
@@ -239,11 +240,13 @@ def recommendMessage(user, message, comment="", sfrom=None):
             user['name'], message['id'], recipients,
             get_webui_base(tuser), message['id']))
 
-    if (len(message['recommendations']) < 1024 and
-        user['name'] != message['user']):
+    recos_count = len(message['recommendations'])
+    if (recos_count < 1024 and user['name'] != message['user'] and
+        user['name'] not in message['recommendations']):
             yield objs.Message.mupdate(
                 {'id': message['id']},
                 {'$addToSet': {'recommendations': user['name']}})
+            publish('upd_recommendations_count', message['id'], recos_count+1)
 
     defer.returnValue((True, (qn, recipients, message['replycount'])))
 

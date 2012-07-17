@@ -87,12 +87,32 @@ function add_node(html, to, at_top) {
 
 function main_page_handler(e) {
     var d = JSON.parse(e.data);
-    if (d.type == "new_message") {
+    if (d.type == "new_message" && !window.location.search) {
+        // Add new messages only to first page.
         add_node(d.html, "div.messages", true);
     } else if (d.type == "del_message") {
         $("div#"+d.id).removeClass("outerborder_added"
         ).addClass("outerborder_deleted");
         change_favicon();
+    } else if (d.type == "upd_comments_count") {
+        var msg = $("div#"+d.id);
+        if (msg.length) {
+            var t = msg.find("div.sign").contents()[2];
+            t.nodeValue = t.nodeValue.replace(/\([0-9]+(\+)?/, "("+d.num+"$1")
+        }
+    } else if (d.type == "upd_recommendations_count") {
+        var msg = $("div#"+d.id);
+        if (msg.length) {
+            var t = msg.find("div.sign").contents()[2];
+            var val = t.nodeValue;
+            var re = /\+[0-9]+\)/;
+            var new_val = d.num ? "+"+d.num+")" : ")";
+            if (val.match(re)) {
+                t.nodeValue = val.replace(re, new_val);
+            } else {
+                t.nodeValue = val.replace(/\)/, new_val);
+            }
+        }
     }
 }
 

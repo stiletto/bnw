@@ -108,8 +108,8 @@
             width: 4em;
         }
 
-        /* Colors for dynamicly added or
-        deleted elements */
+        /* Colors for dynamicly added or deleted elements */
+        /* Colors are ugly, kick me please for that. */
         .outerborder_added {
             background-color: #C5C5C5;
         }
