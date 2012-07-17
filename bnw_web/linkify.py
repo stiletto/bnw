@@ -50,8 +50,8 @@ def thumbify(text,permitted_protocols = ['http','https']):
                             thumb = lh[1](mn.group)
                             thumbs.append((url,thumb))
                             break
-                link_text = m[3] if m[0]=='namedlink' else url
-                texta.append('<a href="%s">%s</a>' % (url,link_text))
+                    link_text = m[3] if m[0]=='namedlink' else url
+                    texta.append('<a href="%s">%s</a>' % (url,link_text))
             elif m[0] in formatting_tags.keys():
                 tag = formatting_tags[m[0]]
                 if not m[0] in stack:

@@ -139,13 +139,14 @@ function message_onmessage(e) {
     change_favicon();
 }
 
+var secure_connection = window.location.protocol=="https:";
 switch (page_type) {
     case "main":
-        ws_addr = "ws://" + websocket_base + "/ws";
+        ws_addr = (secure_connection ? "wss" : "ws" ) + "://" + websocket_base + "/ws";
         onmessage = main_onmessage;
         break;
     case "message":
-        ws_addr = "ws://" + websocket_base + window.location.pathname + "/ws";
+        ws_addr = (secure_connection ? "wss" : "ws" ) + "://" + websocket_base + window.location.pathname + "/ws";
         onmessage = message_onmessage;
         break;
 }
