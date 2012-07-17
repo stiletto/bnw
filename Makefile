@@ -19,11 +19,9 @@ VENV_DEPS=\
 install-deb:
 	sudo apt-get install $(DEBIAN_DEPS)
 	sudo pip install 'git+https://github.com/fiorix/mongo-async-python-driver.git#egg=txmongo'
-	git clone https://github.com/stiletto/linkshit.git
 
 uninstall-deb:
 	sudo pip uninstall txmongo
-	rm -rfv linkshit
 	sudo apt-get autoremove $(DEBIAN_DEPS)
 
 PIP=.venv/bin/pip
@@ -39,10 +37,9 @@ install-venv:
 	virtualenv .venv
 	$(PIP) install twisted tornado PyRSS2Gen PIL
 	$(PIP) install -e 'git+https://github.com/fiorix/mongo-async-python-driver.git#egg=txmongo'
-	git clone https://github.com/stiletto/linkshit.git
 
 uninstall-venv:
-	rm -rfv .venv linkshit
+	rm -rfv .venv
 	sudo apt-get autoremove $(VENV_DEPS)
 
 rm-venv:
@@ -52,11 +49,24 @@ reinstall-venv: rm-venv install-venv
 
 config:
 	cp -i config.py.example config.py
-	test $(EDITOR) && $(EDITOR) config.py || editor config.py
+	if test $(EDITOR); then\
+		$(EDITOR) config.py;\
+	else\
+		editor config.py;\
+	fi
 
 RUN_CMD=twistd -ny instance.tac
-
 run:
-	test -d .venv &&\
-		bash -c "source .venv/bin/activate; $(RUN_CMD)" ||\
-		$(RUN_CMD)
+	if test -d .venv; then\
+		bash -c "source .venv/bin/activate && $(RUN_CMD)";\
+	else\
+		$(RUN_CMD);\
+	fi
+
+TEST_CMD=trial tests.test
+test:
+	if test -d .venv; then\
+		bash -c "source .venv/bin/activate && $(TEST_CMD)";\
+	else\
+		$(TEST_CMD);\
+	fi

@@ -1,7 +1,7 @@
 # coding: utf-8
 import re
 from re import compile as rec
-from linkshit.linkshit import LinkParser, _URL_RE, shittypes
+from bnw_web.linkshit import LinkParser, _URL_RE, shittypes
 from tornado.escape import _unicode,xhtml_escape,url_escape
 
 linkhostings = [
@@ -26,8 +26,10 @@ formatting_tags = {
 
 parser = LinkParser(types=bnwtypes+shittypes)
 
-def thumbify(text,permitted_protocols = ['http','https']):
+def thumbify(text, permitted_protocols=None):
     text = _unicode(xhtml_escape(text))
+    if not permitted_protocols:
+        permitted_protocols = ["http", "https"]
     texta = []
     thumbs = []
     stack = []
@@ -36,6 +38,8 @@ def thumbify(text,permitted_protocols = ['http','https']):
     for m in parser.parse(text):
         if isinstance(m,tuple):
             if m[0] in ('url','namedlink'):
+                # TODO: Move checking for permitted protocols
+                # in linkshit module? Matching twice is bad.
                 up = _URL_RE.match(m[2])
                 url = m[2] if up is None else up.group(1)
                 proto = None if up is None else up.group(2)
@@ -50,8 +54,7 @@ def thumbify(text,permitted_protocols = ['http','https']):
                             thumb = lh[1](mn.group)
                             thumbs.append((url,thumb))
                             break
-                    link_text = m[3] if m[0]=='namedlink' else url
-                    texta.append('<a href="%s">%s</a>' % (url,link_text))
+                    texta.append('<a href="%s">%s</a>' % (url, m[3]))
             elif m[0] in formatting_tags.keys():
                 tag = formatting_tags[m[0]]
                 if not m[0] in stack:
@@ -73,48 +76,8 @@ def thumbify(text,permitted_protocols = ['http','https']):
         else:
             texta.append(m)
     for i in stack:
-	texta.append(formatting_tags[i][1])
+        texta.append(formatting_tags[i][1])
     return ''.join(texta), thumbs
 
 def linkify(text):
     return thumbify(text)[0]
-
-if __name__=="__main__":
-    txs = (
-	('''test //test test// test **test test** test''', 
-	    'test <i>test test</i> test <b>test test</b> test'),
-	('''test //test **test// test** test''',
-	    'test <i>test <b>test</b></i><b> test</b> test'),
-	(u'''Test *жирный* **жирный** ***жирный*** //курсив **жирный курсив**//''',
-	    u'Test *жирный* <b>жирный</b> <b>*жирный</b>* <i>курсив <b>жирный курсив</b></i>'),
-	('**test',
-	    '<b>test</b>'),
-	(u'''Обычный Советский Дурдом: http://allin777.livejournal.com/152675.html
-[[ http://allin777.livejournal.com/152675.html|Обычный Советский Дурдом]]
-"ИЗ РЕЧИ НИКОЛАЯ ЕЖОВА НА ПЛЕНУМЕ ЦК ВКП(б)
-1 марта 1937 г.
-ЕЖОВ. #ABCDEF Здесь заодно, товарищи разрешите сказать о таких умонастроениях, таких некоторых хозяйственников''',
-	    u'''Обычный Советский Дурдом: <a href="http://allin777.livejournal.com/152675.html">http://allin777.livejournal.com/152675.html</a>
-<a href="http://allin777.livejournal.com/152675.html">Обычный Советский Дурдом</a>
-&quot;ИЗ РЕЧИ НИКОЛАЯ ЕЖОВА НА ПЛЕНУМЕ ЦК ВКП(б)
-1 марта 1937 г.
-ЕЖОВ. <a href="/p/ABCDEF">#ABCDEF</a> Здесь заодно, товарищи разрешите сказать о таких умонастроениях, таких некоторых хозяйственников'''),
-        (u'''Wiki-разметка для ссылок (я про [[URL | text]] сейчас), как по мне, выглядит убого. Может, конвертировать её в что-то типа примечаний[1] или сносок[2]?
- 1. http://dic.academic.ru/dic.nsf/ushakov/973938
- 2. https://ru.wikipedia.org/wiki/Сноска''',
-            u'''Wiki-разметка для ссылок (я про <a href="http://URL">text</a> сейчас), как по мне, выглядит убого. Может, конвертировать её в что-то типа примечаний[1] или сносок[2]?
- 1. <a href="http://dic.academic.ru/dic.nsf/ushakov/973938">http://dic.academic.ru/dic.nsf/ushakov/973938</a>
- 2. <a href="https://ru.wikipedia.org/wiki/Сноска">https://ru.wikipedia.org/wiki/Сноска</a>'''),
-    )
-    for i,x in enumerate(txs):
-	print
-	print ' --- ',i,' --- '
-	print 'I:',x[0]
-	o=thumbify(x[0])
-	print 'O:',o[0]
-	if o[0]==x[1]:
-	    print '*** PASSED ***'
-	else:
-	    print '*** FAILED ***'
-	    print 'E:',x[1]
-	    raise AssertionError
