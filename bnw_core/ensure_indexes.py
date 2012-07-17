@@ -24,5 +24,7 @@ def index():
 
 if __name__=="__main__":
     #configfile, dbpath, period = sys.argv[1:]
+    import config
+    base.config.register(config)
     index()
     reactor.run()
