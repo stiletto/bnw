@@ -49,11 +49,24 @@ reinstall-venv: rm-venv install-venv
 
 config:
 	cp -i config.py.example config.py
-	test $(EDITOR) && $(EDITOR) config.py || editor config.py
+	if test $(EDITOR); then\
+		$(EDITOR) config.py;\
+	else\
+		editor config.py;\
+	fi
 
 RUN_CMD=twistd -ny instance.tac
-
 run:
-	test -d .venv &&\
-		bash -c "source .venv/bin/activate; $(RUN_CMD)" ||\
-		$(RUN_CMD)
+	if test -d .venv; then\
+		bash -c "source .venv/bin/activate && $(RUN_CMD)";\
+	else\
+		$(RUN_CMD);\
+	fi
+
+TEST_CMD=trial tests.test
+test:
+	if test -d .venv; then\
+		bash -c "source .venv/bin/activate && $(TEST_CMD)";\
+	else\
+		$(TEST_CMD);\
+	fi

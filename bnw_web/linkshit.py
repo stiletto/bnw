@@ -50,6 +50,7 @@ class LinkParser(object):
                 yield text[pos:]
                 return
             else:
+                # TODO: Fix first empty value.
                 yield text[pos:pos+mins]
                 yield ((minm[0], minm[1].group(0)) + minm[2](minm[1]))
                 pos = pos + minm[1].end()
