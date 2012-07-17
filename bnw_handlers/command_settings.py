@@ -47,6 +47,8 @@ def cmd_set(request, **kwargs):
         if 'name' in kwargs:
             # Simplified interface.
             name, value = kwargs['name'], kwargs['value']
+            if value is None:
+                value = ''
         else:
             # Redeye interface.
             name, value = kwargs.items()[0]

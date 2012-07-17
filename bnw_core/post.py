@@ -212,10 +212,10 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
     defer.returnValue((True,(comment['id'],comment['num'],qn,recipients)))
 
 @defer.inlineCallbacks
-def recommendMessage(user, message_id, comment="", sfrom=None):
+def recommendMessage(user, message, comment="", sfrom=None):
     """Add message to user's recommendations list and send it to subscribers.
     @param user User object.
-    @param message_id Message id.
+    @param message Message object.
     @param comment Recommendation comment (optional).
     """
     if not comment:
@@ -223,9 +223,6 @@ def recommendMessage(user, message_id, comment="", sfrom=None):
     if len(comment) > 256:
         defer.returnValue(
             (False, 'Recommendation is too long. %d/256' % len(comment)))
-    message = yield objs.Message.find_one({'id': message_id})
-    if not message:
-        defer.returnValue((False, 'No such message.'))
 
     # TODO: Message will be queried once more by its id.
     sub_result = yield subscribe(
