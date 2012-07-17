@@ -74,7 +74,7 @@ update_args = (
             )
 
 redeye_handlers = (
-        ("ping", 
+        ("ping",
             (
                 ("s", "safe", False, u"Do not vyebyvatsya."),
             ),
@@ -129,7 +129,7 @@ redeye_handlers = (
             (
                 ("c", "usercss", True, u"User CSS."),
                 ("p", "password", True, u"Password."),
-                ("s", "servicejid", True, u"Set service's jid."),
+                ("s", "servicejid", False, u"Set service's jid."),
                 ("b", "baseurl", True, u"Set base url for links."),
             ),
             command_settings.cmd_set,
@@ -208,7 +208,7 @@ simple_handlers = (
         (ur'(?i)jid',command_jids.cmd_jids),
 
         (ur'(?i)set',command_settings.cmd_set),
-        (ur'(?i)set +(?P<name>\w+) +(?P<value>\S+)',command_settings.cmd_set),
+        (ur'(?i)set +(?P<name>\w+)(?: +(?P<value>\S+))?',command_settings.cmd_set),
 
         (ur'(?i)today',command_show.cmd_today),
         (ur'[#№]',command_show.cmd_feed),
