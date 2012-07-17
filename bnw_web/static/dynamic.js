@@ -48,49 +48,62 @@ $(window).focus(function () {
 });
 
 function change_favicon() {
+    if (timeout_id != undefined) {
+        clearTimeout(timeout_id);
+        timeout_id = undefined;
+    }
     if (!favicon_changed) {
         favicon.change("/static/favicon-event.ico");
         favicon_changed = true;
-        if (timeout_id != undefined) {
-            clearTimeout(timeout_id);
+    }
+    if (document.hasFocus()) {
+        timeout_id = setTimeout(function() {
+            favicon.change("/favicon.ico");
+            favicon_changed = false;
             timeout_id = undefined;
-        }
-        if (document.hasFocus()) {
-            timeout_id = setTimeout(function() {
-                favicon.change("/favicon.ico");
-                favicon_changed = false;
-                timeout_id = undefined;
-            }, 2000);
-        }
+        }, 2000);
     }
 }
 
-function add_dynamic_node(html, to) {
-    var node = $(html);
-    node.addClass("outerborder_dynamic");
+function add_node(html, to, at_top) {
+    var node = $(html).hide();
+    node.addClass("outerborder_added");
     node.find("img.avatar").removeClass("avatar_ps");
     node.find("img.imgpreview_ps").each(function() {
         $(this).removeClass("imgpreview_ps");
     });
     node.mouseover(function() {
-        $(this).removeClass("outerborder_dynamic");
+        $(this).removeClass("outerborder_added");
         $(this).unbind("mouseover");
     });
-    node.hide().prependTo($(to)).show("slow");
+    if (at_top) {
+        node.prependTo(to);
+    } else {
+        node.appendTo(to);
+    }
+    node.show("slow");
     change_favicon();
 }
 
 function main_page_handler(e) {
     var d = JSON.parse(e.data);
     if (d.type == "new_message") {
-        add_dynamic_node(d.html, "div.messages")
+        add_node(d.html, "div.messages", true);
+    } else if (d.type == "del_message") {
+        $("div#"+d.id).removeClass("outerborder_added"
+        ).addClass("outerborder_deleted");
+        change_favicon();
     }
 }
 
 function message_page_handler(e) {
     var d = JSON.parse(e.data);
     if (d.type == "new_comment") {
-        add_dynamic_node(d.html, "div.comments")
+        add_node(d.html, "div.comments", false);
+    } else if (d.type == "del_comment") {
+        $("div#"+d.id).removeClass("outerborder_added"
+        ).addClass("outerborder_deleted");
+        change_favicon();
     }
 }
 

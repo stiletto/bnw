@@ -149,7 +149,7 @@ def postMessage(user,tags,clubs,text,anon=False,anoncomments=False,sfrom=None):
     if ('@' in clubs) or (len(clubs)==0):
         queries+=[{'target': 'anonymous' if anon else user['name'], 'type': 'sub_user'}]
     qn,recipients = yield send_to_subscribers(queries,stored_message)
-    publish('messages',stored_message.filter_fields()) # ALARM
+    publish('new_message',stored_message.filter_fields()) # ALARM
     defer.returnValue((True,(message['id'],qn,recipients)))
 
 @defer.inlineCallbacks
@@ -208,7 +208,7 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
     _ = (yield objs.Message.mupdate({'id':message_id},{'$inc': { 'replycount': 1}}))
 
     qn,recipients = yield send_to_subscribers([{'target': message_id, 'type': 'sub_message'}],comment)
-    publish('comments-'+message_id,comment.filter_fields()) # ALARM
+    publish('new_comment_in_'+message_id,comment.filter_fields()) # ALARM
     defer.returnValue((True,(comment['id'],comment['num'],qn,recipients)))
 
 @defer.inlineCallbacks

@@ -82,12 +82,16 @@ class MainWsHandler(WsHandler):
 
     def get_handlers(self):
         return (
-            ('messages', self.new_message),
+            ('new_message', self.new_message),
+            ('del_message', self.del_message),
         )
 
     def new_message(self, msg):
         html = uimodules.Message(self).render(msg)
         self.write_message(json.dumps({'type': 'new_message', 'html': html}))
+
+    def del_message(self, msg_id):
+        self.write_message(json.dumps({'type': 'del_message', 'id': msg_id}))
 
 
 class MessageWsHandler(WsHandler):
@@ -95,12 +99,17 @@ class MessageWsHandler(WsHandler):
 
     def get_handlers(self, msgid):
         return (
-            ('comments-' + msgid, self.new_comment),
+            ('new_comment_in_'+msgid, self.new_comment),
+            ('del_comment_in_'+msgid, self.del_comment),
         )
 
     def new_comment(self, comment):
         html = uimodules.Comment(self).render(comment)
         self.write_message(json.dumps({'type': 'new_comment', 'html': html}))
+
+    def del_comment(self, comment_id):
+        self.write_message(json.dumps(
+            {'type': 'del_comment', 'id': comment_id}))
 
 
 def get_page(self):

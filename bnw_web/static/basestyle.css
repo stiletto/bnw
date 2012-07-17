@@ -29,9 +29,6 @@
             padding-bottom: 0.5em;*/
             padding: 1em;
         }
-        .outerborder_dynamic {
-            background-color: #D5D5D5;
-        }
 
         .headlink {
             color: #000; background-color: #00CD00; text-decoration: none;
@@ -106,15 +103,30 @@
         .imgpreview:hover {
             border-color: #0000CD;
         }
-        .outerborder_dynamic .imgpreview {
-            border-color: #D5D5D5;
-        }
-        .outerborder_dynamic .imgpreview:hover {
-            border-color: #0000CD;
-        }
         .imgpreview_ps {
             height: 3em;
             width: 4em;
+        }
+
+        /* Colors for dynamicly added or
+        deleted elements */
+        .outerborder_added {
+            background-color: #C5C5C5;
+        }
+        .outerborder_deleted {
+            background-color: #D78787;
+        }
+        .outerborder_added .imgpreview {
+            border-color: #C5C5C5;
+        }
+        .outerborder_added .imgpreview:hover {
+            border-color: #0000CD;
+        }
+        .outerborder_deleted .imgpreview {
+            border-color: #D78787;
+        }
+        .outerborder_deleted .imgpreview:hover {
+            border-color: #0000CD;
         }
 
         .tag {
