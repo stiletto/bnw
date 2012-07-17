@@ -122,10 +122,12 @@ class Message(MongoObject):
     indexes = MongoObject.indexes + (
         (txmongo.filter.DESCENDING("date"), False, False), 
         
-        (txmongo.filter.DESCENDING("user") + txmongo.filter.DESCENDING("tags") + txmongo.filter.DESCENDING("date"),
+        (txmongo.filter.ASCENDING("user") + txmongo.filter.ASCENDING("tags") + txmongo.filter.DESCENDING("date"),
             False, False),
-        (txmongo.filter.DESCENDING("user") + txmongo.filter.DESCENDING("date"), False, False),
-        (txmongo.filter.DESCENDING("user") + txmongo.filter.DESCENDING("clubs") + txmongo.filter.DESCENDING("date"), False, False),
+        (txmongo.filter.ASCENDING("user") + txmongo.filter.DESCENDING("date"), False, False),
+        (txmongo.filter.ASCENDING("user") + txmongo.filter.ASCENDING("clubs") + txmongo.filter.DESCENDING("date"), False, False),
+        (txmongo.filter.ASCENDING("clubs") + txmongo.filter.DESCENDING("date"), False, False),
+        (txmongo.filter.ASCENDING("tags") + txmongo.filter.DESCENDING("date"), False, False),
         (txmongo.filter.DESCENDING("date") + txmongo.filter.DESCENDING("recommendations"), False, False),
     )
 
@@ -152,7 +154,8 @@ class FeedElement(MongoObject):
         user: пользователь-обладатель ленты."""
     collection = CollectionWrapper("feeds")
     indexes = (
-        (txmongo.filter.ASCENDING("message")+txmongo.filter.ASCENDING("user"), False, False),
+        (txmongo.filter.ASCENDING("message")+txmongo.filter.ASCENDING("user"), True, False),
+        (txmongo.filter.ASCENDING("user")+txmongo.filter.DESCENDING("_id"), True, False),
     )
 
 class Comment(MongoObject):
