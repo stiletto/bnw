@@ -2,7 +2,7 @@
 """
 """
 import bnw_objects as objs
-from base import genid,cropstring,config
+from base import genid,cropstring,get_webui_base
 from bnw_mongo import mongo_errors
 from twisted.internet import defer, reactor
 import time
@@ -29,7 +29,9 @@ def subscribe(user,target_type,target,fast=False,sfrom=None):
             tuser = yield objs.User.find_one({'name':target})
             if not tuser:
                 defer.returnValue((False,'No such user.'))
-            _ = yield tuser.send_plain('@%s subscribed to your blog. %su/%s' % (user['name'],config.webui_base,user['name']))
+            _ = yield tuser.send_plain(
+                '@%s subscribed to your blog. %s/u/%s' % (
+                    user['name'],get_webui_base(tuser),user['name']))
             pass
         elif target_type=='sub_message':
             if not fast:
@@ -231,8 +233,10 @@ def recommendMessage(user,message_id,comment="",sfrom=None):
     qn,recipients = yield send_to_subscribers(queries,message,user['name'],comment)
 
     tuser=yield objs.User.find_one({'name':message['user']})
-    _ = yield tuser.send_plain('@%s recommended your message #%s, so %d more users received it. %sp/%s' % (
-            user['name'],message_id,recipients,config.webui_base,message_id))
+    _ = yield tuser.send_plain(
+        '@%s recommended your message #%s, '
+        'so %d more users received it. %s/p/%s' % (
+            user['name'],message_id,recipients,get_webui_base(tuser),message_id))
 
     if len(message['recommendations'])<1024:
         _ = (yield objs.Message.mupdate({'id':message_id},{'$addToSet': { 'recommendations': user['name']}}))
