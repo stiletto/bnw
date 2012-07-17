@@ -20,6 +20,7 @@
     <style type="text/css">
     {% if auth_user %}{{ auth_user.get('settings',{}).get('usercss','') }}{% end %}
     </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     {% block extrahead %}
     {% end %}
 </head>
