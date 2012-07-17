@@ -29,6 +29,10 @@
             padding-bottom: 0.5em;*/
             padding: 1em;
         }
+        .outerborder_dynamic {
+            background-color: #D5D5D5;
+        }
+
         .headlink {
             color: #000; background-color: #00CD00; text-decoration: none;
             padding-left: 0.5em;
@@ -89,24 +93,24 @@
             background-color: #0000CD;
             text-decoration: none;
         }
+
         .imgpreviews {
             float: left;
         }
         .imgpreview {
             float: left;
-            border: 2px solid #E5E5E5;
+            border: 3px solid #E5E5E5;
             max-height: 4em;
             margin-right: 1em;
         }
         .imgpreview:hover {
             border-color: #0000CD;
         }
-        div.ajax {
-            display: none;
-            background-color: #D5D5D5;
-        }
-        img.ajax {
+        .outerborder_dynamic .imgpreview {
             border-color: #D5D5D5;
+        }
+        .outerborder_dynamic .imgpreview:hover {
+            border-color: #0000CD;
         }
         .imgpreview_ps {
             height: 3em;

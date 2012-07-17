@@ -58,37 +58,34 @@ class MessageWsHandler(tornado.websocket.WebSocketHandler):
     """Deliver new comments on message page via websockets."""
 
     def open(self, msgid):
+        self.msgid = msgid
         self.etype = 'comments-' + msgid
-        post.register_listener(self.etype, id(self), self.deliverComment)
-        print 'Opened connection %d (msg %s)' % (id(self), msgid)
+        post.register_listener(self.etype, id(self), self.deliver_new_comment)
+        print 'Opened connection %d (message %s)' % (id(self), msgid)
 
-    def deliverComment(self, comment):
-        comment = comment.copy()
-        comment['linkified'], comment['thumbs'] = thumbify(comment['text'])
-        self.write_message(json.dumps(comment))
+    def deliver_new_comment(self, comment):
+        html = uimodules.Comment(self).render(comment)
+        self.write_message(json.dumps({'type': 'new_comment', 'html': html}))
 
     def on_close(self):
         post.unregister_listener(self.etype, id(self))
-        print 'Closed connection %d' % id(self)
+        print 'Closed connection %d (message %s)' % (id(self), self.msgid)
 
 class MainWsHandler(tornado.websocket.WebSocketHandler):
     """Deliver new messages on main page via websockets."""
 
     def open(self):
         self.etype = 'messages'
-        post.register_listener(self.etype, id(self), self.deliverMessage)
-        print 'Opened connection %d (all messages)' % id(self)
+        post.register_listener(self.etype, id(self), self.deliver_new_message)
+        print 'Opened connection %d (main)' % id(self)
 
-    def deliverMessage(self, msg):
-        msg = msg.copy()
-        # TODO: Should we do it in native javascript?
-        msg['linkified'], msg['thumbs'] = thumbify(msg['text'])
-        msg['wtags'] = widgets.tags(msg['tags'], msg['clubs'], msg['user'])
-        self.write_message(json.dumps(msg))
+    def deliver_new_message(self, msg):
+        html = uimodules.Message(self).render(msg)
+        self.write_message(json.dumps({'type': 'new_message', 'html': html}))
 
     def on_close(self):
         post.unregister_listener(self.etype, id(self))
-        print 'Closed connection %d' % id(self)
+        print 'Closed connection %d (main)' % id(self)
 
 
 def get_page(self):
