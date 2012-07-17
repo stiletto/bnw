@@ -36,6 +36,7 @@ from auth import LoginHandler, requires_auth, AuthMixin
 from api import ApiHandler
 define("port", default=8888, help="run on the given port", type=int)
 
+
 class MessageHandler(BnwWebHandler,AuthMixin):
     templatename='message.html'
     @defer.inlineCallbacks
@@ -54,38 +55,52 @@ class MessageHandler(BnwWebHandler,AuthMixin):
             'comments': comments,
         })
 
-class MessageWsHandler(tornado.websocket.WebSocketHandler):
-    """Deliver new comments on message page via websockets."""
 
-    def open(self, msgid):
-        self.msgid = msgid
-        self.etype = 'comments-' + msgid
-        post.register_listener(self.etype, id(self), self.deliver_new_comment)
-        print 'Opened connection %d (message %s)' % (id(self), msgid)
+class WsHandler(tornado.websocket.WebSocketHandler):
+    """Helper class for websocket handlers.
+    Register listeners and send new events to clients.
+    Unregister listeners on close.
+    """
 
-    def deliver_new_comment(self, comment):
-        html = uimodules.Comment(self).render(comment)
-        self.write_message(json.dumps({'type': 'new_comment', 'html': html}))
+    def get_handlers(self, *args):
+        return ()
+
+    def open(self, *args):
+        self.handlers = self.get_handlers(*args)
+        for etype, handler in self.handlers:
+            post.register_listener(etype, id(self), handler)
+        print 'Opened connection %d' % id(self)
 
     def on_close(self):
-        post.unregister_listener(self.etype, id(self))
-        print 'Closed connection %d (message %s)' % (id(self), self.msgid)
+        for etype, _ in self.handlers:
+            post.unregister_listener(etype, id(self))
+        print 'Closed connection %d' % id(self)
 
-class MainWsHandler(tornado.websocket.WebSocketHandler):
-    """Deliver new messages on main page via websockets."""
 
-    def open(self):
-        self.etype = 'messages'
-        post.register_listener(self.etype, id(self), self.deliver_new_message)
-        print 'Opened connection %d (main)' % id(self)
+class MainWsHandler(WsHandler):
+    """Deliver new events on main page via websockets."""
 
-    def deliver_new_message(self, msg):
+    def get_handlers(self):
+        return (
+            ('messages', self.new_message),
+        )
+
+    def new_message(self, msg):
         html = uimodules.Message(self).render(msg)
         self.write_message(json.dumps({'type': 'new_message', 'html': html}))
 
-    def on_close(self):
-        post.unregister_listener(self.etype, id(self))
-        print 'Closed connection %d (main)' % id(self)
+
+class MessageWsHandler(WsHandler):
+    """Deliver new events on message page via websockets."""
+
+    def get_handlers(self, msgid):
+        return (
+            ('comments-' + msgid, self.new_comment),
+        )
+
+    def new_comment(self, comment):
+        html = uimodules.Comment(self).render(comment)
+        self.write_message(json.dumps({'type': 'new_comment', 'html': html}))
 
 
 def get_page(self):
