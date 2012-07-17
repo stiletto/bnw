@@ -380,6 +380,7 @@ def get_site():
         "static_path":  os.path.join(os.path.dirname(__file__), "static"),
         "ui_modules": uimodules,
         "autoescape": None,
+        "xheaders": True,
     }
     application = tornado.web.Application([
         (r"/p/([A-Z0-9]+)/?", MessageHandler),
