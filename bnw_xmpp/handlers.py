@@ -61,6 +61,8 @@ comment_args = (
             )
 recommend_args = (
                 ("m", "message", True, u"Message to recommend."),
+                ("u", "unrecommend", False,
+                 u"Delete message from your recommendations list."),
             )
 delete_args = (
                 ('m', 'message',True,'Message or comment to delete.'),
@@ -74,7 +76,7 @@ update_args = (
             )
 
 redeye_handlers = (
-        ("ping", 
+        ("ping",
             (
                 ("s", "safe", False, u"Do not vyebyvatsya."),
             ),
@@ -129,7 +131,7 @@ redeye_handlers = (
             (
                 ("c", "usercss", True, u"User CSS."),
                 ("p", "password", True, u"Password."),
-                ("s", "servicejid", True, u"Set service's jid."),
+                ("s", "servicejid", False, u"Set service's jid."),
                 ("b", "baseurl", True, u"Set base url for links."),
             ),
             command_settings.cmd_set,
@@ -208,7 +210,7 @@ simple_handlers = (
         (ur'(?i)jid',command_jids.cmd_jids),
 
         (ur'(?i)set',command_settings.cmd_set),
-        (ur'(?i)set +(?P<name>\w+) +(?P<value>\S+)',command_settings.cmd_set),
+        (ur'(?i)set +(?P<name>\w+)(?: +(?P<value>\S+))?',command_settings.cmd_set),
 
         (ur'(?i)today',command_show.cmd_today),
         (ur'[#№]',command_show.cmd_feed),
@@ -228,6 +230,7 @@ simple_handlers = (
         (ur'#(?P<message>[0-9A-Za-z]+) (?P<text>.+)',command_post.cmd_comment),
         (ur'#(?P<message>[0-9A-Za-z]+[/#][0-9A-Za-z]+) (?P<text>.+)',command_post.cmd_comment),
         (ur'! +#(?P<message>[0-9A-Za-z]+)(?: (?P<comment>.+))?',command_post.cmd_recommend),
+        (ur'!(?P<unrecommend>!) +#(?P<message>[0-9A-Za-z]+)',command_post.cmd_recommend),
         (ur'(?:(?P<tag1>[\*!]\S+)?(?:\s+(?P<tag2>[\*!]\S+))?(?:\s+(?P<tag3>[\*!]\S+))?(?:\s+(?P<tag4>[\*!]\S+))?(?:\s+(?P<tag5>[\*!]\S+))?\s+)?(?P<text>.+)',
             command_post.cmd_post_simple),
     )
