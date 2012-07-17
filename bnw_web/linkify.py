@@ -26,8 +26,10 @@ formatting_tags = {
 
 parser = LinkParser(types=bnwtypes+shittypes)
 
-def thumbify(text,permitted_protocols = ['http','https']):
+def thumbify(text, permitted_protocols=None):
     text = _unicode(xhtml_escape(text))
+    if not permitted_protocols:
+        permitted_protocols = ["http", "https"]
     texta = []
     thumbs = []
     stack = []
@@ -36,6 +38,8 @@ def thumbify(text,permitted_protocols = ['http','https']):
     for m in parser.parse(text):
         if isinstance(m,tuple):
             if m[0] in ('url','namedlink'):
+                # TODO: Move checking for permitted protocols
+                # in linkshit module? Matching twice is bad.
                 up = _URL_RE.match(m[2])
                 url = m[2] if up is None else up.group(1)
                 proto = None if up is None else up.group(2)
@@ -50,8 +54,7 @@ def thumbify(text,permitted_protocols = ['http','https']):
                             thumb = lh[1](mn.group)
                             thumbs.append((url,thumb))
                             break
-                    link_text = m[3] if m[0]=='namedlink' else url
-                    texta.append('<a href="%s">%s</a>' % (url,link_text))
+                    texta.append('<a href="%s">%s</a>' % (url, m[3]))
             elif m[0] in formatting_tags.keys():
                 tag = formatting_tags[m[0]]
                 if not m[0] in stack:
@@ -73,7 +76,7 @@ def thumbify(text,permitted_protocols = ['http','https']):
         else:
             texta.append(m)
     for i in stack:
-	texta.append(formatting_tags[i][1])
+        texta.append(formatting_tags[i][1])
     return ''.join(texta), thumbs
 
 def linkify(text):
@@ -81,7 +84,7 @@ def linkify(text):
 
 if __name__=="__main__":
     txs = (
-	('''test //test test// test **test test** test''', 
+	('''test //test test// test **test test** test''',
 	    'test <i>test test</i> test <b>test test</b> test'),
 	('''test //test **test// test** test''',
 	    'test <i>test <b>test</b></i><b> test</b> test'),

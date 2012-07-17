@@ -12,46 +12,47 @@ _URL_RE = re.compile(ur"""\b((?:([\w-]+):(/{1,3})|www[.])(?:(?:(?:[^\s&()]|&amp;
 _USER_RE = re.compile(ur"""(?:(?<=[\s\W])|^)@(%s)""" % USER_RE)
 _MSG_RE = re.compile(ur"""(?:(?<=[\s\W])|^)#([0-9A-Za-z]+(?:/[0-9A-Za-z]+)?)""")
 
-def url_handler(match):
-    return ('url',match.group(1))
-
-def msg_handler(match):
-    return ('msg',match.group(1))
-
-def user_handler(match):
-    return ('user',match.group(1))
-
 shittypes = (
-    ('url',  _URL_RE,  lambda m: (m.group(1),)),
+    ('url',  _URL_RE,  lambda m: (m.group(1), clip_long_url(m))),
     ('msg',  _MSG_RE,  lambda m: (m.group(1),)),
     ('user', _USER_RE, lambda m: (m.group(1),)),
 )
 
+def clip_long_url(m):
+    """Clip long urls."""
+    # It may be done much better.
+    url = m.group(1)
+    if len(url) > 55:
+        url = url[:40] + "....." + url[-10:]
+    return url
+
 class LinkParser(object):
-    def __init__(self,types=shittypes):
+    def __init__(self, types=shittypes):
         self.types = types
 
     def parse(self,text):
+        # Who the fuck write this piece of shit?
+        # TODO: Refactor this shit.
         pos = 0
         texlen = len(text)
-        while pos<texlen:
+        while pos < texlen:
             mins = texlen
             minm = None
-            for typ,reg,handler in self.types:
+            for typ, reg, handler in self.types:
                 m = reg.search(text[pos:])
                 if m is None:
                     continue
                 s = m.start()
-                if s<mins:
+                if s < mins:
                     mins = s
-                    minm = (m,typ, handler)
-            if minm is None:
+                    minm = (typ, m, handler)
+            if not minm:
                 yield text[pos:]
                 return
             else:
                 yield text[pos:pos+mins]
-                yield (minm[1],minm[0].group(0))+minm[2](minm[0])
-                pos = pos + minm[0].end()
+                yield ((minm[0], minm[1].group(0)) + minm[2](minm[1]))
+                pos = pos + minm[1].end()
 
 _shitparser = LinkParser()
 def linkparse(text):

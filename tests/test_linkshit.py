@@ -14,9 +14,9 @@ class LinkShitTest(unittest.TestCase):
         assert a.next() == 'Ololo lololo '
         assert a.next() == ('msg','#67AB3D','67AB3D')
         assert a.next() == ' fyuck '
-        assert a.next() == ('url','http://bnw.im/u/lol','http://bnw.im/u/lol')
+        assert a.next() == ('url','http://bnw.im/u/lol','http://bnw.im/u/lol','http://bnw.im/u/lol')
         assert a.next() == ' '
-        assert a.next() == ('url','http://ompldr.org/vZGZ1aw','http://ompldr.org/vZGZ1aw')
+        assert a.next() == ('url','http://ompldr.org/vZGZ1aw','http://ompldr.org/vZGZ1aw','http://ompldr.org/vZGZ1aw')
         assert a.next() == ' damn '
         assert a.next() == ('msg','#ABCDEF/XYZ','ABCDEF/XYZ')
         assert a.next() == ' shit-'
