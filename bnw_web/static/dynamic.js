@@ -131,13 +131,13 @@ var secure_connection = window.location.protocol == "https:";
 switch (page_type) {
     case "main":
         ws_addr = ((secure_connection ? "wss" : "ws" ) + "://" +
-                   websocket_base + "/ws");
+                   websocket_base + "/ws?v=2");
         onmessage = main_page_handler;
         openws();
         break;
     case "message":
         ws_addr = ((secure_connection ? "wss" : "ws" ) + "://" +
-                   websocket_base + window.location.pathname + "/ws");
+                   websocket_base + window.location.pathname + "/ws?v=2");
         onmessage = message_page_handler;
         openws();
         break;

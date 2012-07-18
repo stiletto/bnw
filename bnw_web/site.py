@@ -81,16 +81,24 @@ class MainWsHandler(WsHandler):
     """Deliver new events on main page via websockets."""
 
     def get_handlers(self):
-        return (
-            ('new_message', self.new_message),
-            ('del_message', self.del_message),
-            ('upd_comments_count', self.upd_comments_count),
-            ('upd_recommendations_count', self.upd_recommendations_count),
-        )
+        if self.request.arguments.get('v','0')=='2':
+            return (
+                ('new_message', self.new_message),
+                ('del_message', self.del_message),
+                ('upd_comments_count', self.upd_comments_count),
+                ('upd_recommendations_count', self.upd_recommendations_count),
+            )
+        else:
+            return (
+                ('new_message', self.new_message_compat),
+            )
 
     def new_message(self, msg):
         html = uimodules.Message(self).render(msg)
         self.write_message(json.dumps({'type': 'new_message', 'html': html}))
+
+    def new_message_compat(self, msg):
+        self.write_message(json.dumps(msg))
 
     def del_message(self, msg_id):
         self.write_message(json.dumps({'type': 'del_message', 'id': msg_id}))
@@ -108,14 +116,22 @@ class MessageWsHandler(WsHandler):
     """Deliver new events on message page via websockets."""
 
     def get_handlers(self, msgid):
-        return (
-            ('new_comment_in_'+msgid, self.new_comment),
-            ('del_comment_in_'+msgid, self.del_comment),
-        )
+        if self.request.arguments.get('v','0')=='2':
+            return (
+                ('new_comment_in_'+msgid, self.new_comment),
+                ('del_comment_in_'+msgid, self.del_comment),
+            )
+        else:
+            return (
+                ('new_comment_in_'+msgid, self.new_comment_compat),
+            )
 
     def new_comment(self, comment):
         html = uimodules.Comment(self).render(comment)
         self.write_message(json.dumps({'type': 'new_comment', 'html': html}))
+
+    def new_comment_compat(self, comment):
+        self.write_message(json.dumps(comment))
 
     def del_comment(self, comment_id):
         self.write_message(json.dumps(
