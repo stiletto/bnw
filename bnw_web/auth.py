@@ -26,7 +26,7 @@ class LoginHandler(TwistedHandler):
         user=(yield objs.User.find_one({'login_key':key}))
         if user:
             if self.request.protocol == "https":
-                self.set_cookie('bnw_loginkey',key,expires_days=30,secure="")
+                self.set_cookie('bnw_loginkey',key,expires_days=30,secure=True)
             else:
                 self.set_cookie('bnw_loginkey',key,expires_days=30)
             self.redirect('/')
