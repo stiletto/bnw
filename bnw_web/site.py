@@ -36,6 +36,7 @@ from auth import LoginHandler, requires_auth, AuthMixin
 from api import ApiHandler
 define("port", default=8888, help="run on the given port", type=int)
 
+
 class MessageHandler(BnwWebHandler,AuthMixin):
     templatename='message.html'
     @defer.inlineCallbacks
@@ -54,41 +55,87 @@ class MessageHandler(BnwWebHandler,AuthMixin):
             'comments': comments,
         })
 
-class MessageWsHandler(tornado.websocket.WebSocketHandler):
-    """Deliver new comments on message page via websockets."""
 
-    def open(self, msgid):
-        self.etype = 'comments-' + msgid
-        post.register_listener(self.etype, id(self), self.deliverComment)
-        print 'Opened connection %d (msg %s)' % (id(self), msgid)
+class WsHandler(tornado.websocket.WebSocketHandler):
+    """Helper class for websocket handlers.
+    Register listeners and send new events to clients.
+    Unregister listeners on close.
+    """
 
-    def deliverComment(self, comment):
-        comment = comment.copy()
-        comment['linkified'], comment['thumbs'] = thumbify(comment['text'])
-        self.write_message(json.dumps(comment))
+    def get_handlers(self, *args):
+        return ()
+
+    def open(self, *args):
+        self.handlers = self.get_handlers(*args)
+        for etype, handler in self.handlers:
+            post.register_listener(etype, id(self), handler)
+        print 'Opened connection %d' % id(self)
 
     def on_close(self):
-        post.unregister_listener(self.etype, id(self))
+        for etype, _ in self.handlers:
+            post.unregister_listener(etype, id(self))
         print 'Closed connection %d' % id(self)
 
-class MainWsHandler(tornado.websocket.WebSocketHandler):
-    """Deliver new messages on main page via websockets."""
 
-    def open(self):
-        self.etype = 'messages'
-        post.register_listener(self.etype, id(self), self.deliverMessage)
-        print 'Opened connection %d (all messages)' % id(self)
+class MainWsHandler(WsHandler):
+    """Deliver new events on main page via websockets."""
 
-    def deliverMessage(self, msg):
-        msg = msg.copy()
-        # TODO: Should we do it in native javascript?
-        msg['linkified'], msg['thumbs'] = thumbify(msg['text'])
-        msg['wtags'] = widgets.tags(msg['tags'], msg['clubs'], msg['user'])
+    def get_handlers(self):
+        if self.request.arguments.get('v','0')=='2':
+            return (
+                ('new_message', self.new_message),
+                ('del_message', self.del_message),
+                ('upd_comments_count', self.upd_comments_count),
+                ('upd_recommendations_count', self.upd_recommendations_count),
+            )
+        else:
+            return (
+                ('new_message', self.new_message_compat),
+            )
+
+    def new_message(self, msg):
+        html = uimodules.Message(self).render(msg)
+        self.write_message(json.dumps({'type': 'new_message', 'html': html}))
+
+    def new_message_compat(self, msg):
         self.write_message(json.dumps(msg))
 
-    def on_close(self):
-        post.unregister_listener(self.etype, id(self))
-        print 'Closed connection %d' % id(self)
+    def del_message(self, msg_id):
+        self.write_message(json.dumps({'type': 'del_message', 'id': msg_id}))
+
+    def upd_comments_count(self, msg_id, num):
+        self.write_message(json.dumps({
+            'type': 'upd_comments_count', 'id': msg_id, 'num': num}))
+
+    def upd_recommendations_count(self, msg_id, num):
+        self.write_message(json.dumps({
+            'type': 'upd_recommendations_count', 'id': msg_id, 'num': num}))
+
+
+class MessageWsHandler(WsHandler):
+    """Deliver new events on message page via websockets."""
+
+    def get_handlers(self, msgid):
+        if self.request.arguments.get('v','0')=='2':
+            return (
+                ('new_comment_in_'+msgid, self.new_comment),
+                ('del_comment_in_'+msgid, self.del_comment),
+            )
+        else:
+            return (
+                ('new_comment_in_'+msgid, self.new_comment_compat),
+            )
+
+    def new_comment(self, comment):
+        html = uimodules.Comment(self).render(comment)
+        self.write_message(json.dumps({'type': 'new_comment', 'html': html}))
+
+    def new_comment_compat(self, comment):
+        self.write_message(json.dumps(comment))
+
+    def del_comment(self, comment_id):
+        self.write_message(json.dumps(
+            {'type': 'del_comment', 'id': comment_id}))
 
 
 def get_page(self):

@@ -45,16 +45,17 @@ def get_random_words():
     word_count = random.randint(3, 10)
     return map(lambda _: random.choice(words).upper(), xrange(word_count))
 
-def get_random_images():
-    rnd = random.random()
-    if rnd < 0.5:
-        images_count = 0
-    elif rnd < 0.7:
-        images_count = 1
-    elif rnd < 0.9:
-        images_count = 2
-    else:
-        images_count = 3
+def get_random_images(images_count=None):
+    if images_count is None:
+        rnd = random.random()
+        if rnd < 0.5:
+            images_count = 0
+        elif rnd < 0.7:
+            images_count = 1
+        elif rnd < 0.9:
+            images_count = 2
+        else:
+            images_count = 3
     return map(
         lambda _: "http://imgur.com/" + random.choice(imgur_images),
         xrange(images_count))
@@ -70,16 +71,16 @@ def message_handler(cl, msg):
 
 def send(cl, bnw_jid, args):
     msg = ""
-    if args.to != "main":
+    if args.to:
         msg = args.to + " "
-    if args.msg_type == "rnd":
+    if not args.msg:
         if not args.no_rnd_tags:
             tags = " ".join(get_random_tags())
             if tags:
                 msg += tags + "\n"
         msg += " ".join(get_random_words())
         if not args.no_rnd_imgs:
-            imgs = "\n".join(get_random_images())
+            imgs = "\n".join(get_random_images(args.imgs_count))
             if imgs:
                 msg += "\n" + imgs
     else:
@@ -101,7 +102,7 @@ def main(bot_jid, bot_password, bnw_jid, args):
     if not cl.auth(jid_obj.getNode(), bot_password, get_random_resource()):
         sys.stderr.write("Can't auth.\n")
         sys.exit(1)
-    cl.RegisterHandler('message', message_handler)
+    cl.RegisterHandler("message", message_handler)
     cl.send(xmpp.Presence(priority="100"))
 
     if args.count:
@@ -122,8 +123,8 @@ def main(bot_jid, bot_password, bnw_jid, args):
         # Process remained data.
         while True:
             time.sleep(0.1)
-            # Holy crap. Why '0'???
-            if cl.Process(0.01) == '0':
+            # Holy crap. Why "0"???
+            if cl.Process(0.01) == "0":
                 break
     finally:
         cl.sendPresence(typ="unavailable")
@@ -135,14 +136,14 @@ if __name__ == "__main__":
     import config
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--to", default="main", help="destination")
-    parser.add_argument("-c", "--count", type=int, default=0,
+    parser.add_argument("--to", help="destination")
+    parser.add_argument("-c", "--count", type=int, default=1,
                         help="how many messages send; 0 for infinity")
-    parser.add_argument("-mt", "--msg-type", default="rnd",
-                        choices=["rnd", "user"], help="messages type")
-    parser.add_argument("-ni", "--no-rnd-imgs", action='store_true',
+    parser.add_argument("-ni", "--no-rnd-imgs", action="store_true",
                         help="no random images")
-    parser.add_argument("-nt", "--no-rnd-tags", action='store_true',
+    parser.add_argument("-ic", "--imgs-count", type=int,
+                        help="specified images count")
+    parser.add_argument("-nt", "--no-rnd-tags", action="store_true",
                         help="no random tags")
     parser.add_argument("-m", "--msg", help="specified message text")
     parser.add_argument("-w", "--wait", type=float, default=6,

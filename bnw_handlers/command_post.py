@@ -4,6 +4,7 @@ from base import *
 import random,time
 from bnw_core.base import BnwResponse,get_webui_base
 import bnw_core.bnw_objects as objs
+from bnw_core.post import publish
 
 from twisted.python import log
 import bnw_core.post
@@ -113,6 +114,8 @@ def cmd_recommend(request, message="", comment="", unrecommend=""):
                 yield objs.Message.mupdate(
                     {'id': message_id},
                     {'$pull': {'recommendations': request.user['name']}})
+                rcount = len(message_obj['recommendations']) - 1
+                publish('upd_recommendations_count', message_id, rcount)
                 defer.returnValue(dict(
                     ok=True,
                     desc='Message deleted from your recommendations list.'))

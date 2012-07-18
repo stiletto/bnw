@@ -149,7 +149,7 @@ def postMessage(user,tags,clubs,text,anon=False,anoncomments=False,sfrom=None):
     if ('@' in clubs) or (len(clubs)==0):
         queries+=[{'target': 'anonymous' if anon else user['name'], 'type': 'sub_user'}]
     qn,recipients = yield send_to_subscribers(queries,stored_message)
-    publish('messages',stored_message.filter_fields()) # ALARM
+    publish('new_message',stored_message.filter_fields()) # ALARM
     defer.returnValue((True,(message['id'],qn,recipients)))
 
 @defer.inlineCallbacks
@@ -208,7 +208,8 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
     _ = (yield objs.Message.mupdate({'id':message_id},{'$inc': { 'replycount': 1}}))
 
     qn,recipients = yield send_to_subscribers([{'target': message_id, 'type': 'sub_message'}],comment)
-    publish('comments-'+message_id,comment.filter_fields()) # ALARM
+    publish('new_comment_in_'+message_id,comment.filter_fields()) # ALARM
+    publish('upd_comments_count', message_id, comment['num'])
     defer.returnValue((True,(comment['id'],comment['num'],qn,recipients)))
 
 @defer.inlineCallbacks
@@ -239,11 +240,13 @@ def recommendMessage(user, message, comment="", sfrom=None):
             user['name'], message['id'], recipients,
             get_webui_base(tuser), message['id']))
 
-    if (len(message['recommendations']) < 1024 and
-        user['name'] != message['user']):
+    recos_count = len(message['recommendations'])
+    if (recos_count < 1024 and user['name'] != message['user'] and
+        user['name'] not in message['recommendations']):
             yield objs.Message.mupdate(
                 {'id': message['id']},
                 {'$addToSet': {'recommendations': user['name']}})
+            publish('upd_recommendations_count', message['id'], recos_count+1)
 
     defer.returnValue((True, (qn, recipients, message['replycount'])))
 
