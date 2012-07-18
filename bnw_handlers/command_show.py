@@ -111,7 +111,7 @@ def cmd_today(request):
     if (not rebuild) or result:
         postids = list(x['_id'] for x in (yield objs.Today.find_sort({},[('value',-1)],limit=20)))
         dbposts = dict((x['id'],x.filter_fields()) for x in (yield objs.Message.find({'id':{'$in':postids}})))
-        messages = [dbposts[x] for x in postids]
+        messages = [dbposts[x] for x in postids if (x in dbposts)]
         messages.reverse()
         defer.returnValue(
             dict(ok=True,format="messages",
