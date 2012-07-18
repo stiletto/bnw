@@ -66,10 +66,11 @@ class WsHandler(tornado.websocket.WebSocketHandler):
         return ()
 
     def open(self, *args):
+        self.version = self.request.arguments.get('v',['0'])[0]
         self.handlers = self.get_handlers(*args)
         for etype, handler in self.handlers:
             post.register_listener(etype, id(self), handler)
-        print 'Opened connection %d' % id(self)
+        print 'Opened connection %d (v%s)' % (id(self),self.version)
 
     def on_close(self):
         for etype, _ in self.handlers:
@@ -81,7 +82,7 @@ class MainWsHandler(WsHandler):
     """Deliver new events on main page via websockets."""
 
     def get_handlers(self):
-        if self.request.arguments.get('v','0')=='2':
+        if self.version=='2':
             return (
                 ('new_message', self.new_message),
                 ('del_message', self.del_message),
@@ -116,7 +117,7 @@ class MessageWsHandler(WsHandler):
     """Deliver new events on message page via websockets."""
 
     def get_handlers(self, msgid):
-        if self.request.arguments.get('v','0')=='2':
+        if self.version=='2':
             return (
                 ('new_comment_in_'+msgid, self.new_comment),
                 ('del_comment_in_'+msgid, self.del_comment),
