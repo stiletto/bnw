@@ -44,26 +44,9 @@
     {{ modules.Message(msg, full=True) }}
     <hr/>
     <div class="somenote" style="display: none;"></div>
-    <div class="comments rich_comments" style="display: none;"></div> 
     <div class="comments simple_comments hfeed">
     {% for comment in comments %}
-    <div class='outerborder hentry' id="{{ comment['id'].split('/')[1] }}">
-    <div class='comment'>
-        <img class='avatar avatar_ps' alt='avatar' src='/u/{{ comment['user'] }}/avatar/thumb' />
-        {% set linkified, thumbs = thumbify(comment['text']) %}
-        {% if thumbs %}<div class="imgpreviews">
-            {% for thumb in thumbs %}<a class="imglink" href="{{ thumb[0] }}">
-                <img class="imgpreview imgpreview_ps" src="{{ thumb[1] }}"/>
-            </a>{% end %}
-            </div>{% end %}
-        <pre class='comment_body pw entry-title entry-content{{ ' hasthumbs' if thumbs else ''}}'>{{ linkified }}</pre>
-        <div class='sign'>
-            {{ w.msgl(comment['id'],True) }}<span class='cmtb' id='cmtb-{{ comment['id'] }}'></span> / {{ w.userl(comment['user']) }}
-            {% if comment['replyto'] %} --&gt; <a href="/p/{{ comment['replyto'].replace('/','#') }}" class="msgid">#{{ comment['replyto']}}</a>{% end %}
-             / {{ w.time(comment['date']) }}
-        </div>
-    </div>
-    </div>
+        {{ modules.Comment(comment) }}
     {% end %}
     </div>
     {% if auth_user %}
