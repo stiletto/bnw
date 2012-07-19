@@ -1,5 +1,5 @@
 import base64
-import StringIO
+from cStringIO import StringIO
 
 from twisted.words.xish import domish
 from twisted.internet import defer
@@ -30,9 +30,9 @@ def get_and_resize_avatar(iq):
     except TypeError:
         return
     try:
-        im = Image.open(StringIO.StringIO(avatar))
+        im = Image.open(StringIO(avatar))
         im.thumbnail((48, 48), Image.ANTIALIAS)
-        thumb_f = StringIO.StringIO()
+        thumb_f = StringIO()
         im.save(thumb_f, 'png')
     except IOError:
         return
