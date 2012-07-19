@@ -168,12 +168,17 @@
         .sign a { color: #3C4BB0; }
         .sign a:hover { color: #FFFF00; }
 
-        #err_outer {width: 100%; overflow: hidden; position: relative;}
-        #err_outer[id] {display: table; position: static;}
-        #err_middle {position: absolute; top: 50%;} /* for explorer only*/
-        #err_middle[id] {display: table-cell; vertical-align: middle; width: 100%;}
-        #err_inner { background-color: #CD0000; padding: 1em; width: 40em; margin-left: auto; margin-right: auto; position: relative; top: -50%} /* for explorer only */
-        #err_inner2 { padding: 1em; border: thin solid white; text-align: center; }
+        #err_inner {
+            background-color: #CD0000;
+            padding: 1em;
+            width: 40em;
+            margin: 10em 25%;
+        }
+        #err_inner2 {
+            padding: 1em;
+            border: thin solid white;
+            text-align: center;
+        }
 
         .pw {
             white-space: pre-wrap;
