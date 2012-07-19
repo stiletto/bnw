@@ -13,18 +13,11 @@ function openws() {
     }
 
     ws.onopen = function() {
-        $("#ws_status").text("WS Active");
         ws_tid = undefined;
         tries_count = 0;
     }
-    ws.onclose = function() {
-        $("#ws_status").text("WS Closed");
-        reopenws();
-    }
-    ws.onerror = function() {
-        $("#ws_status").text("WS Error");
-        reopenws();
-    }
+    ws.onclose = reopenws;
+    ws.onerror = reopenws;
     ws.onmessage = onmessage;
 
     return ws;
@@ -148,8 +141,78 @@ function message_page_handler(e) {
     }
 }
 
+
+function api_call_alert(func,args) {
+    args['login']=$.cookie("bnw_loginkey");
+    $.ajax({ url: "/api/"+func,
+        data:args,
+        dataType:'json',
+        success: function (data) {
+            if (data.ok)
+                alert("OK. "+data.desc);
+            else
+                alert("ERROR. "+data.desc);
+        },
+        error: function (data,status) {
+            alert("API request failed.");
+            return false;
+        }
+    });
+}
+
+function add_message_page_actions() {
+    function recommendation() {
+        var a = $("<a/>").text("r").click(function() {
+            api_call_alert("recommend", {message: message_id});
+        });
+        $("#"+message_id).find(".msgb").text(" ").append(a);
+    }
+    function textarea() {
+        $("#commenttextarea").keypress(function(event) {
+            if (event.ctrlKey && (event.keyCode==13 || event.keyCode==10)) {
+                $("#commentform").submit();
+            }
+        });
+    }
+    function comment_reply() {
+        var form = $("#commentdiv");
+        $("div.comments").children().each(function() {
+            var comment = $(this);
+            var short_id = comment.attr("id");
+            var id = message_id + "/" + short_id;
+            comment.find(".msgid").first().click(function() {
+                var depth = comment_info[id].depth + 1;
+                form.css("margin-left", depth+"em");
+                form.find("[name=comment]").val(short_id);
+                comment.after(form);
+                form.find("textarea").focus();
+                return false;
+            });
+        });
+        var hr = $("hr").last();
+        function clear_replyto() {
+            form.css("margin-left", "");
+            form.find("[name=comment]").val("");
+            hr.after(form);
+            $("html,body").scrollTop($(document).height());
+            form.find("textarea").focus();
+            return false;
+        }
+        $("#"+message_id).find(".msgid").click(clear_replyto);
+        $("#clear_replyto").click(clear_replyto);
+    }
+
+    recommendation();
+    textarea();
+    comment_reply();
+}
+
+
 var secure_connection = window.location.protocol == "https:";
-switch (page_type) {
+var is_auth_user = $.cookie("bnw_loginkey") != null;
+
+$(function() {
+    switch (page_type) {
     case "main":
         ws_addr = ((secure_connection ? "wss" : "ws" ) + "://" +
                    websocket_base + "/ws?v=2");
@@ -161,5 +224,9 @@ switch (page_type) {
                    websocket_base + window.location.pathname + "/ws?v=2");
         onmessage = message_page_handler;
         openws();
+        if (is_auth_user) {
+            add_message_page_actions();
+        }
         break;
-}
+    }
+});
