@@ -58,8 +58,9 @@
         }
 
         function scroll_to_anchor() {
-            if (window.location.hash) {
-                $("html,body").scrollTop($(window.location.hash).offset().top);
+            var div = $(window.location.hash);
+            if (div.length) {
+                $("html, body").scrollTop(div.offset().top);
             }
         }
 

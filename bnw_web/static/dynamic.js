@@ -142,30 +142,56 @@ function message_page_handler(e) {
 }
 
 
-function api_call_alert(func,args) {
-    args['login']=$.cookie("bnw_loginkey");
-    $.ajax({ url: "/api/"+func,
-        data:args,
-        dataType:'json',
-        success: function (data) {
-            if (data.ok)
-                alert("OK. "+data.desc);
-            else
-                alert("ERROR. "+data.desc);
+function api_call_alert(func, args, verbose) {
+    args["login"] = $.cookie("bnw_loginkey");
+    $.ajax({
+        url: "/api/"+func,
+        data: args,
+        dataType: "json",
+        success: function (d) {
+            if (verbose) {
+                if (d.ok)
+                    alert("OK. "+d.desc);
+                else
+                    alert("ERROR. "+d.desc);
+            }
         },
-        error: function (data,status) {
+        error: function(d, status) {
             alert("API request failed.");
             return false;
         }
     });
 }
 
+function confirm_action(desc, f) {
+    var outer = $("#dlg_outer");
+    var inner = $("#dlg_inner2");
+    inner.html(
+        '<form id="dlg_centered">'+
+        '<span>Вы уверены, что хотите '+desc+'?</span><br /><br />'+
+        '<input type="button" id="dlg_yes" class="styledbutton" value="[&lt; Да &gt;]">'+
+        '<input type="button" id="dlg_no" class="styledbutton" value="[&lt; Нет &gt;]">'+
+        '</form>');
+    inner.find("#dlg_yes").click(function() {
+        outer.css("display", "none");
+        f();
+    });
+    inner.find("#dlg_no").click(function() {
+        outer.css("display", "none");
+    });
+    outer.css("display", "table");
+}
+
 function add_message_page_actions() {
     function recommendation() {
-        var a = $("<a/>").text("r").click(function() {
-            api_call_alert("recommend", {message: message_id});
+        var r = $("<a/>").text("r").click(function() {
+            confirm_action("рекомендовать сообщение #"+message_id,
+            function() {
+                api_call_alert("recommend", {message: message_id});
+            });
         });
-        $("#"+message_id).find(".msgb").text(" ").append(a);
+        r.css("cursor", "pointer");
+        $("#"+message_id).find(".msgb").append(" ").append(r);
     }
     function textarea() {
         $("#commenttextarea").keypress(function(event) {
@@ -201,10 +227,35 @@ function add_message_page_actions() {
         $("#"+message_id).find(".msgid").click(clear_replyto);
         $("#clear_replyto").click(clear_replyto);
     }
+    function comment_delete() {
+        function D_button(id) {
+            var D = $("<a/>").text("D").click(function() {
+                confirm_action("удалить сообщение #"+id,
+                function() {
+                    api_call_alert("delete", {message: id});
+                });
+            });
+            D.css("cursor", "pointer");
+            return D;
+        }
+
+        for (var id in comment_info) {
+            var comment = comment_info[id];
+            var short_id = id.split('/')[1];
+            if (comment["user"] == auth_user || message_user == auth_user) {
+                $("#"+short_id).find(".cmtb").append(" ").append(D_button(id));
+            }
+        }
+        if (message_user == auth_user) {
+            $("#"+message_id).find(".msgb").append(" "
+            ).append(D_button(message_id));
+        }
+    }
 
     recommendation();
     textarea();
     comment_reply();
+    comment_delete();
 }
 
 

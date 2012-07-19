@@ -10,6 +10,8 @@
         var websocket_base = "{{ config.webui_wsbase }}";
         var page_type = "message";
         var message_id = "{{ msgid }}";
+        var message_user = "{% if msg %}{{ msg['user'] }}{% end %}";
+        var auth_user = "{% if auth_user %}{{ auth_user['name'] }}{% end %}";
         var comment_count = {{ len(comments) }};
         var comment_info = {
             {% if msg %}
