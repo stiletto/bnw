@@ -5,8 +5,7 @@ from twisted.python import log
 from twisted.words.xish import domish
 from twisted.words.protocols.jabber.ijabber import IService
 from twisted.words.protocols.jabber import component
-from twisted.python.util import println
-from twisted.web import resource, server, static, xmlrpc
+from twisted.web import xmlrpc
 
 import bnw_core.bnw_objects as objs
 from bnw_core.base import config
@@ -147,8 +146,6 @@ class BnwService(component.Service):
         except KeyError:  # somebody plz kick ma ass 4 dat
             return
         stime = time.time()
-        #else:
-        #    println(msg.body)
         if msg.request and msg.request.getAttribute("xmlns", "urn:xmpp:receipts"):
             rmsg = domish.Element((None, "message"))
             rmsg["id"] = msg["id"]
@@ -194,12 +191,7 @@ class BnwService(component.Service):
             msg.addElement("status", content=termctrl)
             self.xmlstream.send(msg)
 
-    def getResource(self):
-        r = resource.Resource()
-        r.getChild = (lambda path, request:
-                      static.Data('<h1>fuck</h1>',
-                      'text/html'))
-        x = xmlrpc.XMLRPC()
-        x.xmlrpc_send_plain = lambda jid, src, msg: str(self.send_plain(jid, src, msg))
-        r.putChild('RPC2', x)
+    def getRPC(self):
+        r = xmlrpc.XMLRPC(allowNone=True)
+        r.xmlrpc_send_plain = self.send_plain
         return r

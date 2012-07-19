@@ -42,9 +42,9 @@ bnw_core.base.notifiers.add(xmpp_notifier.XmppNotifier())
 serviceCollection = service.IServiceCollection(application)
 sm.setServiceParent(serviceCollection)
 
-if config.fuck_enabled:
+if config.rpc_enabled:
     internet.TCPServer(
-        config.fuck_port, server.Site(s.getResource()),
+        config.rpc_port, server.Site(s.getRPC()),
         interface="127.0.0.1").setServiceParent(serviceCollection)
 
 if config.webui_enabled:
