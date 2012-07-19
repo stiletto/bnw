@@ -1,6 +1,8 @@
 var ws;
-var ws_double_fail = false;
 var ws_addr;
+var last_try = (new Date).getTime();
+var tries_count = 0;
+var ws_tid;
 var onmessage;
 
 function openws() {
@@ -10,18 +12,16 @@ function openws() {
         ws = new MozWebSocket(ws_addr);
     }
 
-    ws.onopen = function () {
-        if (ws_double_fail)
-            $("#ws_status").text("WS Active (again)");
-        else
-            $("#ws_status").text("WS Active");
-        ws_double_fail = false;
+    ws.onopen = function() {
+        $("#ws_status").text("WS Active");
+        ws_tid = undefined;
+        tries_count = 0;
     }
-    ws.onclose = function () {
+    ws.onclose = function() {
         $("#ws_status").text("WS Closed");
         reopenws();
     }
-    ws.onerror = function () {
+    ws.onerror = function() {
         $("#ws_status").text("WS Error");
         reopenws();
     }
@@ -30,12 +30,31 @@ function openws() {
     return ws;
 }
 
+
 function reopenws() {
-    if (!ws_double_fail) {
-        ws_double_fail = true;
+    if (ws_tid != undefined) return;
+    var tnow = (new Date).getTime()
+    if (tries_count < 3) {
+        if (tnow - last_try >= 5000) {
+            openws();
+            tries_count++;
+        } else {
+            ws_tid = setTimeout(_reopenws, 5000);
+        }
+    } else if (tnow - last_try >= 30000) {
         openws();
+        tries_count++;
+    } else {
+        ws_tid = setTimeout(_reopenws, 30000);
     }
+    last_try = tnow;
 }
+
+function _reopenws() {
+    ws_tid = undefined;
+    reopenws();
+}
+
 
 var favicon_changed = false;
 var timeout_id;
@@ -65,6 +84,7 @@ function change_favicon() {
     }
 }
 
+
 function add_node(html, to, at_top) {
     var node = $(html).hide();
     node.addClass("outerborder_added");
@@ -87,9 +107,10 @@ function add_node(html, to, at_top) {
 
 function main_page_handler(e) {
     var d = JSON.parse(e.data);
-    if (d.type == "new_message" && !window.location.search) {
-        // Add new messages only to first page.
-        add_node(d.html, "div.messages", true);
+    if (d.type == "new_message" &&
+        window.location.search.indexOf("page") == -1) {
+            // Add new messages only to first page.
+            add_node(d.html, "div.messages", true);
     } else if (d.type == "del_message") {
         $("div#"+d.id).removeClass("outerborder_added"
         ).addClass("outerborder_deleted");
