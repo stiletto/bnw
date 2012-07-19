@@ -10,11 +10,11 @@
         var websocket_base = "{{ config.webui_wsbase }}";
         var page_type = "message";
         var message_id = "{{ msgid }}";
-        var comment_count = {{ len(comments) }};        
+        var comment_count = {{ len(comments) }};
         var comment_info = {
             {% if msg %}
             {% for c in comments %}
-                "{{ c['id'] }}" : { 
+                "{{ c['id'] }}" : {
                     "date": {{ c['date'] }},
                     "replyto": {{ ('"'+c['replyto']+'"') if c['replyto'] else "null" }},
                     "num": {{ c['num'] }},

@@ -74,6 +74,10 @@
             }
         }
 
+        function scroll_to_anchor() {
+            $("html, body").scrollTop($(window.location.hash).offset().top);
+        }
+
         var tree_comments_time;
         function tree_comments() {
                 tree_comments_time = (new Date()).getTime();
@@ -103,6 +107,7 @@
                     o.setAttribute("style","margin-left: "+margin+"em;");
                     element_idx++;
                 });
+                scroll_to_anchor();
                 tree_comments_time = (new Date()).getTime() - tree_comments_time;
         }
 
