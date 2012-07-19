@@ -1,6 +1,8 @@
 var ws;
-var ws_double_fail = false;
 var ws_addr;
+var last_try = (new Date).getTime();
+var tries_count = 0;
+var ws_tid;
 var onmessage;
 
 function openws() {
@@ -10,32 +12,42 @@ function openws() {
         ws = new MozWebSocket(ws_addr);
     }
 
-    ws.onopen = function () {
-        if (ws_double_fail)
-            $("#ws_status").text("WS Active (again)");
-        else
-            $("#ws_status").text("WS Active");
-        ws_double_fail = false;
+    ws.onopen = function() {
+        ws_tid = undefined;
+        tries_count = 0;
     }
-    ws.onclose = function () {
-        $("#ws_status").text("WS Closed");
-        reopenws();
-    }
-    ws.onerror = function () {
-        $("#ws_status").text("WS Error");
-        reopenws();
-    }
+    ws.onclose = reopenws;
+    ws.onerror = reopenws;
     ws.onmessage = onmessage;
 
     return ws;
 }
 
+
 function reopenws() {
-    if (!ws_double_fail) {
-        ws_double_fail = true;
+    if (ws_tid != undefined) return;
+    var tnow = (new Date).getTime()
+    if (tries_count < 3) {
+        if (tnow - last_try >= 5000) {
+            openws();
+            tries_count++;
+        } else {
+            ws_tid = setTimeout(_reopenws, 5000);
+        }
+    } else if (tnow - last_try >= 30000) {
         openws();
+        tries_count++;
+    } else {
+        ws_tid = setTimeout(_reopenws, 30000);
     }
+    last_try = tnow;
 }
+
+function _reopenws() {
+    ws_tid = undefined;
+    reopenws();
+}
+
 
 var favicon_changed = false;
 var timeout_id;
@@ -65,6 +77,7 @@ function change_favicon() {
     }
 }
 
+
 function add_node(html, to, at_top) {
     var node = $(html).hide();
     node.addClass("outerborder_added");
@@ -87,9 +100,10 @@ function add_node(html, to, at_top) {
 
 function main_page_handler(e) {
     var d = JSON.parse(e.data);
-    if (d.type == "new_message" && !window.location.search) {
-        // Add new messages only to first page.
-        add_node(d.html, "div.messages", true);
+    if (d.type == "new_message" &&
+        window.location.search.indexOf("page") == -1) {
+            // Add new messages only to first page.
+            add_node(d.html, "div.messages", true);
     } else if (d.type == "del_message") {
         $("div#"+d.id).removeClass("outerborder_added"
         ).addClass("outerborder_deleted");
@@ -127,8 +141,129 @@ function message_page_handler(e) {
     }
 }
 
+
+function api_call_alert(func, args, verbose) {
+    args["login"] = $.cookie("bnw_loginkey");
+    $.ajax({
+        url: "/api/"+func,
+        data: args,
+        dataType: "json",
+        success: function (d) {
+            if (verbose) {
+                if (d.ok)
+                    alert("OK. "+d.desc);
+                else
+                    alert("ERROR. "+d.desc);
+            }
+        },
+        error: function(d, status) {
+            alert("API request failed.");
+            return false;
+        }
+    });
+}
+
+function confirm_action(desc, f) {
+    var outer = $("#dlg_outer");
+    var inner = $("#dlg_inner2");
+    inner.html(
+        '<form id="dlg_centered">'+
+        '<span>Вы уверены, что хотите '+desc+'?</span><br /><br />'+
+        '<input type="button" id="dlg_yes" class="styledbutton" value="[&lt; Да &gt;]">'+
+        '<input type="button" id="dlg_no" class="styledbutton" value="[&lt; Нет &gt;]">'+
+        '</form>');
+    inner.find("#dlg_yes").click(function() {
+        outer.css("display", "none");
+        f();
+    });
+    inner.find("#dlg_no").click(function() {
+        outer.css("display", "none");
+    });
+    outer.css("display", "table");
+}
+
+function add_message_page_actions() {
+    function recommendation() {
+        var r = $("<a/>").text("r").click(function() {
+            confirm_action("рекомендовать сообщение #"+message_id,
+            function() {
+                api_call_alert("recommend", {message: message_id});
+            });
+        });
+        r.css("cursor", "pointer");
+        $("#"+message_id).find(".msgb").append(" ").append(r);
+    }
+    function textarea() {
+        $("#commenttextarea").keypress(function(event) {
+            if (event.ctrlKey && (event.keyCode==13 || event.keyCode==10)) {
+                $("#commentform").submit();
+            }
+        });
+    }
+    function comment_reply() {
+        var form = $("#commentdiv");
+        $("div.comments").children().each(function() {
+            var comment = $(this);
+            var short_id = comment.attr("id");
+            var id = message_id + "/" + short_id;
+            comment.find(".msgid").first().click(function() {
+                var depth = comment_info[id].depth + 1;
+                form.css("margin-left", depth+"em");
+                form.find("[name=comment]").val(short_id);
+                comment.after(form);
+                form.find("textarea").focus();
+                return false;
+            });
+        });
+        var hr = $("hr").last();
+        function clear_replyto() {
+            form.css("margin-left", "");
+            form.find("[name=comment]").val("");
+            hr.after(form);
+            $("html,body").scrollTop($(document).height());
+            form.find("textarea").focus();
+            return false;
+        }
+        $("#"+message_id).find(".msgid").click(clear_replyto);
+        $("#clear_replyto").click(clear_replyto);
+    }
+    function comment_delete() {
+        function D_button(id) {
+            var D = $("<a/>").text("D").click(function() {
+                confirm_action("удалить сообщение #"+id,
+                function() {
+                    api_call_alert("delete", {message: id});
+                });
+            });
+            D.css("cursor", "pointer");
+            return D;
+        }
+
+        for (var id in comment_info) {
+            var comment = comment_info[id];
+            var short_id = id.split('/')[1];
+            if (comment["user"] == auth_user || message_user == auth_user) {
+                $("#"+short_id).find(".cmtb").append(" ").append(D_button(id));
+            }
+        }
+        if (message_user == auth_user) {
+            $("#"+message_id).find(".msgb").append(" "
+            ).append(D_button(message_id));
+        }
+    }
+
+    recommendation();
+    textarea();
+    comment_reply();
+    comment_delete();
+}
+
+
 var secure_connection = window.location.protocol == "https:";
-switch (page_type) {
+var is_auth_user = $.cookie("bnw_loginkey") != null;
+
+$(function() {
+    switch (page_type) {
     case "main":
         ws_addr = ((secure_connection ? "wss" : "ws" ) + "://" +
                    websocket_base + "/ws?v=2");
@@ -140,5 +275,9 @@ switch (page_type) {
                    websocket_base + window.location.pathname + "/ws?v=2");
         onmessage = message_page_handler;
         openws();
+        if (is_auth_user) {
+            add_message_page_actions();
+        }
         break;
-}
+    }
+});

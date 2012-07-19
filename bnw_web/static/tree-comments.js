@@ -7,23 +7,6 @@
             });
         };
 
-        function comment_reply() {
-            $(".msgid").each(function (i,o) {
-                var cur=$(o);
-                var text=cur.text();
-                var lp = text.split('/');
-                if ((lp[1])&&(lp[0]=="#"+message_id)) {
-                    cur.click(function () {
-                        $("[name=comment]").val($(this).text().split('/')[1]);
-                    });
-                }
-            });
-        }
-        function textarea_press(event) {
-            if (event.ctrlKey && (event.keyCode==13 || event.keyCode==10))
-                $("#commentform").submit();
-        }
-
         var comments_order = [];
         function comments_order_compare(a,b) {
             var as=a[1]; var bs=b[1];
@@ -74,6 +57,13 @@
             }
         }
 
+        function scroll_to_anchor() {
+            var div = $(window.location.hash);
+            if (div.length) {
+                $("html, body").scrollTop(div.offset().top);
+            }
+        }
+
         var tree_comments_time;
         function tree_comments() {
                 tree_comments_time = (new Date()).getTime();
@@ -103,40 +93,8 @@
                     o.setAttribute("style","margin-left: "+margin+"em;");
                     element_idx++;
                 });
+                scroll_to_anchor();
                 tree_comments_time = (new Date()).getTime() - tree_comments_time;
-        }
-
-        function api_call_alert(func,args) {
-            args['login']=$.cookie("bnw_loginkey");
-            $.ajax({ url: "/api/"+func,
-                data:args,
-                dataType:'json',
-                success: function (data) {
-                    if (data.ok)
-                        alert("OK. "+data.desc);
-                    else
-                        alert("ERROR. "+data.desc);
-                },
-                error: function (data,status) {
-                    alert("API request failed.");
-                    return false;
-                }
-            });
-        }
-
-        var add_message_actions_time;
-        function add_message_actions() {
-            add_message_actions_time = (new Date()).getTime();
-            var isloggedin = $.cookie("bnw_loginkey")!=null;
-                $(".msgb, .cmtb").each(function (i,o) {
-                    var id = o.getAttribute("id").split("-")[1];
-                    var ismsg = id.indexOf("/")==-1;
-                    var jo = $(o);
-                    $(o).html(" ");
-                    if (ismsg&&isloggedin)
-                        jo.append( $("<a/>").text("r").click(function () { api_call_alert("recommend",{message:id}); }) );
-                });
-            add_message_actions_time = (new Date()).getTime() - add_message_actions_time;
         }
 
         var commentinfo_generate_time;
@@ -157,7 +115,4 @@
                     tree_comments();
                 }
             }
-            comment_reply();
-
-            add_message_actions();
         });
