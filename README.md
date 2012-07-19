@@ -5,18 +5,22 @@ Twisted, Tornado and MongoDB and aims to be scalable and high-performance.
 
 ## Installation
 
-* Install necessary dependencies and python libraries from packages  
-(for Debian):  
-`% make install-deb`
+Install necessary dependencies and python libraries from packages  
+(for Debian):
 
-* Alternatively, you can install BnW in virtualenv (for Debian):  
-`% make install-venv`
+    % make install-deb
 
-* Create config file from stub and open it for editing:  
-`% make config`
+Alternatively, you can install BnW in virtualenv (for Debian):
 
-* Run BnW:  
-`% make run`
+    % make install-venv
+
+Create config file from stub and open it for editing:
+
+    % make config
+
+Run BnW:
+
+    % make run
 
 Note that installation and configuration of XMPP and HTTP servers which will  
 be used by BnW are still on your own. However you can find additional info  
