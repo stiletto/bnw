@@ -145,9 +145,16 @@ function message_page_handler(e) {
     var d = JSON.parse(e.data);
     if (d.type == "new_comment") {
         add_node(d.html, "div.comments", false);
+        // TODO: Send already shorted id or create helper function.
+        var short_id = d.id.split('/')[1];
+        add_message_page_actions($("#"+short_id));
     } else if (d.type == "del_comment") {
-        $("div#"+d.id).removeClass("outerborder_added"
+        var comment = $("#"+d.id);
+        comment.removeClass("outerborder_added"
         ).addClass("outerborder_deleted");
+        setTimeout(function() {
+            comment.hide("slow");
+        }, 5000);
         change_favicon();
     }
 }
@@ -159,12 +166,13 @@ function api_call_alert(func, args, verbose) {
         url: "/api/"+func,
         data: args,
         dataType: "json",
-        success: function (d) {
-            if (verbose) {
-                if (d.ok)
-                    alert("OK. "+d.desc);
-                else
-                    alert("ERROR. "+d.desc);
+        success: function(d) {
+            if (d.ok) {
+                if (verbose) {
+                    info_dialog("OK. "+d.desc);
+                }
+            } else {
+                info_dialog("ERROR. "+d.desc);
             }
         },
         error: function(d, status) {
@@ -174,7 +182,7 @@ function api_call_alert(func, args, verbose) {
     });
 }
 
-function confirm_action(desc, f, e) {
+function confirm_dialog(desc, f, e) {
     var inner = $("#dlg_inner");
     var inner2 = $("#dlg_inner2");
     inner2.html(
@@ -185,22 +193,37 @@ function confirm_action(desc, f, e) {
         '</form>');
     inner2.find("#dlg_yes").click(function() {
         inner.hide();
-        $("body").unbind("click");
         f();
     });
     inner2.find("#dlg_no").click(function() {
         inner.hide();
-        $("body").unbind("click");
     });
     inner.css("left", e.pageX+15);
     inner.css("top", e.pageY+15);
     inner.show();
 }
 
-function add_message_page_actions() {
+function info_dialog(desc) {
+    var inner = $("#dlg_inner");
+    var inner2 = $("#dlg_inner2");
+    inner2.html(
+        '<form id="dlg_centered">'+
+        '<span>'+desc+'</span><br /><br />'+
+        '<input type="button" id="dlg_ok" class="styledbutton" value="[&lt; OK &gt;]">'+
+        '</form>');
+    inner2.find("#dlg_ok").click(function() {
+        inner.hide();
+    });
+    inner.css("left", ($(window).width() - inner.width()) / 2);
+    inner.css("top", ($(window).height() - inner.height()) / 2 +
+              $(window).scrollTop());
+    inner.show();
+}
+
+function add_message_page_actions(comment) {
     function recommendation() {
         var r = $("<a/>").text("r").click(function(e) {
-            confirm_action("рекомендовать сообщение #"+message_id,
+            confirm_dialog("рекомендовать сообщение #"+message_id,
             function() {
                 api_call_alert("recommend", {message: message_id});
             }, e);
@@ -215,37 +238,50 @@ function add_message_page_actions() {
             }
         });
     }
-    function comment_reply() {
+    function comment_reply(comment) {
         var form = $("#commentdiv");
-        $("div.comments").children().each(function() {
-            var comment = $(this);
+        function set_reply_link(i, e, depth) {
+            var comment = $(e);
             var short_id = comment.attr("id");
             var id = message_id + "/" + short_id;
             comment.find(".msgid").first().click(function() {
-                var depth = comment_info[id].depth + 1;
+                if (depth == undefined) {
+                    depth = comment_info[id].depth + 1;
+                }
                 form.css("margin-left", depth+"em");
                 form.find("[name=comment]").val(short_id);
                 comment.after(form);
                 form.find("textarea").focus();
                 return false;
             });
-        });
-        var hr = $("hr").last();
-        function clear_replyto() {
-            form.css("margin-left", "");
+        }
+
+        if (comment) {
+            // Add link only to new comment.
+            set_reply_link(0, comment, 1);
+            return;
+        }
+        $("div.comments").children().each(set_reply_link);
+        var hr1 = $("hr").first();
+        var hr2 = $("hr").last();
+        $("#"+message_id).find(".msgid").click(function() {
+            form.css("margin-left", "1em");
             form.find("[name=comment]").val("");
-            hr.after(form);
-            $("html,body").scrollTop($(document).height());
+            hr1.before(form);
             form.find("textarea").focus();
             return false;
-        }
-        $("#"+message_id).find(".msgid").click(clear_replyto);
-        $("#clear_replyto").click(clear_replyto);
+        });
+        $("#clear_replyto").click(function() {
+            form.css("margin-left", "");
+            form.find("[name=comment]").val("");
+            hr2.after(form);
+            return false;
+        });
     }
-    function comment_delete() {
+    function comment_delete(comment) {
         function D_button(id) {
             var D = $("<a/>").text("D").click(function(e) {
-                confirm_action("удалить сообщение #"+id,
+                confirm_dialog("удалить сообщение #"+id,
                 function() {
                     api_call_alert("delete", {message: id});
                 }, e);
@@ -254,6 +290,16 @@ function add_message_page_actions() {
             return D;
         }
 
+        if (comment) {
+            // Add D button only to new comment.
+            var comment_user = comment.find(".usrid").text().slice(1);
+            // TODO: div's ids should be already in full form.
+            var id = message_id + "/" + comment.attr("id");
+            if (comment_user == auth_user || message_user == auth_user) {
+                comment.find(".cmtb").append(" ").append(D_button(id));
+            }
+            return;
+        }
         for (var id in comment_info) {
             var comment = comment_info[id];
             var short_id = id.split('/')[1];
@@ -267,10 +313,16 @@ function add_message_page_actions() {
         }
     }
 
-    recommendation();
-    textarea();
-    comment_reply();
-    comment_delete();
+    if (comment) {
+        // Add actions only to new comment.
+        comment_reply(comment);
+        comment_delete(comment);
+    } else {
+        recommendation();
+        textarea();
+        comment_reply();
+        comment_delete();
+    }
 }
 
 

@@ -58,7 +58,7 @@
             <form id='commentform' action='/comment' method='post'>
                 {{ xsrf_form_html() }}
                 <input type='hidden' name='msg' value='{{ msgid }}'/>
-                <textarea name='text' style='width: 100%;' cols='3' class='blueinput'
+                <textarea name='text' style='width: 100%;' rows='5' class='blueinput'
                 id='commenttextarea'></textarea>
                 Id комментария: <input name='comment' class='blueinput' size='3' maxlength='3' />
                 <input type='button' value='[&lt; Сбросить &gt;]' id='clear_replyto'
