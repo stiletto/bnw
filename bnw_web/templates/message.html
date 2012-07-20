@@ -10,11 +10,13 @@
         var websocket_base = "{{ config.webui_wsbase }}";
         var page_type = "message";
         var message_id = "{{ msgid }}";
-        var comment_count = {{ len(comments) }};        
+        var message_user = "{% if msg %}{{ msg['user'] }}{% end %}";
+        var auth_user = "{% if auth_user %}{{ auth_user['name'] }}{% end %}";
+        var comment_count = {{ len(comments) }};
         var comment_info = {
             {% if msg %}
             {% for c in comments %}
-                "{{ c['id'] }}" : { 
+                "{{ c['id'] }}" : {
                     "date": {{ c['date'] }},
                     "replyto": {{ ('"'+c['replyto']+'"') if c['replyto'] else "null" }},
                     "num": {{ c['num'] }},
@@ -50,15 +52,19 @@
     {% end %}
     </div>
     {% if auth_user %}
-    <div class='outerborder'>
+    <hr />
+    <div class='outerborder' id='commentdiv'>
         <div class='msg'>
             <form id='commentform' action='/comment' method='post'>
                 {{ xsrf_form_html() }}
                 <input type='hidden' name='msg' value='{{ msgid }}'/>
-                <textarea name='text' style='width: 100%;' cols='3' class='blueinput' onkeypress="textarea_press(event)"></textarea>
-                Id комментария: <input name='comment' class='blueinput' size='4'/>
-                <span id='ws_status'></span>
-                <input type='submit' value='[&lt; Комментировать &gt;]' style='float: right;' class='styledbutton'/>
+                <textarea name='text' style='width: 100%;' cols='3' class='blueinput'
+                id='commenttextarea'></textarea>
+                Id комментария: <input name='comment' class='blueinput' size='3' maxlength='3' />
+                <input type='button' value='[&lt; Сбросить &gt;]' id='clear_replyto'
+                class='styledbutton'/>
+                <input type='submit' value='[&lt; Комментировать &gt;]'
+                style='float: right;' class='styledbutton'/>
             </form>
         </div>
     </div>
