@@ -60,6 +60,6 @@ webui_base = 'localhost:7808'
 ## webui_wsbase = 'example.com'
 webui_wsbase = 'localhost:7808'
 
-## Don't touch this, this settings should be rewritten and refactored.
-fuck_enabled = False
-fuck_port = 8081
+## Enable or disable BnW's local RPC for debug and specify it's port.
+rpc_enabled = False
+rpc_port = 8081
