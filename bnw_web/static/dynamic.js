@@ -163,32 +163,36 @@ function api_call_alert(func, args, verbose) {
     });
 }
 
-function confirm_action(desc, f) {
-    var outer = $("#dlg_outer");
-    var inner = $("#dlg_inner2");
-    inner.html(
+function confirm_action(desc, f, e) {
+    var inner = $("#dlg_inner");
+    var inner2 = $("#dlg_inner2");
+    inner2.html(
         '<form id="dlg_centered">'+
         '<span>Вы уверены, что хотите '+desc+'?</span><br /><br />'+
         '<input type="button" id="dlg_yes" class="styledbutton" value="[&lt; Да &gt;]">'+
         '<input type="button" id="dlg_no" class="styledbutton" value="[&lt; Нет &gt;]">'+
         '</form>');
-    inner.find("#dlg_yes").click(function() {
-        outer.css("display", "none");
+    inner2.find("#dlg_yes").click(function() {
+        inner.hide();
+        $("body").unbind("click");
         f();
     });
-    inner.find("#dlg_no").click(function() {
-        outer.css("display", "none");
+    inner2.find("#dlg_no").click(function() {
+        inner.hide();
+        $("body").unbind("click");
     });
-    outer.css("display", "table");
+    inner.css("left", e.pageX+15);
+    inner.css("top", e.pageY+15);
+    inner.show();
 }
 
 function add_message_page_actions() {
     function recommendation() {
-        var r = $("<a/>").text("r").click(function() {
+        var r = $("<a/>").text("r").click(function(e) {
             confirm_action("рекомендовать сообщение #"+message_id,
             function() {
                 api_call_alert("recommend", {message: message_id});
-            });
+            }, e);
         });
         r.css("cursor", "pointer");
         $("#"+message_id).find(".msgb").append(" ").append(r);
@@ -229,11 +233,11 @@ function add_message_page_actions() {
     }
     function comment_delete() {
         function D_button(id) {
-            var D = $("<a/>").text("D").click(function() {
+            var D = $("<a/>").text("D").click(function(e) {
                 confirm_action("удалить сообщение #"+id,
                 function() {
                     api_call_alert("delete", {message: id});
-                });
+                }, e);
             });
             D.css("cursor", "pointer");
             return D;
