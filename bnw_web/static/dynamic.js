@@ -1,11 +1,12 @@
-var ws;
 var ws_addr;
+var opening = false;
 var last_try = (new Date).getTime();
 var tries_count = 0;
-var ws_tid;
 var onmessage;
 
 function openws() {
+    var ws;
+
     if ("WebSocket" in window) {
         ws = new WebSocket(ws_addr);
     } else {
@@ -13,39 +14,49 @@ function openws() {
     }
 
     ws.onopen = function() {
-        ws_tid = undefined;
         tries_count = 0;
     }
     ws.onclose = reopenws;
-    ws.onerror = reopenws;
+    ws.onerror = function() {
+        if (ws.readyState == ws.OPEN) {
+            ws.close()
+        }
+        reopenws();
+    }
     ws.onmessage = onmessage;
 
     return ws;
 }
 
-
 function reopenws() {
-    if (ws_tid != undefined) return;
-    var tnow = (new Date).getTime()
-    if (tries_count < 3) {
-        if (tnow - last_try >= 5000) {
-            openws();
-            tries_count++;
-        } else {
-            ws_tid = setTimeout(_reopenws, 5000);
-        }
-    } else if (tnow - last_try >= 30000) {
-        openws();
-        tries_count++;
-    } else {
-        ws_tid = setTimeout(_reopenws, 30000);
+    if (!opening) {
+        opening = true;
+        _reopenws();
     }
-    last_try = tnow;
 }
 
 function _reopenws() {
-    ws_tid = undefined;
-    reopenws();
+    var tnow = (new Date).getTime()
+    // 3 times for 5 seconds
+    if (tries_count < 3) {
+        if (tnow - last_try >= 5000) {
+            tries_count++;
+            opening = false;
+            openws();
+        } else {
+            setTimeout(_reopenws, 5000);
+        }
+    // 30 times for 1 minute
+    } else if (tries_count < 30) {
+        if (tnow - last_try >= 60000) {
+            tries_count++;
+            opening = false;
+            openws();
+        } else {
+            setTimeout(_reopenws, 60000);
+        }
+    } // In other cases seems like server in deep down, give up.
+    last_try = tnow;
 }
 
 
