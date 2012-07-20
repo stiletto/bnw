@@ -17,12 +17,12 @@ function openws() {
         tries_count = 0;
     }
     ws.onclose = reopenws;
-    ws.onerror = function() {
+    /*ws.onerror = function() {
         if (ws.readyState == ws.OPEN) {
             ws.close()
         }
         reopenws();
-    }
+    }*/
     ws.onmessage = onmessage;
 
     return ws;
