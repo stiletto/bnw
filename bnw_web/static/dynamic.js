@@ -1,11 +1,12 @@
-var ws;
 var ws_addr;
+var opening = false;
 var last_try = (new Date).getTime();
 var tries_count = 0;
-var ws_tid;
 var onmessage;
 
 function openws() {
+    var ws;
+
     if ("WebSocket" in window) {
         ws = new WebSocket(ws_addr);
     } else {
@@ -13,39 +14,49 @@ function openws() {
     }
 
     ws.onopen = function() {
-        ws_tid = undefined;
         tries_count = 0;
     }
     ws.onclose = reopenws;
-    ws.onerror = reopenws;
+    ws.onerror = function() {
+        if (ws.readyState == ws.OPEN) {
+            ws.close()
+        }
+        reopenws();
+    }
     ws.onmessage = onmessage;
 
     return ws;
 }
 
-
 function reopenws() {
-    if (ws_tid != undefined) return;
-    var tnow = (new Date).getTime()
-    if (tries_count < 3) {
-        if (tnow - last_try >= 5000) {
-            openws();
-            tries_count++;
-        } else {
-            ws_tid = setTimeout(_reopenws, 5000);
-        }
-    } else if (tnow - last_try >= 30000) {
-        openws();
-        tries_count++;
-    } else {
-        ws_tid = setTimeout(_reopenws, 30000);
+    if (!opening) {
+        opening = true;
+        _reopenws();
     }
-    last_try = tnow;
 }
 
 function _reopenws() {
-    ws_tid = undefined;
-    reopenws();
+    var tnow = (new Date).getTime()
+    // 3 times for 5 seconds
+    if (tries_count < 3) {
+        if (tnow - last_try >= 5000) {
+            tries_count++;
+            opening = false;
+            openws();
+        } else {
+            setTimeout(_reopenws, 5000);
+        }
+    // 30 times for 1 minute
+    } else if (tries_count < 30) {
+        if (tnow - last_try >= 60000) {
+            tries_count++;
+            opening = false;
+            openws();
+        } else {
+            setTimeout(_reopenws, 60000);
+        }
+    } // In other cases seems like server in deep down, give up.
+    last_try = tnow;
 }
 
 
@@ -163,32 +174,36 @@ function api_call_alert(func, args, verbose) {
     });
 }
 
-function confirm_action(desc, f) {
-    var outer = $("#dlg_outer");
-    var inner = $("#dlg_inner2");
-    inner.html(
+function confirm_action(desc, f, e) {
+    var inner = $("#dlg_inner");
+    var inner2 = $("#dlg_inner2");
+    inner2.html(
         '<form id="dlg_centered">'+
         '<span>Вы уверены, что хотите '+desc+'?</span><br /><br />'+
         '<input type="button" id="dlg_yes" class="styledbutton" value="[&lt; Да &gt;]">'+
         '<input type="button" id="dlg_no" class="styledbutton" value="[&lt; Нет &gt;]">'+
         '</form>');
-    inner.find("#dlg_yes").click(function() {
-        outer.css("display", "none");
+    inner2.find("#dlg_yes").click(function() {
+        inner.hide();
+        $("body").unbind("click");
         f();
     });
-    inner.find("#dlg_no").click(function() {
-        outer.css("display", "none");
+    inner2.find("#dlg_no").click(function() {
+        inner.hide();
+        $("body").unbind("click");
     });
-    outer.css("display", "table");
+    inner.css("left", e.pageX+15);
+    inner.css("top", e.pageY+15);
+    inner.show();
 }
 
 function add_message_page_actions() {
     function recommendation() {
-        var r = $("<a/>").text("r").click(function() {
+        var r = $("<a/>").text("r").click(function(e) {
             confirm_action("рекомендовать сообщение #"+message_id,
             function() {
                 api_call_alert("recommend", {message: message_id});
-            });
+            }, e);
         });
         r.css("cursor", "pointer");
         $("#"+message_id).find(".msgb").append(" ").append(r);
@@ -229,11 +244,11 @@ function add_message_page_actions() {
     }
     function comment_delete() {
         function D_button(id) {
-            var D = $("<a/>").text("D").click(function() {
+            var D = $("<a/>").text("D").click(function(e) {
                 confirm_action("удалить сообщение #"+id,
                 function() {
                     api_call_alert("delete", {message: id});
-                });
+                }, e);
             });
             D.css("cursor", "pointer");
             return D;

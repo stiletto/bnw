@@ -396,7 +396,9 @@ class CommentHandler(BnwWebHandler,AuthMixin):
         else:
             defer.returnValue({'error':result})
 
-emptypng=base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAAXNSR0IDN8dNUwAAAANQTFRF////p8QbyAAAAAlwSFlzAAAPYQAAD2EBqD+naQAAABZ6VFh0YXV0aG9yAAB42gtOLUpPrQQACDECcKiD3nQAAAAKSURBVAjXY2AAAAACAAHiIbwzAAAAAElFTkSuQmCC')
+emptypng = base64.b64decode(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAAAnRSTlMAAHaTzTgAAAAKSURB'
+    'VAjXY2AAAAACAAHiIbwzAAAAAElFTkSuQmCC')
 
 class AvatarHandler(BnwWebHandler):
     @defer.inlineCallbacks

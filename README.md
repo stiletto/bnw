@@ -1,6 +1,6 @@
 # BnW
 
-BnW is XMPP microbblogging service written in Python. It's powered by  
+BnW is a XMPP microbblogging service written in Python. It's powered by  
 Twisted, Tornado and MongoDB and aims to be scalable and high-performance.
 
 ## Installation
