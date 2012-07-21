@@ -101,17 +101,19 @@ function message_page_handler(e) {
     }
 }
 
-function api_call(func, args, verbose) {
+function api_call(func, args, verbose, onsuccess, onerror) {
     args["login"] = $.cookie("bnw_loginkey");
     $.ajax({
         url: "/api/"+func,
         data: args,
         dataType: "json",
         success: function(d) {
-            if (!d.ok) {
+            if (d.ok) {
+                if (onsuccess) onsuccess();
+                if (verbose) info_dialog("OK. "+d.desc);
+            } else {
+                if (onerror) onerror();
                 info_dialog("ERROR. "+d.desc);
-            } else if (verbose) {
-                info_dialog("OK. "+d.desc);
             }
         },
         error: function() {
@@ -148,26 +150,56 @@ function add_message_page_actions(comment) {
     function dynamic_submit() {
         var form = $("#commentdiv");
         var form2 = $("#commentform");
+        var hr2 = $("hr").last();
         var comment_text = form2.find("[name=comment]");
         var textarea = $("#commenttextarea");
-        var hr2 = $("hr").last();
+        var clearb = $("#clear_replyto");
+        var sendb = $("#send_comment");
+        var old_value, iid;
+        function before() {
+            textarea.focus();
+            clearb.attr("disabled", "disabled");
+            sendb.attr("disabled", "disabled");
+            old_value = sendb.val();
+            sendb.val(".");
+            iid = setInterval(function() {
+                if (sendb.val().length > 4) {
+                    sendb.val(".");
+                } else {
+                    sendb.val("."+sendb.val());
+                }
+            }, 300);
+        }
+        function after() {
+            clearInterval(iid);
+            sendb.val(old_value);
+            clearb.removeAttr("disabled");
+            sendb.removeAttr("disabled");
+        }
         form2.submit(function() {
             if (ws.readyState != ws.OPEN) {
+                // Use non-ajax submit if websocket not opened.
                 form2.submit();
                 return;
             }
-
+            before();
             var id = message_id;
-            var short_id = comment_text.val();
-            if (short_id) {
-                id += "/" + short_id;
+            if (comment_text.val()) {
+                id += "/" + comment_text.val();
             }
-            api_call("comment", {message: id, text: textarea.val()});
-            form.css("margin-left", "");
-            comment_text.val("");
-            textarea.val("");
-            hr2.after(form);
-            $("html, body").scrollTop($(document).height());
+            api_call(
+                "comment", {message: id, text: textarea.val()}, false,
+                // onsuccess
+                function() {
+                    after();
+                    form.css("margin-left", "");
+                    comment_text.val("");
+                    textarea.val("");
+                    hr2.after(form);
+                    $("html, body").scrollTop($(document).height());
+                },
+                // onerror
+                after);
             return false;
         });
     }
@@ -184,7 +216,7 @@ function add_message_page_actions(comment) {
                 form.css("margin-left", depth+"em");
                 form.find("[name=comment]").val(short_id);
                 comment.after(form);
-                form.find("textarea").focus();
+                $("#commenttextarea").focus();
                 return false;
             });
         }
@@ -201,7 +233,7 @@ function add_message_page_actions(comment) {
             form.css("margin-left", "1em");
             form.find("[name=comment]").val("");
             hr1.before(form);
-            form.find("textarea").focus();
+            $("#commenttextarea").focus();
             return false;
         });
         $("#clear_replyto").click(function() {
@@ -214,10 +246,11 @@ function add_message_page_actions(comment) {
     function comment_delete(comment) {
         function D_button(id) {
             var D = $("<a/>").text("D").click(function(e) {
-                confirm_dialog("удалить сообщение #"+id,
-                function() {
-                    api_call("delete", {message: id});
-                }, e);
+                confirm_dialog(
+                    "удалить сообщение #"+id,
+                    function() {
+                        api_call("delete", {message: id});
+                    }, e);
             });
             D.css("cursor", "pointer");
             return D;
