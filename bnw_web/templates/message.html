@@ -12,6 +12,9 @@
         var message_id = "{{ msgid }}";
         var message_user = "{% if msg %}{{ msg['user'] }}{% end %}";
         var auth_user = "{% if auth_user %}{{ auth_user['name'] }}{% end %}";
+        var is_recommended = {% if (
+            msg and auth_user and auth_user['name'] in msg['recommendations'])
+            %}true{% else %}false{% end %};
         var comment_count = {{ len(comments) }};
         var comment_info = {
             {% if msg %}

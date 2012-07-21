@@ -108,17 +108,14 @@ function api_call(func, args, verbose) {
         data: args,
         dataType: "json",
         success: function(d) {
-            if (d.ok) {
-                if (verbose) {
-                    info_dialog("OK. "+d.desc);
-                }
-            } else {
+            if (!d.ok) {
                 info_dialog("ERROR. "+d.desc);
+            } else if (verbose) {
+                info_dialog("OK. "+d.desc);
             }
         },
-        error: function(d, status) {
-            alert("API request failed.");
-            return false;
+        error: function() {
+            info_dialog("API request failed.");
         }
     });
 }
@@ -163,14 +160,21 @@ function info_dialog(desc) {
 
 function add_message_page_actions(comment) {
     function recommendation() {
-        var r = $("<a/>").text("r").click(function(e) {
-            confirm_dialog("рекомендовать сообщение #"+message_id,
-            function() {
-                api_call("recommend", {message: message_id});
-            }, e);
-        });
-        r.css("cursor", "pointer");
-        $("#"+message_id).find(".msgb").append(" ").append(r);
+        if (is_recommended) {
+            // TODO: Helper title.
+            var u = $("<a/>").text("!!").click(function() {
+                api_call("recommend",
+                    {message: message_id, unrecommend: true}, true);
+            });
+            u.css("cursor", "pointer");
+            $("#"+message_id).find(".msgb").append(" ").append(u);
+        } else if (auth_user != message_user) {
+            var r = $("<a/>").text("!").click(function() {
+                api_call("recommend", {message: message_id}, true);
+            });
+            r.css("cursor", "pointer");
+            $("#"+message_id).find(".msgb").append(" ").append(r);
+        }
     }
     function textarea() {
         $("#commenttextarea").keypress(function(event) {
@@ -294,14 +298,12 @@ function add_message_page_actions(comment) {
 }
 
 
-var is_auth_user = $.cookie("bnw_loginkey") != null;
-
 $(function() {
     switch (page_type) {
     case "main":
         break;
     case "message":
-        if (is_auth_user) {
+        if (auth_user) {
             add_message_page_actions();
         }
         break;
