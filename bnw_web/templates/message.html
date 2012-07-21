@@ -12,6 +12,9 @@
         var message_id = "{{ msgid }}";
         var message_user = "{% if msg %}{{ msg['user'] }}{% end %}";
         var auth_user = "{% if auth_user %}{{ auth_user['name'] }}{% end %}";
+        var is_recommended = {% if (
+            msg and auth_user and auth_user['name'] in msg['recommendations'])
+            %}true{% else %}false{% end %};
         var comment_count = {{ len(comments) }};
         var comment_info = {
             {% if msg %}
@@ -28,6 +31,7 @@
     </script>
     <script type="text/javascript" src="{{ static_url("tree-comments.js") }}"></script>
     <script type="text/javascript" src="{{ static_url("dynamic.js") }}"></script>
+    <script type="text/javascript" src="{{ static_url("ws.js") }}"></script>
 {% end %}
 {% block body_extraclass %}hfeed{% end %}
 {% block body %}
@@ -58,7 +62,7 @@
             <form id='commentform' action='/comment' method='post'>
                 {{ xsrf_form_html() }}
                 <input type='hidden' name='msg' value='{{ msgid }}'/>
-                <textarea name='text' style='width: 100%;' cols='3' class='blueinput'
+                <textarea name='text' style='width: 100%;' rows='5' class='blueinput'
                 id='commenttextarea'></textarea>
                 Id комментария: <input name='comment' class='blueinput' size='3' maxlength='3' />
                 <input type='button' value='[&lt; Сбросить &gt;]' id='clear_replyto'
