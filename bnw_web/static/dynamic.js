@@ -120,44 +120,6 @@ function api_call(func, args, verbose) {
     });
 }
 
-function confirm_dialog(desc, f, e) {
-    var inner = $("#dlg_inner");
-    var inner2 = $("#dlg_inner2");
-    inner2.html(
-        '<form id="dlg_centered">'+
-        '<span>Вы уверены, что хотите '+desc+'?</span><br /><br />'+
-        '<input type="button" id="dlg_yes" class="styledbutton" value="[&lt; Да &gt;]">'+
-        '<input type="button" id="dlg_no" class="styledbutton" value="[&lt; Нет &gt;]">'+
-        '</form>');
-    inner2.find("#dlg_yes").click(function() {
-        inner.hide();
-        f();
-    });
-    inner2.find("#dlg_no").click(function() {
-        inner.hide();
-    });
-    inner.css("left", e.pageX+15);
-    inner.css("top", e.pageY+15);
-    inner.show();
-}
-
-function info_dialog(desc) {
-    var inner = $("#dlg_inner");
-    var inner2 = $("#dlg_inner2");
-    inner2.html(
-        '<form id="dlg_centered">'+
-        '<span>'+desc+'</span><br /><br />'+
-        '<input type="button" id="dlg_ok" class="styledbutton" value="[&lt; OK &gt;]">'+
-        '</form>');
-    inner2.find("#dlg_ok").click(function() {
-        inner.hide();
-    });
-    inner.css("left", ($(window).width() - inner.width()) / 2);
-    inner.css("top", ($(window).height() - inner.height()) / 2 +
-              $(window).scrollTop());
-    inner.show();
-}
-
 function add_message_page_actions(comment) {
     function recommendation() {
         if (is_recommended) {
