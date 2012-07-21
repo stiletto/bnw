@@ -9,16 +9,10 @@
 {% block extrahead %}
     <link rel="alternate" type="application/rss+xml" title="Последние сообщения BnW"
     href="/?format=rss" />
-    <script type="text/javascript" src="{{ static_url("web-socket-js/swfobject.js") }}"></script>
-    <script type="text/javascript" src="{{ static_url("web-socket-js/web_socket.js") }}"></script>
-    <script type="text/javascript" src="{{ static_url("favicon.js") }}"></script>
     <script type="text/javascript">
-        var WEB_SOCKET_SWF_LOCATION = "{{ static_url("web-socket-js/WebSocketMain.swf") }}";
-        var websocket_base = "{{ config.webui_wsbase }}";
         var page_type = "main";
     </script>
-    <script type="text/javascript" src="{{ static_url("dynamic.js") }}"></script>
-    <script type="text/javascript" src="{{ static_url("ws.js") }}"></script>
+    {% include "ws_headers.html" %}
 {% end %}
 {% block body_extraclass %}hfeed{% end %}
 {% block body %}

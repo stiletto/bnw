@@ -74,6 +74,7 @@ def cmd_delete(request,message="",last=False):
         _ = yield objs.Message.remove({'id':post['id'],'user':post['user']})
         _ = yield objs.Comment.remove({'message':post['id']})
         publish('del_message', message_id)
+        publish('del_message_on_user_'+post['user'], message_id)
         defer.returnValue(
             dict(ok=True,desc='Message %s removed.' % (message,))
         )

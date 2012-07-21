@@ -37,25 +37,6 @@ from api import ApiHandler
 define("port", default=8888, help="run on the given port", type=int)
 
 
-class MessageHandler(BnwWebHandler,AuthMixin):
-    templatename='message.html'
-    @defer.inlineCallbacks
-    def respond(self,msgid):
-        user = yield self.get_auth_user()
-        f = txmongo.filter.sort(txmongo.filter.ASCENDING("date"))
-        msg=(yield objs.Message.find_one({'id': msgid}))
-        comments=list((yield objs.Comment.find({'message': msgid},filter=f))) # ненавидь себя, сука
-        self.set_header("Cache-Control", "max-age=5")
-        if not msg:
-            self.set_status(404)
-        defer.returnValue({
-            'msgid': msgid,
-            'msg': msg,
-            'auth_user': user,
-            'comments': comments,
-        })
-
-
 class WsHandler(tornado.websocket.WebSocketHandler):
     """Helper class for websocket handlers.
     Register listeners and send new events to clients.
@@ -84,6 +65,7 @@ class MainWsHandler(WsHandler):
     def get_handlers(self):
         if self.version=='2':
             return (
+                # TODO: Should we check page to reduce sending data?
                 ('new_message', self.new_message),
                 ('del_message', self.del_message),
                 ('upd_comments_count', self.upd_comments_count),
@@ -112,6 +94,19 @@ class MainWsHandler(WsHandler):
     def upd_recommendations_count(self, msg_id, num):
         self.write_message(json.dumps({
             'type': 'upd_recommendations_count', 'id': msg_id, 'num': num}))
+
+
+class UserWsHandler(MainWsHandler):
+    """Deliver new events on user page via websockets."""
+
+    def get_handlers(self, user):
+        return (
+            ('new_message_on_user_'+user, self.new_message),
+            ('del_message_on_user_'+user, self.del_message),
+            # TODO: Should we update only user's messages?
+            ('upd_comments_count', self.upd_comments_count),
+            ('upd_recommendations_count', self.upd_recommendations_count),
+        )
 
 
 class MessageWsHandler(WsHandler):
@@ -194,6 +189,7 @@ class UserHandler(BnwWebHandler,AuthMixin):
                 'hasmes': hasmes,
             })
 
+
 class UserRecoHandler(BnwWebHandler,AuthMixin):
     templatename='user.html'
     @defer.inlineCallbacks
@@ -249,6 +245,25 @@ class UserInfoHandler(BnwWebHandler,AuthMixin):
             'subscriptions': subscriptions_only,
             'friends': friends,
             'vcard': user.get('vcard', {}),
+        })
+
+
+class MessageHandler(BnwWebHandler,AuthMixin):
+    templatename='message.html'
+    @defer.inlineCallbacks
+    def respond(self,msgid):
+        user = yield self.get_auth_user()
+        f = txmongo.filter.sort(txmongo.filter.ASCENDING("date"))
+        msg=(yield objs.Message.find_one({'id': msgid}))
+        comments=list((yield objs.Comment.find({'message': msgid},filter=f))) # ненавидь себя, сука
+        self.set_header("Cache-Control", "max-age=5")
+        if not msg:
+            self.set_status(404)
+        defer.returnValue({
+            'msgid': msgid,
+            'msg': msg,
+            'auth_user': user,
+            'comments': comments,
         })
 
 
@@ -437,6 +452,7 @@ def get_site():
         (r"/p/([A-Z0-9]+)/?", MessageHandler),
         (r"/p/([A-Z0-9]+)/ws/?", MessageWsHandler),
         (r"/u/([0-9a-z_-]+)/?", UserHandler),
+        (r"/u/([0-9a-z_-]+)/ws/?", UserWsHandler),
         (r"/u/([0-9a-z_-]+)/recommendations/?", UserRecoHandler),
         (r"/u/([0-9a-z_-]+)/avatar(/thumb)?/?", AvatarHandler),
         (r"/u/([0-9a-z_-]+)/info/?", UserInfoHandler),

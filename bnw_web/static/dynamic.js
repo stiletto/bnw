@@ -27,6 +27,10 @@ function change_favicon() {
 }
 
 
+///////////////////////////////////////////////////////////////////////////
+// Websocket handlers.
+///////////////////////////////////////////////////////////////////////////
+
 function add_node(html, to, at_top) {
     var node = $(html).hide();
     node.addClass("outerborder_added");
@@ -55,12 +59,14 @@ function main_page_handler(e) {
             add_node(d.html, "div.messages", true);
     } else if (d.type == "del_message") {
         var msg = $("div#"+d.id);
-        msg.removeClass("outerborder_added"
-        ).addClass("outerborder_deleted");
-        setTimeout(function() {
-            msg.hide("slow");
-        }, 3000);
-        change_favicon();
+        if (msg.length) {
+            msg.removeClass("outerborder_added"
+            ).addClass("outerborder_deleted");
+            setTimeout(function() {
+                msg.hide("slow");
+            }, 3000);
+            change_favicon();
+        }
     } else if (d.type == "upd_comments_count") {
         var msg = $("div#"+d.id);
         if (msg.length) {
@@ -100,6 +106,11 @@ function message_page_handler(e) {
         change_favicon();
     }
 }
+
+
+///////////////////////////////////////////////////////////////////////////
+// Dynamic actions.
+///////////////////////////////////////////////////////////////////////////
 
 function api_call(func, args, verbose, onsuccess, onerror) {
     args["login"] = $.cookie("bnw_loginkey");
