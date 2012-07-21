@@ -96,7 +96,8 @@ class MainWsHandler(WsHandler):
 
     def new_message(self, msg):
         html = uimodules.Message(self).render(msg)
-        self.write_message(json.dumps({'type': 'new_message', 'html': html}))
+        self.write_message(json.dumps({
+            'type': 'new_message', 'id': msg['id'], 'html': html}))
 
     def new_message_compat(self, msg):
         self.write_message(json.dumps(msg))
@@ -129,7 +130,8 @@ class MessageWsHandler(WsHandler):
 
     def new_comment(self, comment):
         html = uimodules.Comment(self).render(comment)
-        self.write_message(json.dumps({'type': 'new_comment', 'html': html}))
+        self.write_message(json.dumps({
+            'type': 'new_comment', 'id': comment['id'], 'html': html}))
 
     def new_comment_compat(self, comment):
         self.write_message(json.dumps(comment))
