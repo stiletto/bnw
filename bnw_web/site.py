@@ -468,7 +468,7 @@ def get_site():
         (r"/clubs", ClubsHandler),
         (r"/blog", BlogHandler),
         (r"/comment", CommentHandler),
-        (r"/api(?:/([0-9a-z]+))?/?", ApiHandler),
+        (r"/api/([0-9a-z/]*)", ApiHandler),
     ],**settings)
 
     return tornado.httpserver.HTTPServer(application,xheaders=True)
