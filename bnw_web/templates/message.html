@@ -2,12 +2,7 @@
 {% block title %}BnW — {{ msg.get('user','None') if msg else 'None' }}: {{ w.shorttext(msg['text']) if msg else 'None' }}{% end %}
 {% block extrahead %}
     <link rel="canonical" href="http://{{ config.webui_base }}/p/{{ msgid }}" />
-    <script type="text/javascript" src="{{ static_url("web-socket-js/swfobject.js") }}"></script>
-    <script type="text/javascript" src="{{ static_url("web-socket-js/web_socket.js") }}"></script>
-    <script type="text/javascript" src="{{ static_url("favicon.js") }}"></script>
     <script type="text/javascript">
-        var WEB_SOCKET_SWF_LOCATION = "{{ static_url("web-socket-js/WebSocketMain.swf") }}";
-        var websocket_base = "{{ config.webui_wsbase }}";
         var page_type = "message";
         var message_id = "{{ msgid }}";
         var message_user = "{% if msg %}{{ msg['user'] }}{% end %}";
@@ -30,8 +25,7 @@
         };
     </script>
     <script type="text/javascript" src="{{ static_url("tree-comments.js") }}"></script>
-    <script type="text/javascript" src="{{ static_url("dynamic.js") }}"></script>
-    <script type="text/javascript" src="{{ static_url("ws.js") }}"></script>
+    {% include "ws_headers.html" %}
 {% end %}
 {% block body_extraclass %}hfeed{% end %}
 {% block body %}
@@ -67,7 +61,7 @@
                 Id комментария: <input name='comment' class='blueinput' size='3' maxlength='3' />
                 <input type='button' value='[&lt; Сбросить &gt;]' id='clear_replyto'
                 class='styledbutton'/>
-                <input type='submit' value='[&lt; Комментировать &gt;]'
+                <input type='submit' value='[&lt; Комментировать &gt;]' id='send_comment'
                 style='float: right;' class='styledbutton'/>
             </form>
         </div>

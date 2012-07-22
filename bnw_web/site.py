@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-from twisted.internet import epollreactor
-#epollreactor.install()
 from twisted.internet import reactor
 from twisted.internet import interfaces, defer
-from twisted.web.server import Site, NOT_DONE_YET
 from twisted.web.resource import Resource, NoResource
 
 import tornado.options
@@ -27,33 +24,14 @@ from tornado.options import define, options
 import bnw_core.bnw_objects as objs
 import bnw_core.post as post
 import bnw_core.base
-from bnw_core.bnw_mongo import get_db,get_fs
-from bnw_handlers.command_show import cmd_feed,cmd_today
-from bnw_handlers.command_clubs import cmd_clubs,cmd_tags
+from bnw_core.bnw_mongo import get_db, get_fs
+from bnw_handlers.command_show import cmd_feed, cmd_today
+from bnw_handlers.command_clubs import cmd_clubs, cmd_tags
 
-from base import BnwWebHandler, TwistedHandler, BnwWebRequest
-from auth import LoginHandler, requires_auth, AuthMixin
-from api import ApiHandler
+from bnw_web.base import BnwWebHandler, BnwWebRequest
+from bnw_web.auth import LoginHandler, LogoutHandler, requires_auth, AuthMixin
+from bnw_web.api import ApiHandler
 define("port", default=8888, help="run on the given port", type=int)
-
-
-class MessageHandler(BnwWebHandler,AuthMixin):
-    templatename='message.html'
-    @defer.inlineCallbacks
-    def respond(self,msgid):
-        user = yield self.get_auth_user()
-        f = txmongo.filter.sort(txmongo.filter.ASCENDING("date"))
-        msg=(yield objs.Message.find_one({'id': msgid}))
-        comments=list((yield objs.Comment.find({'message': msgid},filter=f))) # ненавидь себя, сука
-        self.set_header("Cache-Control", "max-age=5")
-        if not msg:
-            self.set_status(404)
-        defer.returnValue({
-            'msgid': msgid,
-            'msg': msg,
-            'auth_user': user,
-            'comments': comments,
-        })
 
 
 class WsHandler(tornado.websocket.WebSocketHandler):
@@ -84,6 +62,7 @@ class MainWsHandler(WsHandler):
     def get_handlers(self):
         if self.version=='2':
             return (
+                # TODO: Should we check page to reduce sending data?
                 ('new_message', self.new_message),
                 ('del_message', self.del_message),
                 ('upd_comments_count', self.upd_comments_count),
@@ -97,7 +76,8 @@ class MainWsHandler(WsHandler):
     def new_message(self, msg):
         html = uimodules.Message(self).render(msg)
         self.write_message(json.dumps({
-            'type': 'new_message', 'id': msg['id'], 'html': html}))
+            'type': 'new_message', 'id': msg['id'],
+            'user': msg['user'], 'html': html}))
 
     def new_message_compat(self, msg):
         self.write_message(json.dumps(msg))
@@ -112,6 +92,19 @@ class MainWsHandler(WsHandler):
     def upd_recommendations_count(self, msg_id, num):
         self.write_message(json.dumps({
             'type': 'upd_recommendations_count', 'id': msg_id, 'num': num}))
+
+
+class UserWsHandler(MainWsHandler):
+    """Deliver new events on user page via websockets."""
+
+    def get_handlers(self, user):
+        return (
+            ('new_message_on_user_'+user, self.new_message),
+            ('del_message_on_user_'+user, self.del_message),
+            # TODO: Should we update only user's messages?
+            ('upd_comments_count', self.upd_comments_count),
+            ('upd_recommendations_count', self.upd_recommendations_count),
+        )
 
 
 class MessageWsHandler(WsHandler):
@@ -131,7 +124,8 @@ class MessageWsHandler(WsHandler):
     def new_comment(self, comment):
         html = uimodules.Comment(self).render(comment)
         self.write_message(json.dumps({
-            'type': 'new_comment', 'id': comment['id'], 'html': html}))
+            'type': 'new_comment', 'id': comment['id'],
+            'user': comment['user'], 'html': html}))
 
     def new_comment_compat(self, comment):
         self.write_message(json.dumps(comment))
@@ -171,7 +165,7 @@ class UserHandler(BnwWebHandler,AuthMixin):
         if tag:
             tag = tornado.escape.url_unescape(tag)
             qdict['tags'] = tag
-        messages=(yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page))
+        messages=list((yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page)))
         hasmes = yield is_hasmes(qdict, page)
 
         format=self.get_argument("format","")
@@ -193,6 +187,7 @@ class UserHandler(BnwWebHandler,AuthMixin):
                 'tag' : tag,
                 'hasmes': hasmes,
             })
+
 
 class UserRecoHandler(BnwWebHandler,AuthMixin):
     templatename='user.html'
@@ -252,6 +247,25 @@ class UserInfoHandler(BnwWebHandler,AuthMixin):
         })
 
 
+class MessageHandler(BnwWebHandler,AuthMixin):
+    templatename='message.html'
+    @defer.inlineCallbacks
+    def respond(self,msgid):
+        user = yield self.get_auth_user()
+        f = txmongo.filter.sort(txmongo.filter.ASCENDING("date"))
+        msg=(yield objs.Message.find_one({'id': msgid}))
+        comments=list((yield objs.Comment.find({'message': msgid},filter=f))) # ненавидь себя, сука
+        self.set_header("Cache-Control", "max-age=5")
+        if not msg:
+            self.set_status(404)
+        defer.returnValue({
+            'msgid': msgid,
+            'msg': msg,
+            'auth_user': user,
+            'comments': comments,
+        })
+
+
 class MainHandler(BnwWebHandler,AuthMixin):
     templatename='main.html'
     @defer.inlineCallbacks
@@ -269,7 +283,7 @@ class MainHandler(BnwWebHandler,AuthMixin):
             club = tornado.escape.url_unescape(club)
             qdict['clubs'] = club
 
-        messages=(yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page))
+        messages=list((yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page)))
         hasmes = yield is_hasmes(qdict, page)
         uc=(yield objs.User.count())
         format=self.get_argument("format","")
@@ -437,6 +451,7 @@ def get_site():
         (r"/p/([A-Z0-9]+)/?", MessageHandler),
         (r"/p/([A-Z0-9]+)/ws/?", MessageWsHandler),
         (r"/u/([0-9a-z_-]+)/?", UserHandler),
+        (r"/u/([0-9a-z_-]+)/ws/?", UserWsHandler),
         (r"/u/([0-9a-z_-]+)/recommendations/?", UserRecoHandler),
         (r"/u/([0-9a-z_-]+)/avatar(/thumb)?/?", AvatarHandler),
         (r"/u/([0-9a-z_-]+)/info/?", UserInfoHandler),
@@ -446,23 +461,24 @@ def get_site():
         (r"/t/()(.*)/?", MainHandler),
         (r"/c/(.*)()/?", MainHandler),
         (r"/login", LoginHandler),
+        (r"/logout", LogoutHandler),
         (r"/post", PostHandler),
         (r"/feed", FeedHandler),
         (r"/today", TodayHandler),
         (r"/clubs", ClubsHandler),
         (r"/blog", BlogHandler),
         (r"/comment", CommentHandler),
-        (r"/api/([0-9a-z/]*)/?", ApiHandler),
+        (r"/api/([0-9a-z/]*)", ApiHandler),
     ],**settings)
 
     return tornado.httpserver.HTTPServer(application,xheaders=True)
+
 
 def main():
     tornado.options.parse_command_line()
     site = get_site()
     reactor.listenTCP(options.port, site)
-
     reactor.run()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

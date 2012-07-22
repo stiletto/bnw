@@ -1,5 +1,19 @@
+function get_ws_addr() {
+    var proto;
+    if (window.location.protocol == "https:") {
+        proto = "wss";
+    } else {
+        proto = "ws";
+    }
+    var path = window.location.pathname;
+    if (path == "/") {
+        path = "";
+    }
+    return proto + "://" + websocket_base + path + "/ws?v=2";
+}
+
 var ws;
-var ws_addr;
+var ws_addr = get_ws_addr();
 var opening = false;
 var last_try = (new Date).getTime();
 var tries_count = 0;
@@ -46,7 +60,7 @@ function _reopenws() {
             setTimeout(_reopenws, 5000);
         }
     // 30 times for 1 minute
-    } else if (tries_count < 30) {
+    } else if (tries_count < 33) {
         if (tnow - last_try >= 60000) {
             tries_count++;
             opening = false;
@@ -59,19 +73,17 @@ function _reopenws() {
 }
 
 
-var secure_connection = window.location.protocol == "https:";
-
 switch (page_type) {
     case "main":
-        ws_addr = ((secure_connection ? "wss" : "ws" ) + "://" +
-                   websocket_base + "/ws?v=2");
         onmessage = main_page_handler;
         openws();
         break;
     case "message":
-        ws_addr = ((secure_connection ? "wss" : "ws" ) + "://" +
-                   websocket_base + window.location.pathname + "/ws?v=2");
         onmessage = message_page_handler;
+        openws();
+        break;
+    case "user":
+        onmessage = main_page_handler;
         openws();
         break;
 }
