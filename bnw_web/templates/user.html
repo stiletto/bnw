@@ -5,6 +5,19 @@
     href="/u/{{ username }}/?format=rss" />
     <script type="text/javascript">
         var page_type = "user";
+        var auth_user = "{% if auth_user %}{{ auth_user['name'] }}{% end %}";
+        {% if auth_user %}
+        var message_info = {
+            {% for m in messages %}
+                "{{ m['id'] }}" : {
+                    "user": "{{ m['user'] }}",
+                    "is_recommended": {%
+                    if auth_user['name'] in m['recommendations']
+                    %}true{% else %}false{% end %},
+                },
+            {% end %}
+        };
+        {% end %}
     </script>
     {% include "ws_headers.html" %}
 {% end %}

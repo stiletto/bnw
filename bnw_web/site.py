@@ -79,7 +79,8 @@ class MainWsHandler(WsHandler):
     def new_message(self, msg):
         html = uimodules.Message(self).render(msg)
         self.write_message(json.dumps({
-            'type': 'new_message', 'id': msg['id'], 'html': html}))
+            'type': 'new_message', 'id': msg['id'],
+            'user': msg['user'], 'html': html}))
 
     def new_message_compat(self, msg):
         self.write_message(json.dumps(msg))
@@ -126,7 +127,8 @@ class MessageWsHandler(WsHandler):
     def new_comment(self, comment):
         html = uimodules.Comment(self).render(comment)
         self.write_message(json.dumps({
-            'type': 'new_comment', 'id': comment['id'], 'html': html}))
+            'type': 'new_comment', 'id': comment['id'],
+            'user': comment['user'], 'html': html}))
 
     def new_comment_compat(self, comment):
         self.write_message(json.dumps(comment))
@@ -166,7 +168,7 @@ class UserHandler(BnwWebHandler,AuthMixin):
         if tag:
             tag = tornado.escape.url_unescape(tag)
             qdict['tags'] = tag
-        messages=(yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page))
+        messages=list((yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page)))
         hasmes = yield is_hasmes(qdict, page)
 
         format=self.get_argument("format","")
@@ -284,7 +286,7 @@ class MainHandler(BnwWebHandler,AuthMixin):
             club = tornado.escape.url_unescape(club)
             qdict['clubs'] = club
 
-        messages=(yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page))
+        messages=list((yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page)))
         hasmes = yield is_hasmes(qdict, page)
         uc=(yield objs.User.count())
         format=self.get_argument("format","")
