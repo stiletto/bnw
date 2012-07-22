@@ -47,7 +47,7 @@ function add_node(html, to, at_top) {
     } else {
         node.appendTo(to);
     }
-    node.show("slow");
+    node.fadeIn("slow");
     change_favicon();
 }
 
