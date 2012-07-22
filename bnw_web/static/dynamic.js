@@ -64,7 +64,7 @@ function main_page_handler(e) {
             msg.removeClass("outerborder_added"
             ).addClass("outerborder_deleted");
             setTimeout(function() {
-                msg.hide("slow");
+                msg.fadeOut("slow");
             }, 3000);
         }
     } else if (d.type == "upd_comments_count") {
@@ -100,7 +100,7 @@ function message_page_handler(e) {
         comment.removeClass("outerborder_added"
         ).addClass("outerborder_deleted");
         setTimeout(function() {
-            comment.hide("slow");
+            comment.fadeOut("slow");
         }, 3000);
     }
 }
