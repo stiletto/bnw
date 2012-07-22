@@ -31,11 +31,12 @@
 {% block body %}
     <div class='outerborder'>
         <div class='msg'>
-            Привет{% if auth_user %}, {{ auth_user['name'] }}{% end %}, TbI — HRWKA! {{ users_count }}.0238 пользователей не могут ошибаться!
-            {% if auth_user %}<a href='javascript:$.cookie("bnw_loginkey","");window.location=window.location;'>Красная пилюля.</a>{% end %}
-            <br/>
+            Привет{% if auth_user %}, {{ auth_user['name'] }}{% end %}, TbI — HRWKA!
+            {{ users_count }}.0238 пользователей не могут ошибаться!<br />
             {% for mtag in toptags %}
-                <div style='display: inline-block;'> {{ w.tag(mtag['_id']) }}<sup>{{ int(mtag['value']) }}</sup></div>
+                <div style='display: inline-block;'>
+                {{ w.tag(mtag['_id']) }}<sup>{{ int(mtag['value']) }}</sup>
+                </div>
             {% end %}
         </div>
     </div>

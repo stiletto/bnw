@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-from twisted.internet import epollreactor
-#epollreactor.install()
 from twisted.internet import reactor
 from twisted.internet import interfaces, defer
-from twisted.web.server import Site, NOT_DONE_YET
 from twisted.web.resource import Resource, NoResource
 
 import tornado.options
@@ -27,13 +24,13 @@ from tornado.options import define, options
 import bnw_core.bnw_objects as objs
 import bnw_core.post as post
 import bnw_core.base
-from bnw_core.bnw_mongo import get_db,get_fs
-from bnw_handlers.command_show import cmd_feed,cmd_today
-from bnw_handlers.command_clubs import cmd_clubs,cmd_tags
+from bnw_core.bnw_mongo import get_db, get_fs
+from bnw_handlers.command_show import cmd_feed, cmd_today
+from bnw_handlers.command_clubs import cmd_clubs, cmd_tags
 
-from base import BnwWebHandler, TwistedHandler, BnwWebRequest
-from auth import LoginHandler, requires_auth, AuthMixin
-from api import ApiHandler
+from bnw_web.base import BnwWebHandler, BnwWebRequest
+from bnw_web.auth import LoginHandler, LogoutHandler, requires_auth, AuthMixin
+from bnw_web.api import ApiHandler
 define("port", default=8888, help="run on the given port", type=int)
 
 
@@ -464,23 +461,24 @@ def get_site():
         (r"/t/()(.*)/?", MainHandler),
         (r"/c/(.*)()/?", MainHandler),
         (r"/login", LoginHandler),
+        (r"/logout", LogoutHandler),
         (r"/post", PostHandler),
         (r"/feed", FeedHandler),
         (r"/today", TodayHandler),
         (r"/clubs", ClubsHandler),
         (r"/blog", BlogHandler),
         (r"/comment", CommentHandler),
-        (r"/api/([0-9a-z/]*)/?", ApiHandler),
+        (r"/api(?:/([0-9a-z]+))?/?", ApiHandler),
     ],**settings)
 
     return tornado.httpserver.HTTPServer(application,xheaders=True)
+
 
 def main():
     tornado.options.parse_command_line()
     site = get_site()
     reactor.listenTCP(options.port, site)
-
     reactor.run()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

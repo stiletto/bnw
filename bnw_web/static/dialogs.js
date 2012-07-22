@@ -4,6 +4,7 @@ function login_win() {
     inner.css("left", ($(window).width() - inner.width()) / 2);
     inner.css("top", ($(window).height() - inner.height()) / 2);
     inner.show()
+    return false;
 }
 
 function login_cancel() {

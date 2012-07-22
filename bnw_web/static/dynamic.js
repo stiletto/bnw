@@ -323,7 +323,10 @@ function add_message_page_actions(comment_id, comment_user) {
 }
 
 
+// Add actions.
 $(function() {
+    $("#login_button").click(login_win);
+
     switch (page_type) {
     case "main":
         if (auth_user) {
