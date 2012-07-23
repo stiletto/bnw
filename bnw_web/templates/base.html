@@ -16,7 +16,9 @@
     <script type="text/javascript" src="{{ static_url("jquery.cookie.js") }}"></script>
     <script type="text/javascript" src="{{ static_url("dialogs.js") }}"></script>
     <script type="text/javascript">
-        $(function(){
+        var page_type = "base";
+        var auth_user = "{% if auth_user %}{{ auth_user['name'] }}{% end %}";
+        $(function() {
             $(".avatar_ps").removeClass("avatar_ps");
             $(".imgpreview_ps").removeClass("imgpreview_ps");
         });
@@ -30,7 +32,7 @@
         <a href='/' class='tagline'>{{ w.ranq() }}</a>
         <span style='float: right; padding-right: 1em;'>
             {% if auth_user %}
-            <a href='/post' class='headlink'>Написать</a>
+            <a href='/post' class='headlink' id='new_post'>Написать</a>
             <a href='/feed' class='headlink'>@{{ auth_user['name'] }}</a>
             {% else %}
             <a href='/' class='headlink' id='login_button'>Войти</a>

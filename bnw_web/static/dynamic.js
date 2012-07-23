@@ -114,6 +114,7 @@ function api_call(func, args, verbose, onsuccess, onerror) {
     args["login"] = $.cookie("bnw_loginkey");
     $.ajax({
         url: "/api/"+func,
+        type: "POST",
         data: args,
         dataType: "json",
         success: function(d) {
@@ -205,19 +206,19 @@ function add_message_page_actions(comment_id, comment_user) {
     }
     function textarea() {
         var sendb = $("#send_comment")[0];
-        $("#commenttextarea").keypress(function(event) {
+        $("#comment_textarea").keypress(function(event) {
             if (event.ctrlKey && (event.keyCode==13 || event.keyCode==10) &&
                 !sendb.disabled) {
-                    $("#commentform").submit();
+                    $("#comment_form").submit();
             }
         });
     }
     function dynamic_submit() {
-        var form = $("#commentdiv");
-        var form2 = $("#commentform");
+        var form = $("#comment_div");
+        var form2 = $("#comment_form");
         var hr2 = $("hr").last();
         var comment_text = form2.find("[name=comment]");
-        var textarea = $("#commenttextarea");
+        var textarea = $("#comment_textarea");
         var clearb = $("#clear_replyto");
         var sendb = $("#send_comment");
         var old_value, iid;
@@ -247,11 +248,11 @@ function add_message_page_actions(comment_id, comment_user) {
                 form2.submit();
                 return;
             }
-            before();
             var id = message_id;
             if (comment_text.val()) {
                 id += "/" + comment_text.val();
             }
+            before();
             api_call(
                 "comment", {message: id, text: textarea.val()}, false,
                 // onsuccess
@@ -269,7 +270,7 @@ function add_message_page_actions(comment_id, comment_user) {
         });
     }
     function message_reply() {
-        var form = $("#commentdiv");
+        var form = $("#comment_div");
         var comment_text = form.find("[name=comment]");
         var hr1 = $("hr").first();
         var hr2 = $("hr").last();
@@ -277,7 +278,7 @@ function add_message_page_actions(comment_id, comment_user) {
             form.css("margin-left", "1em");
             comment_text.val("");
             hr1.before(form);
-            $("#commenttextarea").focus();
+            $("#comment_textarea").focus();
             return false;
         });
         $("#clear_replyto").click(function() {
@@ -288,7 +289,7 @@ function add_message_page_actions(comment_id, comment_user) {
         });
     }
     function comment_reply(comment_id, comment_user, depth) {
-        var form = $("#commentdiv");
+        var form = $("#comment_div");
         var short_id = comment_id.split("/")[1];
         var comment = $("#"+short_id);
         comment.find(".msgid").first().click(function() {
@@ -300,7 +301,7 @@ function add_message_page_actions(comment_id, comment_user) {
             form.css("margin-left", depth+"em");
             form.find("[name=comment]").val(short_id);
             comment.after(form);
-            $("#commenttextarea").focus();
+            $("#comment_textarea").focus();
             return false;
         });
     }
@@ -333,7 +334,9 @@ function add_message_page_actions(comment_id, comment_user) {
 
 // Add actions.
 $(function() {
-    $("#login_button").click(login_win);
+    if (!auth_user) {
+        $("#login_button").click(login_win);
+    }
 
     switch (page_type) {
     case "main":

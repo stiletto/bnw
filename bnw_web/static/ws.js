@@ -1,13 +1,8 @@
 function get_ws_addr() {
-    var proto;
-    if (window.location.protocol == "https:") {
-        proto = "wss";
-    } else {
-        proto = "ws";
-    }
+    var proto = (window.location.protocol == "https:") ? "wss" : "ws";
     var path = window.location.pathname;
-    if (path == "/") {
-        path = "";
+    if (path.slice(-1) == "/") {
+        path = path.slice(0, -1);
     }
     return proto + "://" + websocket_base + path + "/ws?v=2";
 }

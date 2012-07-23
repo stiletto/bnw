@@ -43,6 +43,23 @@
             А ещё у нас есть <a href="/u/{{ username }}/?format=rss">RSS</a>.
         </div>
     </div>
+    <div class='outerborder' id='post_div'>
+        <div class='msg'>
+            <form id='post_form' action='/post' method='post'>
+                {{ xsrf_form_html() }}
+                <textarea name='text' rows='9' class='blueinput'
+                id='post_textarea'></textarea>
+                <abbr title='Через запятую'>Теги</abbr>:
+                <input name='tags' class='blueinput' size='20' />
+                <abbr title='Через запятую'>Клубы</abbr>:
+                <input name='clubs' class='blueinput' size='20' />
+                <input type='button' value='[&lt; Спрятать &gt;]' id='hide_post'
+                class='styledbutton'/>
+                <input type='submit' value='[&lt; Отправить &gt;]' id='send_post'
+                class='styledbutton'/>
+            </form>
+        </div>
+    </div>
     <hr/>
     <div id='messages'>
     {% for msg in messages %}

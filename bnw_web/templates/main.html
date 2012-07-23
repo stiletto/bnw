@@ -11,7 +11,6 @@
     href="/?format=rss" />
     <script type="text/javascript">
         var page_type = "main";
-        var auth_user = "{% if auth_user %}{{ auth_user['name'] }}{% end %}";
         {% if auth_user %}
         var message_info = {
             {% for m in messages %}
