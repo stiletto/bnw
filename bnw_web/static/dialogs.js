@@ -64,11 +64,15 @@ function info_dialog(desc) {
         '<span>'+desc+'</span><br /><br />'+
         '<input type="button" id="dlg_ok" class="styledbutton" value="[&lt; OK &gt;]">'+
         '</form>');
-    inner2.find("#dlg_ok").click(function() {
+    var ok_b = $("#dlg_ok");
+    ok_b.click(function() {
         inner.hide();
+        focused.focus();
     });
     inner.css("left", ($(window).width() - inner.width()) / 2);
     inner.css("top", ($(window).height() - inner.height()) / 2 +
               $(window).scrollTop());
     inner.show();
+    var focused = $("*:focus");
+    ok_b.focus();
 }
