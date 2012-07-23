@@ -182,6 +182,9 @@ var actions = {
 }
 
 function add_main_page_actions(message_id, message_user) {
+    if (!auth_user) {
+        return;
+    }
     if (message_id) {
         // Add actions only to new message.
         actions.recommendation(message_id, message_user, false);
@@ -196,6 +199,9 @@ function add_main_page_actions(message_id, message_user) {
 }
 
 function add_message_page_actions(comment_id, comment_user) {
+    if (!auth_user) {
+        return;
+    }
     function textarea() {
         $("#commenttextarea").keypress(function(event) {
             if (event.ctrlKey && (event.keyCode==13 || event.keyCode==10)) {
@@ -329,19 +335,13 @@ $(function() {
 
     switch (page_type) {
     case "main":
-        if (auth_user) {
-            add_main_page_actions();
-        }
+        add_main_page_actions();
         break;
     case "message":
-        if (auth_user) {
-            add_message_page_actions();
-        }
+        add_message_page_actions();
         break;
     case "user":
-        if (auth_user) {
-            add_main_page_actions();
-        }
+        add_main_page_actions();
         break;
     }
 });
