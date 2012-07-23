@@ -1,4 +1,3 @@
-
 from bnw_handlers import command_clubs
 from bnw_handlers import command_delete
 from bnw_handlers import command_except
@@ -17,6 +16,7 @@ from bnw_handlers import command_vcard
 from bnw_handlers import command_userlist
 from bnw_handlers import command_bl
 from bnw_handlers import command_stat
+
 
 handlers = {
     "register":             command_register.cmd_register,

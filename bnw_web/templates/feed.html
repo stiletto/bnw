@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}BnW - лента @{{auth_user['name']}} {% end %}
+{% block title %}BnW — лента пользователя @{{auth_user['name']}}{% end %}
 {% block body %}
 {% if not result['ok'] %}
     <div id="err_outer">
@@ -7,7 +7,7 @@
             <div id="err_inner">
                 <div id="err_inner2">
                     Ошибка<br/>
-                    Кто бы еще знал что случилось.
+                    Кто бы еще знал, что случилось.
                 </div>
               </div>
         </div>
@@ -15,9 +15,10 @@
 {% else %}
     <div class='outerborder'>
         <div class='msg'>
-            Вот эта хреновина, которую вы читаете - ваша лента.
-            Она полностью повторяет последние 20 сообщений пришедших вам в Jabber.
-            (Или не пришедших потому что вы были OFF)
+            Лента пользователя
+            <a href="/u/{{ auth_user['name'] }}">@{{ auth_user['name'] }}</a>.<br />
+            Последние 20 сообщений, пришедших в Jabber (или не пришедших,
+            потому что вы были OFF).
         </div>
     </div>
     <hr/>

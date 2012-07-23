@@ -4,15 +4,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>{% block title %}BnW — Somewhere in Nevada{% end %}</title>
     <link rel="stylesheet" href="{{ static_url("basestyle.css") }}" type="text/css" />
-    <script type="text/javascript" src="{{ static_url("jquery.min.js") }}"></script>
-    <script type="text/javascript" src="{{ static_url("jquery.cookie.js") }}"></script>
-    <script type="text/javascript" src="{{ static_url("dlgs/login.js") }}"></script>
-    <script type="text/javascript">
-            jQuery(window).load(function(){
-                $(".avatar_ps").removeClass('avatar_ps');
-                $(".imgpreview_ps").removeClass('imgpreview_ps');
-            });
-    </script>
     <style type="text/css">
     {% block basestyles %}/* dark: CD, light: FF, gray E5 */{% end %}
     {% block extrastyle %}{% end %}
@@ -20,7 +11,16 @@
     <style type="text/css">
     {% if auth_user %}{{ auth_user.get('settings',{}).get('usercss','') }}{% end %}
     </style>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script type="text/javascript" src="{{ static_url("jquery.min.js") }}"></script>
+    <script type="text/javascript" src="{{ static_url("jquery.cookie.js") }}"></script>
+    <script type="text/javascript" src="{{ static_url("dialogs.js") }}"></script>
+    <script type="text/javascript">
+        $(function(){
+            $(".avatar_ps").removeClass("avatar_ps");
+            $(".imgpreview_ps").removeClass("imgpreview_ps");
+        });
+    </script>
     {% block extrahead %}
     {% end %}
 </head>
@@ -31,15 +31,16 @@
         <span style='float: right; padding-right: 1em;'>
             {% if auth_user %}
             <a href='/post' class='headlink'>Написать</a>
-            <!-- только если ты регистрат  -->
-            <a href='/blog' class='headlink'>{{ auth_user['name'] }}</a>
-            <a href='/feed' class='headlink'>Лента</a>
+            <a href='/feed' class='headlink'>@{{ auth_user['name'] }}</a>
             {% else %}
-            <a href='#' class='headlink' onClick='login_win()'>Войти</a>
+            <a href='/' class='headlink' id='login_button'>Войти</a>
             {% end %}
             <a href='/c/bnw' class='headlink'>!bnw</a>
             <a href='/today' class='headlink'>Сегодня</a>
             <a href='/clubs' class='headlink'>Клубы</a>
+            {% if auth_user %}
+            <a href='/logout' class='headlink'>Выход</a>
+            {% end %}
         </span>
     </div>
 {% block body %}
