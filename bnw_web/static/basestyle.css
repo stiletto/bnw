@@ -203,6 +203,20 @@
             color: #000;
             border: thin solid black;
         }
-        #dlg_centered {
+        .dlg_centered {
             text-align: center;
+        }
+        .dlg_ok_cancel {
+            padding-top: 1em;
+            text-align: center;
+        }
+
+        #post_div {
+            display: none;
+        }
+        #post_textarea, #comment_textarea {
+            width: 100%;
+        }
+        #send_post, #send_comment {
+            float: right;
         }

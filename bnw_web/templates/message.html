@@ -6,10 +6,11 @@
         var page_type = "message";
         var message_id = "{{ msgid }}";
         var message_user = "{% if msg %}{{ msg['user'] }}{% end %}";
-        var auth_user = "{% if auth_user %}{{ auth_user['name'] }}{% end %}";
-        var is_recommended = {% if (
-            msg and auth_user and auth_user['name'] in msg['recommendations'])
+        {% if auth_user %}
+        var is_recommended = {%
+            if msg and auth_user['name'] in msg['recommendations']
             %}true{% else %}false{% end %};
+        {% end %}
         var comment_count = {{ len(comments) }};
         var comment_info = {
             {% if msg %}
@@ -44,25 +45,25 @@
     {{ modules.Message(msg, full=True) }}
     <hr/>
     <div class="somenote" style="display: none;"></div>
-    <div class="comments simple_comments hfeed">
+    <div id="comments">
     {% for comment in comments %}
         {{ modules.Comment(comment) }}
     {% end %}
     </div>
     {% if auth_user %}
     <hr />
-    <div class='outerborder' id='commentdiv'>
+    <div class='outerborder' id='comment_div'>
         <div class='msg'>
-            <form id='commentform' action='/comment' method='post'>
+            <form id='comment_form' action='/comment' method='post'>
                 {{ xsrf_form_html() }}
                 <input type='hidden' name='msg' value='{{ msgid }}'/>
-                <textarea name='text' style='width: 100%;' rows='5' class='blueinput'
-                id='commenttextarea'></textarea>
+                <textarea name='text' rows='5' class='blueinput'
+                id='comment_textarea'></textarea>
                 Id комментария: <input name='comment' class='blueinput' size='3' maxlength='3' />
                 <input type='button' value='[&lt; Сбросить &gt;]' id='clear_replyto'
                 class='styledbutton'/>
                 <input type='submit' value='[&lt; Комментировать &gt;]' id='send_comment'
-                style='float: right;' class='styledbutton'/>
+                class='styledbutton'/>
             </form>
         </div>
     </div>

@@ -16,7 +16,9 @@
     <script type="text/javascript" src="{{ static_url("jquery.cookie.js") }}"></script>
     <script type="text/javascript" src="{{ static_url("dialogs.js") }}"></script>
     <script type="text/javascript">
-        $(function(){
+        var page_type = "base";
+        var auth_user = "{% if auth_user %}{{ auth_user['name'] }}{% end %}";
+        $(function() {
             $(".avatar_ps").removeClass("avatar_ps");
             $(".imgpreview_ps").removeClass("imgpreview_ps");
         });
@@ -27,10 +29,10 @@
 <body>
 <div class='bodyshit {% block body_extraclass %}{% end %}'>
     <div style='text-align: left; overflow: hidden; width: 100%;'>
-        <a href='/' class='tagline'>{{ ranq }}</a>
+        <a href='/' class='tagline'>{{ w.ranq() }}</a>
         <span style='float: right; padding-right: 1em;'>
             {% if auth_user %}
-            <a href='/post' class='headlink'>Написать</a>
+            <a href='/post' class='headlink' id='new_post'>Написать</a>
             <a href='/feed' class='headlink'>@{{ auth_user['name'] }}</a>
             {% else %}
             <a href='/' class='headlink' id='login_button'>Войти</a>
@@ -49,16 +51,21 @@
         {% block footerrow %}
         {% end %}
         <div style='float:right;'>
-            <a href="http://ipv6-test.com/validate.php?url=referer"><img src="{{ static_url("button-ipv6-80x15.png") }}" alt="ipv6 ready" title="ipv6 ready" style="border: none; vertical-align: middle;" /></a>
-            <a href="https://bitbucket.org/stiletto/bnw-android/downloads" class='pagelink'>BnW для ведрофона</a>
+            <a href="http://ipv6-test.com/validate.php?url=referer"><img src="{{
+            static_url("button-ipv6-80x15.png") }}" alt="ipv6 ready"
+            title="ipv6 ready" style="border: none; vertical-align: middle;" /></a>
+
+            <a href="https://bitbucket.org/stiletto/bnw-android/downloads"
+            class='pagelink'>BnW для ведрофона</a>
+
             <a href="http://bnw.reformal.ru/" class='pagelink'>BnW на Реформале</a>
+
             <a href="http://hive.blasux.ru/u/Stiletto/BnW" class="pagelink">Викивач</a>
         </div>
     </div>
+    <br />
     <div style='text-align: center;'>
-        Цоперайт &copy; 2010-2012 <a href='/u/stiletto'>@stiletto</a>.<br/>
-        <!-- Пользуясь случаем передаю добра хостингу <a href="http://locum.ru?code=86ae196b0fc58a7f6798a45e16faf166ae42d02f">locum.ru</a>
-            Ааа, блять, все равно нихуя мне не принесет эта партнерка. -->
+        Цоперайт &copy; 2010-2012 <a href='/u/stiletto'>@stiletto</a>.
     </div>
 </div>
 

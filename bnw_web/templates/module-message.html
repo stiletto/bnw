@@ -1,23 +1,27 @@
 <div class='outerborder hentry' id='{{ msg['id'] }}'>
     <div class='msg'>
         <img class='avatar avatar_ps' alt='avatar' src='/u/{{ msg['user'] }}/avatar/thumb' />
-        {{ w.tags(msg['tags'],msg['clubs'],username) }}
+        {{ w.tags(msg['tags'], msg['clubs'], username) }}
         {% set linkified, thumbs = thumbify(msg['text']) %}
         {% if thumbs %}<div class="imgpreviews">
             {% for thumb in thumbs %}<a class="imglink" href="{{ thumb[0] }}">
                 <img class="imgpreview imgpreview_ps" src="{{ thumb[1] }}"/>
             </a>{% end %}
             </div>{% end %}
-        <pre class='pw entry-title entry-content{{ ' hasthumbs' if thumbs else ''}}'>{{ linkified }}</pre>
+        <pre class='pw entry-title entry-content{{ ' hasthumbs' if thumbs else ''
+        }}'>{{ linkified }}</pre>
         {% if msg['recommendations'] and full %}
             <div class='recos'>
                 Рекомендовали:
                 {% for u in msg['recommendations'] %} {{ w.userl(u) }} {% end %}
             </div>
         {% end %}
-        <div class='sign'>{{ w.msgl(msg['id'],True) }}<span class='msgb' id='msgb-{{ msg['id'] }}'></span>
-            {% if not full %}({{ int(msg['replycount']) }}{% if msg['recommendations'] %}+{{ len(msg['recommendations']) }}{% end %}){% end %}
-             / {{ w.userl(msg['user']) }} / {{ w.time(msg['date']) }}
+        <div class='sign'>{{ w.msgl(msg['id'], True) }}
+            <span class='msgb' id='msgb-{{ msg['id'] }}'></span>
+            {% if not full %}({{ int(msg['replycount'])
+            }}{% if msg['recommendations'] %}+{{ len(msg['recommendations']) }}{% end
+            %}){% end %}
+            / {{ w.userl(msg['user']) }} / {{ w.time(msg['date']) }}
         </div>
     </div>
 </div>

@@ -7,11 +7,16 @@
             <img class="imgpreview imgpreview_ps" src="{{ thumb[1] }}"/>
         </a>{% end %}
         </div>{% end %}
-    <pre class='comment_body pw entry-title entry-content{{ ' hasthumbs' if thumbs else ''}}'>{{ linkified }}</pre>
+    <pre class='comment_body pw entry-title entry-content{{
+    ' hasthumbs' if thumbs else '' }}'>{{ linkified }}</pre>
     <div class='sign'>
-        {{ w.msgl(comment['id'],True) }}<span class='cmtb' id='cmtb-{{ comment['id'] }}'></span> / {{ w.userl(comment['user']) }}
-        {% if comment['replyto'] %} --&gt; <a href="/p/{{ comment['replyto'].replace('/','#') }}" class="msgid">#{{ comment['replyto']}}</a>{% end %}
-         / {{ w.time(comment['date']) }}
+        {{ w.msgl(comment['id'], True) }}
+        <span class='cmtb' id='cmtb-{{ comment['id'] }}'></span>
+        / {{ w.userl(comment['user']) }}
+        {% if comment['replyto'] %} --&gt;
+        <a href="/p/{{ comment['replyto'].replace('/', '#') }}"
+        class="msgid">#{{ comment['replyto']}}</a>{% end %}
+        / {{ w.time(comment['date']) }}
     </div>
 </div>
 </div>
