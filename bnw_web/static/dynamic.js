@@ -56,7 +56,7 @@ function main_page_handler(e) {
     if (d.type == "new_message" &&
         window.location.search.indexOf("page") == -1) {
             // Add new messages only to first page.
-            add_node(d.html, "div.messages", true);
+            add_node(d.html, "#messages", true);
             add_main_page_actions(d.id, d.user);
     } else if (d.type == "del_message") {
         var msg = $("#"+d.id);
@@ -92,7 +92,7 @@ function main_page_handler(e) {
 function message_page_handler(e) {
     var d = JSON.parse(e.data);
     if (d.type == "new_comment") {
-        add_node(d.html, "div.comments", false);
+        add_node(d.html, "#comments", false);
         add_message_page_actions(d.id, d.user);
     } else if (d.type == "del_comment") {
         var short_id = d.id.split("/")[1];
@@ -324,7 +324,6 @@ function add_message_page_actions(comment_id, comment_user) {
         actions.recommendation(message_id, message_user, is_recommended);
         for (var id in comment_info) {
             var info = comment_info[id];
-            // TODO: Pass comment node and short_id?
             comment_reply(id, info.user, info.depth);
             comment_delete(id, info.user);
         }

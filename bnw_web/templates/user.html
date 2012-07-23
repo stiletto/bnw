@@ -44,7 +44,7 @@
         </div>
     </div>
     <hr/>
-    <div class='messages'>
+    <div id='messages'>
     {% for msg in messages %}
         {{ modules.Message(msg,username=username) }}
     {% end %}
