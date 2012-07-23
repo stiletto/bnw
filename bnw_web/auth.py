@@ -30,10 +30,8 @@ class AuthMixin(object):
     def get_auth_user(self):
         if not getattr(self, 'user', None):
             key = self.get_cookie('bnw_loginkey', '')
-            if key:
-                self.user = yield objs.User.find_one({'login_key': key})
-            else:
-                self.user = None
+            self.user = yield objs.User.find_one({'login_key': key}) \
+                if key else None
         defer.returnValue(self.user)
 
 
