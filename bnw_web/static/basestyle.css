@@ -203,7 +203,11 @@
             color: #000;
             border: thin solid black;
         }
-        #dlg_centered {
+        .dlg_centered {
+            text-align: center;
+        }
+        .dlg_ok_cancel {
+            padding-top: 1em;
             text-align: center;
         }
 
