@@ -126,6 +126,7 @@ function api_call(func, args, verbose, onsuccess, onerror) {
             }
         },
         error: function() {
+            if (onerror) onerror();
             info_dialog("API request failed.");
         }
     });
@@ -203,9 +204,11 @@ function add_message_page_actions(comment_id, comment_user) {
         return;
     }
     function textarea() {
+        var sendb = $("#send_comment")[0];
         $("#commenttextarea").keypress(function(event) {
-            if (event.ctrlKey && (event.keyCode==13 || event.keyCode==10)) {
-                $("#commentform").submit();
+            if (event.ctrlKey && (event.keyCode==13 || event.keyCode==10) &&
+                !sendb.disabled) {
+                    $("#commentform").submit();
             }
         });
     }
