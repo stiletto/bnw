@@ -149,7 +149,9 @@ def postMessage(user,tags,clubs,text,anon=False,anoncomments=False,sfrom=None):
     if ('@' in clubs) or (len(clubs)==0):
         queries+=[{'target': 'anonymous' if anon else user['name'], 'type': 'sub_user'}]
     qn,recipients = yield send_to_subscribers(queries,stored_message)
-    publish('new_message',stored_message.filter_fields()) # ALARM
+    filtered = stored_message.filter_fields()
+    publish('new_message', filtered) # ALARM
+    publish('new_message_on_user_'+message['user'], filtered)
     defer.returnValue((True,(message['id'],qn,recipients)))
 
 @defer.inlineCallbacks

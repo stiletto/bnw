@@ -57,7 +57,7 @@ def cmd_delete(request,message="",last=False):
             )
         _ = (yield objs.Message.mupdate({'id':message_id},{'$inc': { 'replycount': -1}}))
         _ = yield objs.Comment.remove({'id':comment['id'],'message':comment['message'],'user':comment['user']})
-        publish('del_comment_in_'+message_id, splitpost[1])
+        publish('del_comment_in_'+message_id, comment_id)
         publish('upd_comments_count', message_id, post['replycount']-1)
         defer.returnValue(
             dict(ok=True,desc='Comment %s removed.' % (comment_id,))
@@ -74,6 +74,7 @@ def cmd_delete(request,message="",last=False):
         _ = yield objs.Message.remove({'id':post['id'],'user':post['user']})
         _ = yield objs.Comment.remove({'message':post['id']})
         publish('del_message', message_id)
+        publish('del_message_on_user_'+post['user'], message_id)
         defer.returnValue(
             dict(ok=True,desc='Message %s removed.' % (message,))
         )

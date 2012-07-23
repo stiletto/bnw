@@ -3,10 +3,12 @@ import tornado.escape
 import datetime
 
 def runums(n, d1, d2, d5):
-    l = n % 10
-    if l == 1:
+    if 10 < n < 15:
+        return d5
+    n = n % 10
+    if n == 1:
         return d1
-    elif 1 < l < 5:
+    elif 1 < n < 5:
         return d2
     else:
         return d5
