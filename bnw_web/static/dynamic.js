@@ -331,15 +331,120 @@ function add_message_page_actions(comment_id, comment_user) {
     }
 }
 
+function new_post() {
+    var newb = $("#new_post");
+    if (page_type != "user") {
+        newb.attr("href", "/u/"+auth_user+"#write");
+        return;
+    } else {
+        newb.attr("href", "#");
+    }
+
+    // Add actions.
+    function show_hide() {
+        if (window.location.hash == "#write") {
+            window.location.hash = "";
+        }
+        if (post_div.is(":visible")) {
+            post_div.hide();
+        } else {
+            post_div.show();
+            textarea.focus();
+        }
+        return false;
+    }
+    function before() {
+        textarea.focus();
+        hideb.attr("disabled", "disabled");
+        sendb.attr("disabled", "disabled");
+        old_value = sendb.val();
+        sendb.val(".");
+        iid = setInterval(function() {
+            if (sendb.val().length > 4) {
+                sendb.val(".");
+            } else {
+                sendb.val("."+sendb.val());
+            }
+        }, 300);
+    }
+    function after() {
+        clearInterval(iid);
+        sendb.val(old_value);
+        hideb.removeAttr("disabled");
+        sendb.removeAttr("disabled");
+    }
+    var post_div = $("#post_div");
+    var post_form = $("#post_form");
+    var tags_text = post_form.find("[name=tags]");
+    var clubs_text = post_form.find("[name=clubs]");
+    var textarea = $("#post_textarea");
+    var sendb = $("#send_post");
+    var hideb = $("#hide_post");
+    var old_value, iid;
+    newb.click(show_hide);
+    hideb.click(show_hide);
+    post_form.submit(function() {
+        if (ws.readyState != ws.OPEN) {
+            // Use non-ajax submit if websocket not opened.
+            post_form.submit();
+            return;
+        }
+        before();
+        api_call(
+            "post", {tags: tags_text.val(), clubs: clubs_text.val(),
+                     text: textarea.val()}, false,
+            // onsuccess
+            function() {
+                after();
+                tags_text.val("");
+                clubs_text.val("");
+                textarea.val("");
+                show_hide();
+            },
+            // onerror
+            after);
+        return false;
+    });
+    textarea.keypress(function(event) {
+        if (event.ctrlKey && (event.keyCode==13 || event.keyCode==10) &&
+            !sendb[0].disabled) {
+                post_form.submit();
+        }
+    });
+
+    // Finally, show form if user clicked on new post button
+    // on another page.
+    if (window.location.hash == "#write") {
+        show_hide();
+    }
+}
+
 
 // Add actions.
 $(function() {
+    if (auth_user) {
+        new_post();
+    } else {
+        login_dialog();
+    }
+
     switch (page_type) {
     case "main":
         add_main_page_actions();
         break;
     case "message":
-        add_message_page_actions();
+        treeing_complete = function() {
+            add_message_page_actions();
+        }
+
+        is_many_comments = comment_count > 200;
+        is_force_notree = window.location.search.indexOf("notree") != -1;
+        // If tree will not be created immediately add our actions.
+        // We will be required add them once more if user will confirm
+        // tree creation.
+        if (is_many_comments || is_force_notree) {
+            treeing_complete();
+        }
         break;
     case "user":
         add_main_page_actions();

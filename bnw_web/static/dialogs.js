@@ -50,23 +50,12 @@ function login_win() {
     dialog.find("form").submit(function() {
         var l = dialog.find(".login_name").val();
         var p = dialog.find(".login_pass").val();
-        // TODO: That's duplicate api_call dynamic.js function.
-        $.ajax({
-            url: "/api/passlogin",
-            type: "POST",
-            data: {user: l, password: p},
-            dataType: "json",
-            success: function (d) {
-                if (d.ok) {
-                    window.location = "/login?key="+d.desc;
-                } else {
-                    info_dialog(d.desc);
-                }
-            },
-            error: function () {
-                info_dialog("API request failed.");
-            }
-        });
+        api_call(
+            "passlogin", {user: l, password: p}, false,
+            // onsuccess
+            function() {
+                window.location = "/login?key="+d.desc;
+            });
         return false;
     });
     dialog.find(".dlg_cancel").click(function() {
@@ -110,99 +99,3 @@ function info_dialog(desc) {
     dialog.show_centered();
     ok_b.focus();
 }
-
-function new_post() {
-    var newb = $("#new_post");
-    if (page_type != "user") {
-        newb.attr("href", "/u/"+auth_user+"#write");
-        return;
-    }
-
-    // Add actions.
-    function show_hide() {
-        if (window.location.hash == "#write") {
-            window.location.hash = "";
-        }
-        if (post_div.is(":visible")) {
-            post_div.hide();
-        } else {
-            post_div.show();
-            textarea.focus();
-        }
-        return false;
-    }
-    function before() {
-        textarea.focus();
-        hideb.attr("disabled", "disabled");
-        sendb.attr("disabled", "disabled");
-        old_value = sendb.val();
-        sendb.val(".");
-        iid = setInterval(function() {
-            if (sendb.val().length > 4) {
-                sendb.val(".");
-            } else {
-                sendb.val("."+sendb.val());
-            }
-        }, 300);
-    }
-    function after() {
-        clearInterval(iid);
-        sendb.val(old_value);
-        hideb.removeAttr("disabled");
-        sendb.removeAttr("disabled");
-    }
-    var post_div = $("#post_div");
-    var post_form = $("#post_form");
-    var tags_text = post_form.find("[name=tags]");
-    var clubs_text = post_form.find("[name=clubs]");
-    var textarea = $("#post_textarea");
-    var sendb = $("#send_post");
-    var hideb = $("#hide_post");
-    var old_value, iid;
-    newb.click(show_hide);
-    hideb.click(show_hide);
-    post_form.submit(function() {
-        if (ws.readyState != ws.OPEN) {
-            // Use non-ajax submit if websocket not opened.
-            post_form.submit();
-            return;
-        }
-        before();
-        api_call(
-            "post", {tags: tags_text.val(), clubs: clubs_text.val(),
-                     text: textarea.val()}, false,
-            // onsuccess
-            function() {
-                after();
-                tags_text.val("");
-                clubs_text.val("");
-                textarea.val("");
-                show_hide();
-            },
-            // onerror
-            after);
-        return false;
-    });
-    textarea.keypress(function(event) {
-        if (event.ctrlKey && (event.keyCode==13 || event.keyCode==10) &&
-            !sendb[0].disabled) {
-                post_form.submit();
-        }
-    });
-
-    // Finally, show form if user clicked on new post button
-    // on another page.
-    if (window.location.hash == "#write") {
-        show_hide();
-    }
-}
-
-
-// Add actions.
-$(function() {
-    if (auth_user) {
-        new_post();
-    } else {
-        login_dialog();
-    }
-});

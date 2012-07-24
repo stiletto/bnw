@@ -95,7 +95,12 @@
                 });
                 scroll_to_anchor();
                 tree_comments_time = (new Date).getTime() - tree_comments_time;
+                // Add dynamic.js actions after we complete tree.
+                // TODO: Fix treeing and not break already added
+                // dynamic actions?
+                treeing_complete();
         }
+
 
         var commentinfo_generate_time;
         $(function() {
@@ -104,7 +109,7 @@
             commentinfo_generate_time = (new Date).getTime() -
                                         commentinfo_generate_time;
             if (comment_count) {
-                if (comment_count > 200) {
+                if (is_many_comments) {
                     $(".somenote").html(
                         "В этом треде слишком много комментариев. "+
                         "Ваш браузер <a href='#' id='force_tree'>не лопнет"+
@@ -114,7 +119,7 @@
                         tree_comments();
                     });
                     $(".somenote").show();
-                } else if (window.location.search.indexOf("notree") == -1) {
+                } else if (!is_force_notree) {
                     tree_comments();
                 }
             }
