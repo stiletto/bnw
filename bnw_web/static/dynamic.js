@@ -271,11 +271,13 @@ var actions = {
         var okb = $("<a/>");
         okb.attr("title", "Сохранить");
         okb.text("✔");
+        okb.addClass("ok_button");
         okb.css("cursor", "pointer");
         okb.click(update_tags);
         var cancelb = $("<a/>");
         cancelb.attr("title", "Отменить");
         cancelb.text("✘");
+        cancelb.addClass("cancel_button");
         cancelb.css("cursor", "pointer");
         cancelb.click(function() {
             form.hide();

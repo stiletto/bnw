@@ -224,3 +224,9 @@
         .ajax_link {
             color: #00ADAD;
         }
+        .ok_button {
+            color: #008000;
+        }
+        .cancel_button {
+            color: #FF0000;
+        }
