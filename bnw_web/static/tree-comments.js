@@ -95,7 +95,12 @@
                 });
                 scroll_to_anchor();
                 tree_comments_time = (new Date).getTime() - tree_comments_time;
+                // Add dynamic.js actions after we complete tree.
+                // TODO: Fix treeing and not break already added
+                // dynamic actions?
+                treeing_complete();
         }
+
 
         var commentinfo_generate_time;
         $(function() {
@@ -114,8 +119,16 @@
                         tree_comments();
                     });
                     $(".somenote").show();
-                } else if (window.location.search.indexOf("notree") == -1) {
+                    // It will be required to run once more if
+                    // user will forced tree creation.
+                    treeing_complete();
+                } else if (window.location.search.indexOf("notree") != -1) {
+                    // Treeing forbidden.
+                    treeing_complete();
+                } else {
                     tree_comments();
                 }
+            } else {
+                treeing_complete();
             }
         });
