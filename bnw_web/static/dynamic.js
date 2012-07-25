@@ -436,15 +436,6 @@ $(function() {
         treeing_complete = function() {
             add_message_page_actions();
         }
-
-        is_many_comments = comment_count > 200;
-        is_force_notree = window.location.search.indexOf("notree") != -1;
-        // If tree will not be created immediately add our actions.
-        // We will be required add them once more if user will confirm
-        // tree creation.
-        if (is_many_comments || is_force_notree) {
-            treeing_complete();
-        }
         break;
     case "user":
         add_main_page_actions();

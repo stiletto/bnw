@@ -109,7 +109,7 @@
             commentinfo_generate_time = (new Date).getTime() -
                                         commentinfo_generate_time;
             if (comment_count) {
-                if (is_many_comments) {
+                if (comment_count > 200) {
                     $(".somenote").html(
                         "В этом треде слишком много комментариев. "+
                         "Ваш браузер <a href='#' id='force_tree'>не лопнет"+
@@ -119,8 +119,16 @@
                         tree_comments();
                     });
                     $(".somenote").show();
-                } else if (!is_force_notree) {
+                    // It will be required to run once more if
+                    // user will forced tree creation.
+                    treeing_complete();
+                } else if (window.location.search.indexOf("notree") != -1) {
+                    // Treeing forbidden.
+                    treeing_complete();
+                } else {
                     tree_comments();
                 }
+            } else {
+                treeing_complete();
             }
         });
