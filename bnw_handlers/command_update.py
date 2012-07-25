@@ -41,7 +41,7 @@ def cmd_update(request,message='',text='',club=False,tag=False,delete=False,raw=
     if raw:
         clubs = []
         tags = []
-        for s in text.split():
+        for s in text.split(','):
             if len(s) > 1:
                 if s.startswith("!"):
                     clubs.append(s[1:])

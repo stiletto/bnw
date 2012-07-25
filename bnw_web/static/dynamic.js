@@ -190,9 +190,9 @@ var actions = {
             return;
         }
         function show_edit_input() {
-            var clubs_t = clubs.map(function(t){return "!"+t}).join(" ");
-            var tags_t = tags.map(function(t){return "*"+t}).join(" ");
-            if (clubs_t && tags_t) clubs_t += " ";
+            var clubs_t = clubs.map(function(t){return "!"+t}).join(",");
+            var tags_t = tags.map(function(t){return "*"+t}).join(",");
+            if (clubs_t && tags_t) clubs_t += ",";
             var text = clubs_t + tags_t;
             input.val(text);
             input.attr("size", (text.length > 39) ? 60 : text.length + 20);
@@ -205,13 +205,13 @@ var actions = {
         }
         function update_tags() {
             api_call("update",
-                {message: message_id, raw: true, text: input.val()}, true,
+                {message: message_id, raw: true, text: input.val()}, false,
                 // onsuccess
                 function() {
                     // Update tags.
                     clubs = [];
                     tags = [];
-                    input.val().split(" ").map(function(t) {
+                    input.val().split(",").map(function(t) {
                         if (t[0] == "!") {
                             var club = t.slice(1);
                             clubs.push(club);
@@ -250,7 +250,7 @@ var actions = {
         tags_div.after(form);
         form.submit(update_tags);
         var input = form.find("input");
-        input.attr("title", "!Клубы и *теги через пробел");
+        input.attr("title", "!Клубы и *теги через запятую");
         var clubs = tags_div.find(".club").map(function(i,o){return o.text}).get();
         var tags = tags_div.find(".tag").map(function(i,o){return o.text}).get();
         var editb = $("<a/>");
