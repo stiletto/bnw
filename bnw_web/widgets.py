@@ -88,10 +88,10 @@ class Widgets(object):
                 res + u' назад</abbr>')
 
     def messages(self, count):
-        return runums(count, u'сообщение', u'сообщения', u'сообщений')
+        return self.runums(count, u'сообщение', u'сообщения', u'сообщений')
 
     def comments(self, count):
-        return runums(count, u'комментарий', u'комментария', u'комментариев')
+        return self.runums(count, u'комментарий', u'комментария', u'комментариев')
 
     def shorttext(self, txt, maxwords=7, maxlen=70, ellipsis=u'…'):
         words = 0
