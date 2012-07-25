@@ -204,22 +204,31 @@ var actions = {
             input.val(val);
         }
         function update_tags() {
+            // Update tags.
+            var _clubs = [];
+            var _tags = [];
+            if (input.val()) {
+                var spl = input.val().split(",");
+                for (var i = 0; i < spl.length; i++) {
+                    if (spl[i].length > 1 && spl[i][0] == "!") {
+                        var club = spl[i].slice(1);
+                        _clubs.push(club);
+                    } else if (spl[i].length > 1 && spl[i][0] == "*") {
+                        var tag = spl[i].slice(1);
+                        _tags.push(tag);
+                    } else {
+                        info_dialog("ERROR. Wrong format!");
+                        return false;
+                    }
+                }
+            }
             api_call("update",
-                {message: message_id, raw: true, text: input.val()}, false,
+                {message: message_id, clubs: _clubs.join(","),
+                 tags: _tags.join(","), api: true}, false,
                 // onsuccess
                 function() {
-                    // Update tags.
-                    clubs = [];
-                    tags = [];
-                    input.val().split(",").map(function(t) {
-                        if (t[0] == "!") {
-                            var club = t.slice(1);
-                            clubs.push(club);
-                        } else if (t[0] == "*") {
-                            var tag = t.slice(1);
-                            tags.push(tag);
-                        }
-                    });
+                    clubs = _clubs;
+                    tags = _tags;
                     tags_div.empty();
                     for (var i=0; i<clubs.length; i++) {
                         var a = $("<a/>");
