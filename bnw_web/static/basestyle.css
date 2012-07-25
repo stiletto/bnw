@@ -220,3 +220,7 @@
         #send_post, #send_comment {
             float: right;
         }
+
+        .ajax_link {
+            color: #00ADAD;
+        }

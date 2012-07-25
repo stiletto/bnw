@@ -44,7 +44,7 @@ class Widgets(object):
     def tags(self, tags, clubs, user=None):
         return ('<div class="tags">' +
                 ' '.join(self.club(c,user) for c in clubs) + ' ' +
-                ' '.join(self.tag(t,user) for t in tags)+'</div>')
+                ' '.join(self.tag(t,user) for t in tags)+' </div>')
 
     def user_url(self, name):
         return '/u/%(u)s' % {'u': name}

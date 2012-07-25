@@ -73,6 +73,7 @@ update_args = (
                 ('c', 'club',False,'Add/delete club.'),
                 ('t', 'tag',False,'Add/delete tag.'),
                 ('d', 'delete',False,'Delete, not add.'),
+                ('r', 'raw', False, 'Set clubs and tags from raw string.'),
             )
 
 redeye_handlers = (

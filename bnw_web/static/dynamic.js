@@ -110,6 +110,10 @@ function message_page_handler(e) {
 // Dynamic actions.
 ///////////////////////////////////////////////////////////////////////////
 
+function escapeHTML(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 function api_call(func, args, verbose, onsuccess, onerror) {
     args["login"] = $.cookie("bnw_loginkey");
     $.ajax({
@@ -120,10 +124,10 @@ function api_call(func, args, verbose, onsuccess, onerror) {
         success: function(d) {
             if (d.ok) {
                 if (onsuccess) onsuccess();
-                if (verbose) info_dialog("OK. "+d.desc);
+                if (verbose) info_dialog("OK. "+escapeHTML(d.desc));
             } else {
                 if (onerror) onerror();
-                info_dialog("ERROR. "+d.desc);
+                info_dialog("ERROR. "+escapeHTML(d.desc));
             }
         },
         error: function() {
@@ -181,6 +185,97 @@ var actions = {
             ).append(actions.D_button(message_id));
         }
     },
+    message_update: function(message_id, message_user) {
+        if (auth_user != message_user) {
+            return;
+        }
+        function show_edit_input() {
+            var clubs_t = clubs.map(function(t){return "!"+t}).join(" ");
+            var tags_t = tags.map(function(t){return "*"+t}).join(" ");
+            if (clubs_t && tags_t) clubs_t += " ";
+            var text = clubs_t + tags_t;
+            input.val(text);
+            input.attr("size", (text.length > 39) ? 60 : text.length + 20);
+            tags_div.hide();
+            form.show();
+            var val = input.val();
+            input.val("");
+            input.focus();
+            input.val(val);
+        }
+        function update_tags() {
+            api_call("update",
+                {message: message_id, raw: true, text: input.val()}, true,
+                // onsuccess
+                function() {
+                    // Update tags.
+                    clubs = [];
+                    tags = [];
+                    input.val().split(" ").map(function(t) {
+                        if (t[0] == "!") {
+                            var club = t.slice(1);
+                            clubs.push(club);
+                        } else if (t[0] == "*") {
+                            var tag = t.slice(1);
+                            tags.push(tag);
+                        }
+                    });
+                    tags_div.empty();
+                    for (var i=0; i<clubs.length; i++) {
+                        var a = $("<a/>");
+                        a.addClass("club");
+                        a.attr("href", "/c/"+clubs[i]);
+                        a.text(clubs[i]);
+                        tags_div.append(a).append(" ");
+                    }
+                    for (var i=0; i<tags.length; i++) {
+                        var a = $("<a/>");
+                        a.addClass("tag");
+                        a.attr("href", "/t/"+tags[i]);
+                        a.text(tags[i]);
+                        tags_div.append(a).append(" ");
+                    }
+                    tags_div.append(editb);
+                    // Rebind click because we have used empty on tags_div.
+                    editb.click(show_edit_input);
+                    form.hide();
+                    tags_div.show();
+                });
+                return false;
+        }
+
+        var tags_div = $("#"+message_id).find(".tags");
+        var form = $('<form><input class="blueinput" /></form>').append(" ");
+        form.hide();
+        tags_div.after(form);
+        form.submit(update_tags);
+        var input = form.find("input");
+        input.attr("title", "!Клубы и *теги через пробел");
+        var clubs = tags_div.find(".club").map(function(i,o){return o.text}).get();
+        var tags = tags_div.find(".tag").map(function(i,o){return o.text}).get();
+        var editb = $("<a/>");
+        editb.attr("title", "Редактировать теги");
+        editb.text("±");
+        editb.addClass("ajax_link");
+        editb.css("cursor", "pointer");
+        editb.click(show_edit_input);
+        var okb = $("<a/>");
+        okb.attr("title", "Сохранить");
+        okb.text("✔");
+        okb.css("cursor", "pointer");
+        okb.click(update_tags);
+        var cancelb = $("<a/>");
+        cancelb.attr("title", "Отменить");
+        cancelb.text("✘");
+        cancelb.css("cursor", "pointer");
+        cancelb.click(function() {
+            form.hide();
+            tags_div.show();
+        });
+        form.append(okb).append(" ").append(cancelb);
+
+        tags_div.append(editb);
+    }
 }
 
 function add_main_page_actions(message_id, message_user) {
@@ -322,6 +417,7 @@ function add_message_page_actions(comment_id, comment_user) {
         dynamic_submit();
         message_reply();
         actions.message_delete(message_id, message_user);
+        actions.message_update(message_id, message_user);
         actions.recommendation(message_id, message_user, is_recommended);
         for (var id in comment_info) {
             var info = comment_info[id];
