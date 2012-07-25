@@ -33,6 +33,7 @@ from bnw_web.auth import LoginHandler, LogoutHandler, requires_auth, AuthMixin
 from bnw_web.api import ApiHandler
 define("port", default=8888, help="run on the given port", type=int)
 
+wscount = 0
 
 class WsHandler(tornado.websocket.WebSocketHandler):
     """Helper class for websocket handlers.
@@ -48,12 +49,16 @@ class WsHandler(tornado.websocket.WebSocketHandler):
         self.handlers = self.get_handlers(*args)
         for etype, handler in self.handlers:
             post.register_listener(etype, id(self), handler)
-        print 'Opened connection %d (v%s)' % (id(self),self.version)
+        global wscount
+        wscount += 1
+        print 'Opened connection %d (v%s). %d connections. %s' % (id(self),self.version,wscount,self.request.path)
 
     def on_close(self):
         for etype, _ in self.handlers:
             post.unregister_listener(etype, id(self))
-        print 'Closed connection %d' % id(self)
+        global wscount
+        wscount -= 1
+        print 'Closed connection %d. %d connections active.' % (id(self),wscount)
 
 
 class MainWsHandler(WsHandler):
