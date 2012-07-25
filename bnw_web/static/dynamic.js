@@ -70,13 +70,13 @@ function main_page_handler(e) {
     } else if (d.type == "upd_comments_count") {
         var msg = $("#"+d.id);
         if (msg.length) {
-            var t = msg.find("div.sign").contents()[2];
+            var t = msg.find("div.sign").contents()[3];
             t.nodeValue = t.nodeValue.replace(/\([0-9]+(\+)?/, "("+d.num+"$1")
         }
     } else if (d.type == "upd_recommendations_count") {
         var msg = $("#"+d.id);
         if (msg.length) {
-            var t = msg.find("div.sign").contents()[2];
+            var t = msg.find("div.sign").contents()[3];
             var val = t.nodeValue;
             var re = /\+[0-9]+\)/;
             var new_val = d.num ? "+"+d.num+")" : ")";
