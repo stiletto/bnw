@@ -66,10 +66,10 @@
 
         var tree_comments_time;
         function tree_comments() {
-                tree_comments_time = (new Date()).getTime();
+                tree_comments_time = (new Date).getTime();
                 var comments_html={};
                 comments_order.sort(comments_order_compare);
-                $("div.comments div.outerborder").each(function (i,o) {
+                $("#comments").children().each(function(i,o) {
                     var cmt_id = message_id+"/"+o.getAttribute("id");
                     comments_html[cmt_id]=o.innerHTML;
                 });
@@ -78,7 +78,7 @@
                 if (comments_max_depth>50)
                     margin_ratio = 32.0 / 50;
                 if (margin_ratio > 1) margin_ratio = 1;
-                $("div.comments div.outerborder").each(function (i,o) {
+                $("#comments").children().each(function(i,o) {
                     var cmt_id = comments_order[element_idx][0];
                     var cmt_html = comments_html[cmt_id];
 
@@ -94,25 +94,41 @@
                     element_idx++;
                 });
                 scroll_to_anchor();
-                tree_comments_time = (new Date()).getTime() - tree_comments_time;
+                tree_comments_time = (new Date).getTime() - tree_comments_time;
+                // Add dynamic.js actions after we complete tree.
+                // TODO: Fix treeing and not break already added
+                // dynamic actions?
+                treeing_complete();
         }
 
-        var commentinfo_generate_time;
-        $(function(){
-            commentinfo_generate_time = (new Date()).getTime();
-            commentinfo_generate();
-            commentinfo_generate_time = (new Date()).getTime() - commentinfo_generate_time;
 
+        var commentinfo_generate_time;
+        $(function() {
+            commentinfo_generate_time = (new Date).getTime();
+            commentinfo_generate();
+            commentinfo_generate_time = (new Date).getTime() -
+                                        commentinfo_generate_time;
             if (comment_count) {
-                if ( comment_count > 200 ) {
-                    $(".somenote").html("В этом треде слишком много комментариев. Ваш браузер <a href='#' id='force_tree'>не лопнет</a> от их отображения в виде дерева?");
-                    $("#force_tree").click(function () {
-                        $(".somenote").css("display","none");
+                if (comment_count > 200) {
+                    $(".somenote").html(
+                        "В этом треде слишком много комментариев. "+
+                        "Ваш браузер <a href='#' id='force_tree'>не лопнет"+
+                        "</a> от их отображения в виде дерева?");
+                    $("#force_tree").click(function() {
+                        $(".somenote").hide();
                         tree_comments();
                     });
-                    $(".somenote").css("display","block");
-                } else if (!window.location.search || (window.location.search.indexOf("notree")==-1)) {
+                    $(".somenote").show();
+                    // It will be required to run once more if
+                    // user will forced tree creation.
+                    treeing_complete();
+                } else if (window.location.search.indexOf("notree") != -1) {
+                    // Treeing forbidden.
+                    treeing_complete();
+                } else {
                     tree_comments();
                 }
+            } else {
+                treeing_complete();
             }
         });

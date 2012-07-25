@@ -201,7 +201,7 @@ class UserRecoHandler(BnwWebHandler,AuthMixin):
         if tag:
             tag = tornado.escape.url_unescape(tag)
             qdict['tags'] = tag
-        messages=(yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page))
+        messages=list((yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page)))
         hasmes = yield is_hasmes(qdict, page)
 
         self.set_header("Cache-Control", "max-age=1")

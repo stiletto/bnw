@@ -56,7 +56,7 @@ function main_page_handler(e) {
     if (d.type == "new_message" &&
         window.location.search.indexOf("page") == -1) {
             // Add new messages only to first page.
-            add_node(d.html, "div.messages", true);
+            add_node(d.html, "#messages", true);
             add_main_page_actions(d.id, d.user);
     } else if (d.type == "del_message") {
         var msg = $("#"+d.id);
@@ -92,7 +92,7 @@ function main_page_handler(e) {
 function message_page_handler(e) {
     var d = JSON.parse(e.data);
     if (d.type == "new_comment") {
-        add_node(d.html, "div.comments", false);
+        add_node(d.html, "#comments", false);
         add_message_page_actions(d.id, d.user);
     } else if (d.type == "del_comment") {
         var short_id = d.id.split("/")[1];
@@ -114,6 +114,7 @@ function api_call(func, args, verbose, onsuccess, onerror) {
     args["login"] = $.cookie("bnw_loginkey");
     $.ajax({
         url: "/api/"+func,
+        type: "POST",
         data: args,
         dataType: "json",
         success: function(d) {
@@ -126,6 +127,7 @@ function api_call(func, args, verbose, onsuccess, onerror) {
             }
         },
         error: function() {
+            if (onerror) onerror();
             info_dialog("API request failed.");
         }
     });
@@ -182,6 +184,9 @@ var actions = {
 }
 
 function add_main_page_actions(message_id, message_user) {
+    if (!auth_user) {
+        return;
+    }
     if (message_id) {
         // Add actions only to new message.
         actions.recommendation(message_id, message_user, false);
@@ -196,19 +201,24 @@ function add_main_page_actions(message_id, message_user) {
 }
 
 function add_message_page_actions(comment_id, comment_user) {
+    if (!auth_user) {
+        return;
+    }
     function textarea() {
-        $("#commenttextarea").keypress(function(event) {
-            if (event.ctrlKey && (event.keyCode==13 || event.keyCode==10)) {
-                $("#commentform").submit();
+        var sendb = $("#send_comment")[0];
+        $("#comment_textarea").keypress(function(event) {
+            if (event.ctrlKey && (event.keyCode==13 || event.keyCode==10) &&
+                !sendb.disabled) {
+                    $("#comment_form").submit();
             }
         });
     }
     function dynamic_submit() {
-        var form = $("#commentdiv");
-        var form2 = $("#commentform");
+        var form = $("#comment_div");
+        var form2 = $("#comment_form");
         var hr2 = $("hr").last();
         var comment_text = form2.find("[name=comment]");
-        var textarea = $("#commenttextarea");
+        var textarea = $("#comment_textarea");
         var clearb = $("#clear_replyto");
         var sendb = $("#send_comment");
         var old_value, iid;
@@ -238,11 +248,11 @@ function add_message_page_actions(comment_id, comment_user) {
                 form2.submit();
                 return;
             }
-            before();
             var id = message_id;
             if (comment_text.val()) {
                 id += "/" + comment_text.val();
             }
+            before();
             api_call(
                 "comment", {message: id, text: textarea.val()}, false,
                 // onsuccess
@@ -260,7 +270,7 @@ function add_message_page_actions(comment_id, comment_user) {
         });
     }
     function message_reply() {
-        var form = $("#commentdiv");
+        var form = $("#comment_div");
         var comment_text = form.find("[name=comment]");
         var hr1 = $("hr").first();
         var hr2 = $("hr").last();
@@ -268,7 +278,7 @@ function add_message_page_actions(comment_id, comment_user) {
             form.css("margin-left", "1em");
             comment_text.val("");
             hr1.before(form);
-            $("#commenttextarea").focus();
+            $("#comment_textarea").focus();
             return false;
         });
         $("#clear_replyto").click(function() {
@@ -279,7 +289,7 @@ function add_message_page_actions(comment_id, comment_user) {
         });
     }
     function comment_reply(comment_id, comment_user, depth) {
-        var form = $("#commentdiv");
+        var form = $("#comment_div");
         var short_id = comment_id.split("/")[1];
         var comment = $("#"+short_id);
         comment.find(".msgid").first().click(function() {
@@ -291,7 +301,7 @@ function add_message_page_actions(comment_id, comment_user) {
             form.css("margin-left", depth+"em");
             form.find("[name=comment]").val(short_id);
             comment.after(form);
-            $("#commenttextarea").focus();
+            $("#comment_textarea").focus();
             return false;
         });
     }
@@ -315,33 +325,120 @@ function add_message_page_actions(comment_id, comment_user) {
         actions.recommendation(message_id, message_user, is_recommended);
         for (var id in comment_info) {
             var info = comment_info[id];
-            // TODO: Pass comment node and short_id?
             comment_reply(id, info.user, info.depth);
             comment_delete(id, info.user);
         }
     }
 }
 
+function new_post() {
+    var newb = $("#new_post");
+    if (page_type != "user") {
+        newb.attr("href", "/u/"+auth_user+"#write");
+        return;
+    } else {
+        newb.attr("href", "#");
+    }
+
+    // Add actions.
+    function show_hide() {
+        if (window.location.hash == "#write") {
+            window.location.hash = "";
+        }
+        if (post_div.is(":visible")) {
+            post_div.hide();
+        } else {
+            post_div.show();
+            textarea.focus();
+        }
+        return false;
+    }
+    function before() {
+        textarea.focus();
+        hideb.attr("disabled", "disabled");
+        sendb.attr("disabled", "disabled");
+        old_value = sendb.val();
+        sendb.val(".");
+        iid = setInterval(function() {
+            if (sendb.val().length > 4) {
+                sendb.val(".");
+            } else {
+                sendb.val("."+sendb.val());
+            }
+        }, 300);
+    }
+    function after() {
+        clearInterval(iid);
+        sendb.val(old_value);
+        hideb.removeAttr("disabled");
+        sendb.removeAttr("disabled");
+    }
+    var post_div = $("#post_div");
+    var post_form = $("#post_form");
+    var tags_text = post_form.find("[name=tags]");
+    var clubs_text = post_form.find("[name=clubs]");
+    var textarea = $("#post_textarea");
+    var sendb = $("#send_post");
+    var hideb = $("#hide_post");
+    var old_value, iid;
+    newb.click(show_hide);
+    hideb.click(show_hide);
+    post_form.submit(function() {
+        if (ws.readyState != ws.OPEN) {
+            // Use non-ajax submit if websocket not opened.
+            post_form.submit();
+            return;
+        }
+        before();
+        api_call(
+            "post", {tags: tags_text.val(), clubs: clubs_text.val(),
+                     text: textarea.val()}, false,
+            // onsuccess
+            function() {
+                after();
+                tags_text.val("");
+                clubs_text.val("");
+                textarea.val("");
+                show_hide();
+            },
+            // onerror
+            after);
+        return false;
+    });
+    textarea.keypress(function(event) {
+        if (event.ctrlKey && (event.keyCode==13 || event.keyCode==10) &&
+            !sendb[0].disabled) {
+                post_form.submit();
+        }
+    });
+
+    // Finally, show form if user clicked on new post button
+    // on another page.
+    if (window.location.hash == "#write") {
+        show_hide();
+    }
+}
+
 
 // Add actions.
 $(function() {
-    $("#login_button").click(login_win);
+    if (auth_user) {
+        new_post();
+    } else {
+        login_dialog();
+    }
 
     switch (page_type) {
     case "main":
-        if (auth_user) {
-            add_main_page_actions();
-        }
+        add_main_page_actions();
         break;
     case "message":
-        if (auth_user) {
+        treeing_complete = function() {
             add_message_page_actions();
         }
         break;
     case "user":
-        if (auth_user) {
-            add_main_page_actions();
-        }
+        add_main_page_actions();
         break;
     }
 });
