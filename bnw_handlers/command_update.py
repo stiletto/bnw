@@ -22,7 +22,6 @@ def cmd_update(request, message='', text='', club=False, tag=False,
                delete=False, clubs=None, tags=None, api=False):
     """Update message's clubs and tags."""
     message=canonic_message(message).upper()
-    print repr(clubs), repr(tags)
     if (not message or not ((text and (club or tag)) or
                             (clubs is not None) or
                             (tags is not None) or api)):
