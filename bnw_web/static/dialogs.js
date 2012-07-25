@@ -39,13 +39,14 @@ function login_win() {
     dialog.html(
         '<form><table>'+
         '<tr><td>Имя:</td><td>'+
-        '<input class="login_name blueinput"></td></tr>'+
+        '<input class="login_name blueinput" /></td></tr>'+
         '<tr><td>Пароль:</td><td>'+
-        '<input type="password" class="login_pass blueinput">'+
+        '<input type="password" class="login_pass blueinput" />'+
         '</td></tr><tr><td colspan="2" class="dlg_ok_cancel">'+
-        '<input type="submit" class="styledbutton" value="[&lt; Войти &gt;]">'+
+        '<input type="submit" class="styledbutton" '+
+        'value="[&lt; Войти &gt;]" />'+
         '<input type="button" class="dlg_cancel styledbutton" '+
-        'value="[&lt; Отмена &gt;]">'+
+        'value="[&lt; Отмена &gt;]" />'+
         '</td></tr></table></form>');
     dialog.find("form").submit(function() {
         var l = dialog.find(".login_name").val();
@@ -70,8 +71,10 @@ function confirm_dialog(desc, f, e) {
     dialog.html(
         '<form class="dlg_centered">'+
         '<span>Вы уверены, что хотите '+desc+'?</span><br /><br />'+
-        '<input type="button" class="dlg_yes styledbutton" value="[&lt; Да &gt;]">'+
-        '<input type="button" class="dlg_no styledbutton" value="[&lt; Нет &gt;]">'+
+        '<input type="button" class="dlg_yes styledbutton" '+
+        'value="[&lt; Да &gt;]" />'+
+        '<input type="button" class="dlg_no styledbutton" '+
+        'value="[&lt; Нет &gt;]" />'+
         '</form>');
     dialog.find(".dlg_yes").click(function() {
         dialog.destroy();
@@ -88,7 +91,8 @@ function info_dialog(desc) {
     dialog.html(
         '<form class="dlg_centered">'+
         '<span>'+desc+'</span><br /><br />'+
-        '<input type="button" class="dlg_ok styledbutton" value="[&lt; OK &gt;]">'+
+        '<input type="button" class="dlg_ok styledbutton" '+
+        'value="[&lt; OK &gt;]" />'+
         '</form>');
     var ok_b = dialog.find(".dlg_ok");
     ok_b.click(function() {

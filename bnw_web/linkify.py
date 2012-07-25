@@ -17,7 +17,7 @@ linkhostings=[(re.compile('^'+k+'$'),v,k) for (k,v) in linkhostings]
 bnwtypes = (
     ("emph", rec(ur'(?<!:)//'), lambda m: ()),
     ("strong", rec(ur'\*\*'), lambda m: ()),
-    ("namedlink", rec(ur'''\[\[\s*(?P<link_target>.+?)\s*([|]\s*(?P<link_text>.+?)\s*)?]]'''), lambda m: (m.group('link_target'),m.group('link_text'))),
+    ("namedlink", rec(ur'''\[\[\s*(?P<link_target>.+?)\s*[|]\s*(?P<link_text>.+?)\s*]]'''), lambda m: (m.group('link_target'),m.group('link_text'))),
 )
 formatting_tags = {
     'emph': ('<i>','</i>'),
