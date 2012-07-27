@@ -235,20 +235,21 @@ def recommendMessage(user, message, comment="", sfrom=None):
     qn, recipients = yield send_to_subscribers(
         queries, message, user['name'], comment)
 
-    tuser = yield objs.User.find_one({'name': message['user']})
-    yield tuser.send_plain(
-        '@%s recommended your message #%s, '
-        'so %d more users received it. %s/p/%s' % (
-            user['name'], message['id'], recipients,
-            get_webui_base(tuser), message['id']))
-
-    recos_count = len(message['recommendations'])
-    if (recos_count < 1024 and user['name'] != message['user'] and
-        user['name'] not in message['recommendations']):
-            yield objs.Message.mupdate(
-                {'id': message['id']},
-                {'$addToSet': {'recommendations': user['name']}})
-            publish('upd_recommendations_count', message['id'], recos_count+1)
+    if user['name'] != message['user']:
+        tuser = yield objs.User.find_one({'name': message['user']})
+        yield tuser.send_plain(
+            '@%s recommended your message #%s, '
+            'so %d more users received it. %s/p/%s' % (
+                user['name'], message['id'], recipients,
+                get_webui_base(tuser), message['id']))
+        recos_count = len(message['recommendations'])
+        if (recos_count < 1024 and
+            user['name'] not in message['recommendations']):
+                yield objs.Message.mupdate(
+                    {'id': message['id']},
+                    {'$addToSet': {'recommendations': user['name']}})
+                publish('upd_recommendations_count', message['id'],
+                        recos_count+1)
 
     defer.returnValue((True, (qn, recipients, message['replycount'])))
 
