@@ -61,7 +61,7 @@ class WsHandler(tornado.websocket.WebSocketHandler):
         print 'Closed connection %d. %d connections active.' % (id(self),wscount)
 
 
-class MainWsHandler(WsHandler):
+class MainWsHandler(WsHandler, AuthMixin):
     """Deliver new events on main page via websockets."""
 
     def get_handlers(self):
@@ -78,13 +78,21 @@ class MainWsHandler(WsHandler):
                 ('new_message', self.new_message_compat),
             )
 
+    @defer.inlineCallbacks
     def new_message(self, msg):
+        user = yield self.get_auth_user()
+        if user and ['user', msg['user']] in user.get('blacklist', []):
+            return
         html = uimodules.Message(self).render(msg)
         self.write_message(json.dumps({
             'type': 'new_message', 'id': msg['id'],
             'user': msg['user'], 'html': html}))
 
+    @defer.inlineCallbacks
     def new_message_compat(self, msg):
+        user = yield self.get_auth_user()
+        if user and ['user', msg['user']] in user.get('blacklist', []):
+            return
         self.write_message(json.dumps(msg))
 
     def del_message(self, msg_id):
@@ -112,7 +120,7 @@ class UserWsHandler(MainWsHandler):
         )
 
 
-class MessageWsHandler(WsHandler):
+class MessageWsHandler(WsHandler, AuthMixin):
     """Deliver new events on message page via websockets."""
 
     def get_handlers(self, msgid):
@@ -126,7 +134,11 @@ class MessageWsHandler(WsHandler):
                 ('new_comment_in_'+msgid, self.new_comment_compat),
             )
 
+    @defer.inlineCallbacks
     def new_comment(self, comment):
+        user = yield self.get_auth_user()
+        if user and ['user', comment['user']] in user.get('blacklist', []):
+            return
         html = uimodules.Comment(self).render(comment)
         self.write_message(json.dumps({
             'type': 'new_comment', 'id': comment['id'],
@@ -259,7 +271,16 @@ class MessageHandler(BnwWebHandler,AuthMixin):
         user = yield self.get_auth_user()
         f = txmongo.filter.sort(txmongo.filter.ASCENDING("date"))
         msg=(yield objs.Message.find_one({'id': msgid}))
-        comments=list((yield objs.Comment.find({'message': msgid},filter=f))) # ненавидь себя, сука
+        qdict = {'message': msgid}
+        if user:
+            bl = []
+            for e in user.get('blacklist', []):
+                if e[0] == 'user':
+                    bl.append(e[1])
+            if bl:
+                qdict['user'] = {'$nin': bl}
+        # TODO: Converting generator to list may be inefficient.
+        comments = list((yield objs.Comment.find(qdict, filter=f)))
         self.set_header("Cache-Control", "max-age=5")
         if not msg:
             self.set_status(404)
@@ -287,6 +308,13 @@ class MainHandler(BnwWebHandler,AuthMixin):
         if club:
             club = tornado.escape.url_unescape(club)
             qdict['clubs'] = club
+        if user:
+            bl = []
+            for e in user.get('blacklist', []):
+                if e[0] == 'user':
+                    bl.append(e[1])
+            if bl:
+                qdict['user'] = {'$nin': bl}
 
         messages=list((yield objs.Message.find(qdict,filter=f,limit=20,skip=20*page)))
         hasmes = yield is_hasmes(qdict, page)
