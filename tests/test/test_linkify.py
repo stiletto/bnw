@@ -43,3 +43,7 @@ class LinkifyTest(unittest.TestCase):
             u'''Wiki-разметка для ссылок (я про <a href="http://URL">text</a> сейчас), как по мне, выглядит убого. Может, конвертировать её в что-то типа примечаний[1] или сносок[2]?
      1. <a href="http://dic.academic.ru/dic.nsf/ushakov/973938">http://dic.academic.ru/dic.nsf/ushakov/973938</a>
      2. <a href="https://ru.wikipedia.org/wiki/Сноска">https://ru.wikipedia.org/wiki/Сноска</a>''')
+
+        self.assertEqual(
+            l(u'[[http://няшные котики]]]'),
+            u'[[<a href="http://няшные">http://няшные</a> котики]]]')

@@ -18,13 +18,18 @@ def update_internal(message,what,delete,text):
 @check_arg(message=MESSAGE_COMMENT_RE)
 @require_auth
 @defer.inlineCallbacks
-def cmd_update(request,text,message='',club='',tag='',delete=''):
-    """ Редактирование сооббщений """
+def cmd_update(request, message='', text='', club=False, tag=False,
+               delete=False, clubs=None, tags=None, api=False):
+    """Update message's clubs and tags."""
     message=canonic_message(message).upper()
-    if not ((message and text) or (club or text)):
-        defer.returnValue(
-            dict(ok=False,desc='Usage: <update|u> -m <message> <--club|--tag> [--delete] <tag|club>')
-        )
+    if (not message or not ((text and (club or tag)) or
+                            (clubs is not None) or
+                            (tags is not None) or api)):
+        defer.returnValue(dict(
+            ok=False,
+            desc='Usage: <update|u> -m <message> <--club|--tag> '
+                 '[--delete] <tag|club> [--clubs=club1,club2] '
+                 '[--tags=tag1,tag2]'))
 
     post=yield objs.Message.find_one({'id':message})
 
@@ -36,6 +41,34 @@ def cmd_update(request,text,message='',club='',tag='',delete=''):
         defer.returnValue(
             dict(ok=False,desc='Not your message.')
         )
+
+    if api:
+        # Fucked tornado. It not save empty argument values in
+        # self.request.arguments. Ugly workargound.
+        # See https://
+        # groups.google.com/forum/?fromgroups#!topic/python-tornado/PVP9NW_vFA0
+        if not clubs:
+            clubs = ''
+        if not tags:
+            tags = ''
+    if clubs is not None or tags is not None:
+        if clubs is not None:
+            clubs = clubs.split(',') if clubs else []
+            if filter(lambda s: not s, clubs):
+                defer.returnValue(dict(ok=False, desc='Wrong format.'))
+            if len(clubs) > 5:
+                defer.returnValue(dict(ok=False, desc='Too many clubs.'))
+            yield objs.Message.mupdate(
+                {'id': message}, {'$set': {'clubs': clubs}}, safe=True)
+        if tags is not None:
+            tags = tags.split(',') if tags else []
+            if filter(lambda s: not s, tags):
+                defer.returnValue(dict(ok=False, desc='Wrong format.'))
+            if len(tags) > 5:
+                defer.returnValue(dict(ok=False, desc='Too many tags.'))
+            yield objs.Message.mupdate(
+                {'id': message}, {'$set': {'tags': tags}}, safe=True)
+        defer.returnValue(dict(ok=True, desc='Message updated.'))
 
     if club:
         if not delete and len(post['clubs'])>=5:
