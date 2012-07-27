@@ -97,11 +97,13 @@ function message_page_handler(e) {
     } else if (d.type == "del_comment") {
         var short_id = d.id.split("/")[1];
         var comment = $("#"+short_id);
-        comment.removeClass("outerborder_added"
-        ).addClass("outerborder_deleted");
-        setTimeout(function() {
-            comment.fadeOut("slow");
-        }, 3000);
+        if (comment.length) {
+            comment.removeClass("outerborder_added"
+            ).addClass("outerborder_deleted");
+            setTimeout(function() {
+                comment.fadeOut("slow");
+            }, 3000);
+        }
     }
 }
 
