@@ -16,8 +16,10 @@ from bnw_handlers import command_vcard
 from bnw_handlers import command_userlist
 from bnw_handlers import command_bl
 from bnw_handlers import command_stat
+from bnw_handlers import command_update
 
 
+# TODO: Auto-import all avialable handlers?
 handlers = {
     "register":             command_register.cmd_register,
     "search":               command_search.cmd_search,
@@ -42,4 +44,5 @@ handlers = {
     "passlogin":            command_login.cmd_passlogin,
     "blacklist":            command_bl.cmd_blacklist,
     "stat":                 command_stat.cmd_stat,
+    "update":               command_update.cmd_update,
 }

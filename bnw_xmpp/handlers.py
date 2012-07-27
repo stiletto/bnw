@@ -73,6 +73,9 @@ update_args = (
                 ('c', 'club',False,'Add/delete club.'),
                 ('t', 'tag',False,'Add/delete tag.'),
                 ('d', 'delete',False,'Delete, not add.'),
+                ('', 'clubs', True, 'Set comma-separated list of clubs.'),
+                ('', 'tags', True, 'Set comma-separated list of tags.'),
+                ('', 'api', False, 'Set clubs and tags using api.'),
             )
 
 redeye_handlers = (
