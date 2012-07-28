@@ -1,20 +1,12 @@
-#!/usr/bin/env python
-
-import os
-import sys
-dirname = os.path.dirname(__file__)
-root = os.path.abspath(os.path.join(dirname, '..'))
-sys.path.insert(0, root)
-os.chdir(os.path.abspath(dirname))
-import traceback
 import xapian
 from twisted.internet import defer, reactor, threads
-from twisted.web import xmlrpc, server
+from twisted.python import log
+from twisted.web import xmlrpc
 from bnw_core import bnw_objects
 from bnw_search.indexer import Indexer
 
 
-class BnwSearchService(xmlrpc.XMLRPC):
+class RPCSearch(xmlrpc.XMLRPC):
     def __init__(self, dbpath, language):
         xmlrpc.XMLRPC.__init__(self)
         self.indexer = Indexer(dbpath, language)
@@ -50,7 +42,7 @@ class BnwSearchService(xmlrpc.XMLRPC):
             objs = yield bnw_o.find({'indexed': {'$exists': False}}, limit=500)
             objs = list(objs)
             if not objs:
-                print '=== Indexing is over. Will repeat an hour later. ==='
+                log.msg('=== Indexing is over. Will repeat an hour later. ===')
                 reactor.callLater(3600, self.run_incremental_indexing)
                 return
 
@@ -60,7 +52,7 @@ class BnwSearchService(xmlrpc.XMLRPC):
             {'_id': {'$in': ids}}, {'$set': {'indexed': True}},
             safe=True, multi=True)
         self.indexed += len(objs)
-        print 'Indexed %d/%d...' % (self.indexed, self.total)
+        log.msg('Indexed %d/%d...' % (self.indexed, self.total))
         reactor.callLater(0.01, self._run_incremental_indexing)
 
     def xmlrpc_search(self, text):
@@ -89,13 +81,3 @@ class BnwSearchService(xmlrpc.XMLRPC):
             res['percent'] = match.percent
             results.append(res)
         return matches.get_matches_estimated(), results
-
-
-if __name__ == '__main__':
-    import config
-    import bnw_core.base
-    bnw_core.base.config.register(config)
-    r = BnwSearchService(config.search_db, config.search_language)
-    reactor.listenTCP(
-        config.search_port, server.Site(r), interface='127.0.0.1')
-    reactor.run()

@@ -68,7 +68,7 @@ run:
 		$(RUN_CMD);\
 	fi
 
-RUN_SEARCH_CMD=./bnw_search/search_server.py
+RUN_SEARCH_CMD=twistd --pidfile search.pid -ny search.tac
 run_search:
 	if test -d .venv; then\
 		bash -c "source .venv/bin/activate && $(RUN_SEARCH_CMD)";\
