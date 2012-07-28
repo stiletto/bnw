@@ -1,88 +1,71 @@
-#!/usr/bin/env python
-from datetime import *
+import re
+import datetime
 import xapian
 
-import sys
-#sys.path.append('..')
-#import bnw_shell
 
-import time
-from twisted.internet import defer, reactor
+class Indexer(object):
+    """Create search index for passed message and
+    comment objects.
+    """
 
-try:
-    from bnw_core import base
-except:
-    sys.path.append('..')
-    import bnw_shell
-    from bnw_core import base
+    def __init__(self, dbpath, language):
+        self.db = xapian.WritableDatabase(dbpath, xapian.DB_CREATE_OR_OPEN)
+        self.stemmer = xapian.Stem(language)
 
-from bnw_core import bnw_objects as objs
-import re
+    def make_stem_term(self, text):
+        term = text.lower()
+        term_e = term.encode('utf-8')
+        # Max term length is 245 bytes.
+        if len(term_e) > 245:
+            term = term_e[:245].decode('utf-8', 'ignore')
+        return self.stemmer(term)
 
-WORD_RE = re.compile(ur"\w{1,32}", re.U)
-ARTICLE_ID = 0
+    WORD_REC = re.compile(r'\w+', re.UNICODE)
+    ID = 0
+    USER = 1
+    DATE = 2
+    TYPE = 3
+    TAGS_INFO = 4
+    DATE_ORIG = 5
+    def create_document(self, obj):
+        """Get an message or comment object and
+        return a tuple of unique term and Xapian
+        document representing it.
+        """
+        doc = xapian.Document()
+        text = obj['text']
+        doc.set_data(text)
+        # Go word by word, stem it and add to the document.
+        for index, match in enumerate(self.WORD_REC.finditer(text)):
+            doc.add_posting(self.make_stem_term(match.group()), index)
+        id_term = 'Q'+obj['id']
+        doc.add_term(id_term)
+        doc.add_term('A'+obj['user'])
+        tags_info = []
+        if 'replycount' in obj:
+            # Message object.
+            doc.add_term('XTYPEm')
+            doc.add_value(self.TYPE, 'message')
+            for tag in obj['tags']:
+                doc.add_term('XTAGS'+self.make_stem_term(tag))
+                tags_info.append('*'+tag)
+            for club in obj['clubs']:
+                doc.add_term('XCLUBS'+self.make_stem_term(club))
+                tags_info.append('!'+club)
+        else:
+            # Comment object.
+            doc.add_term('XTYPEc')
+            doc.add_value(self.TYPE, 'comment')
+        doc.add_value(self.ID, obj['id'])
+        doc.add_value(self.USER, obj['user'])
+        doc.add_value(self.TAGS_INFO, ' '.join(tags_info))
+        date = datetime.datetime.utcfromtimestamp(obj['date'])
+        date = date.strftime('%Y%m%d')
+        doc.add_value(self.DATE, date)
+        doc.add_value(self.DATE_ORIG, str(obj['date']))
+        return id_term, doc
 
-stemmer = xapian.Stem("russian") # english stemmer
-
-def create_document(message):
-    """Gets an article object and returns
-    a Xapian document representing it and
-    a unique article identifier."""
-
-    doc = xapian.Document()
-    text = message['text']
-
-    # go word by word, stem it and add to the
-    # document.
-    for index, term in enumerate(WORD_RE.finditer(text)):
-        tg = term.group().encode("utf-8")
-        st = stemmer(tg)
-        #print tg, st
-        doc.add_posting(st, index)
-    doc.add_term("A"+message['user'])
-    doc.set_data(text)
-    #doc.add_term("S"+message['article.subject.encode("utf8"))
-    article_id_term = 'I'+message['id']
-    doc.add_term(article_id_term)
-    doc.add_value(ARTICLE_ID, str(message['id']))
-    return doc, article_id_term
-
-@defer.inlineCallbacks
-def index(db,period,force=False):
-    """Index all articles that were modified
-    in the last <period> hours into the given
-    Xapian database"""
-
-    query = {}
-    if not force:
-        query['indexed'] = {'$ne': 1}
-    if period:
-        start = time.time()-3600*period
-        query['date']= { '$gte': start}
-
-    skip = 0
-    while True:
-        print '-- Messages %d-%d' % (skip,skip+20)
-        messages = list((yield objs.Message.find(query))) #,skip=skip,limit=20)))
-
-        if len(messages)==0:
-            break
-
-        for message in messages:
-            print 'Indexed',message['id']
-            _ = yield objs.Message.mupdate({'id':message['id']},{'$set':{'indexed':1}},safe=True)
-            doc, id_term = create_document(message)
-            db.replace_document(id_term, doc)
-        skip += 20
-        break
-    defer.returnValue(None)
-
-if __name__=="__main__":
-    #configfile, dbpath, period = sys.argv[1:]
-    import config
-    import bnw_core.base
-    bnw_core.base.config.register(config)
-    db = xapian.WritableDatabase('test/',
-        xapian.DB_CREATE_OR_OPEN)
-    index(db, 10000)
-    reactor.run()
+    def create_index(self, objs):
+        for obj in objs:
+            self.db.replace_document(*self.create_document(obj))
+        self.db.commit()

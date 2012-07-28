@@ -53,6 +53,22 @@ def formatter_message_with_replies(request,result):
     return format_message(request,result['message']) + '\n' + \
             '\n'.join((format_comment(request,c,True) for c in result['replies']))
 
+def formatter_search(request, result):
+    total, results = result['search_result']
+    if not results:
+        return 'No results found.'
+    info = 'Found %d results' % total
+    if total > 10:
+        info += ' (displaing first 10)'
+    print repr(info)
+    out = [info+':']
+    for res in results:
+        out.append('@%s: %s (%s%%)\n%s\n\n#%s %s/p/%s' % (
+            res['user'], res['tags_info'], res['percent'], res['text'],
+            res['id'], get_webui_base(request.user),
+            res['id'].replace('/', '#')))
+    return '\n\n'.join(out)
+
 def formatter_subscriptions(request,result):
     return 'Your subscriptions:\n'+'\n'.join(
         (s['type'][4:].ljust(5)+s['target'].rjust(10)+' '+s.get('from','')
@@ -72,12 +88,6 @@ def formatter_recommendation(request,result):
 
 def formatter_comment(request,result):
     return '\n'+format_comment(request,result['comment'])
-
-def formatter_search(request,result):
-    print 'search res type',result['result']
-    if not result['result']:
-        return 'No results.'
-    return '\n\n'.join('%s (%d%%): %s' % (x[0],x[1],x[2]) for x in result['result'])
 
 def formatter_userlist(request,result):
     if not result['users']:
