@@ -6,6 +6,7 @@ DEBIAN_DEPS=\
 	python-pip\
 	build-essential\
 	python-dev\
+	python-xapian\
 	mongodb-server
 
 VENV_DEPS=\
@@ -14,6 +15,7 @@ VENV_DEPS=\
 	zlib1g-dev\
 	build-essential\
 	python-dev\
+	python-xapian\
 	mongodb-server
 
 install-deb:
@@ -25,7 +27,6 @@ uninstall-deb:
 	sudo apt-get autoremove $(DEBIAN_DEPS)
 
 PIP=.venv/bin/pip
-
 install-venv:
 	sudo apt-get install $(VENV_DEPS)
 	# http://jj.isgeek.net/2011/09/install-pil-with-jpeg-support-on-ubuntu-oneiric-64bits/
@@ -34,7 +35,11 @@ install-venv:
 		sudo ln -s /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib
 	test -e /usr/lib/x86_64-linux-gnu/libz.so && test ! -e /usr/lib/libz.so &&\
 		sudo ln -s /usr/lib/x86_64-linux-gnu/libz.so /usr/lib
-	virtualenv .venv
+	# xapian python binding not avaiable on pypi and
+	# required manual compiling so we will use global one
+	# (from python-xapian package) and so we should allow
+	# global site-packages in virtualenv.
+	virtualenv --system-site-packages .venv
 	$(PIP) install twisted tornado PyRSS2Gen PIL
 	$(PIP) install -e 'git+https://github.com/fiorix/mongo-async-python-driver.git#egg=txmongo'
 
@@ -61,6 +66,14 @@ run:
 		bash -c "source .venv/bin/activate && $(RUN_CMD)";\
 	else\
 		$(RUN_CMD);\
+	fi
+
+RUN_SEARCH_CMD=./bnw_search/search_server.py
+run_search:
+	if test -d .venv; then\
+		bash -c "source .venv/bin/activate && $(RUN_SEARCH_CMD)";\
+	else\
+		$(RUN_SEARCH_CMD);\
 	fi
 
 TEST_CMD=trial tests.test
