@@ -1,25 +1,26 @@
-# -*- coding: utf-8 -*-
-
-from base import *
+import time
+import traceback
+from twisted.python import log
 from twisted.internet import defer
-import bnw_core.bnw_objects as objs
-
 from twisted.web.xmlrpc import Proxy
+from bnw_core.base import config
+from bnw_handlers.base import require_auth
 
 
-#@require_auth
-def cmd_search(request,text):
-    """ Поиск """
-    if len(text)>2048:
-    	result = defer.Deferred()
-        result.callback(dict(ok=False,desc='Too long.'))
-        return result
-    print 'querylen',len(text)
-    search_service = Proxy('http://127.0.0.1:7850/')
-    result = search_service.callRemote('search', text.encode('utf-8','ignore'))
-    def shit(x):
-        print 'got shit',x
-        return x
-    result.addCallback(shit)
-    result.addCallback(lambda x: dict(ok=True,desc='Here it is.',format='search',result=x))
-    return result
+@require_auth
+@defer.inlineCallbacks
+def cmd_search(request, text):
+    if len(text) > 2048:
+        defer.returnValue(dict(ok=False, desc='Search query is too long.'))
+    service = Proxy('http://127.0.0.1:%d/' % config.search_port)
+    start = time.time()
+    try:
+        result = yield service.callRemote('search', text)
+    except Exception:
+        log.msg('SEARCH ERROR:\n\n' + traceback.format_exc())
+        defer.returnValue(dict(ok=False, desc='Sorry, search not available.'))
+
+    t = time.time() - start
+    log.msg('Queried "%s" by %s. Found %s results in %.3fs.' % (
+        text, request.user['name'], result[0], t))
+    defer.returnValue(dict(ok=True, format='search', search_result=result))
