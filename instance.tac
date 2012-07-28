@@ -45,7 +45,7 @@ sm.setServiceParent(serviceCollection)
 
 def indexes_updated(ign):
     print "Indexes updated."
-ensure_indexes.index().addCallback(indexes_updated)
+bnw_core.ensure_indexes.index().addCallback(indexes_updated)
 
 if config.rpc_enabled:
     internet.TCPServer(
