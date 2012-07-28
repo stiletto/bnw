@@ -43,11 +43,11 @@ class BnwSearchService(xmlrpc.XMLRPC):
     @defer.inlineCallbacks
     def _run_incremental_indexing(self):
         bnw_o = bnw_objects.Message
-        objs = yield bnw_o.find({'indexed': {'$exists': False}}, limit=100)
+        objs = yield bnw_o.find({'indexed': {'$exists': False}}, limit=500)
         objs = list(objs)
         if not objs:
             bnw_o = bnw_objects.Comment
-            objs = yield bnw_o.find({'indexed': {'$exists': False}}, limit=100)
+            objs = yield bnw_o.find({'indexed': {'$exists': False}}, limit=500)
             objs = list(objs)
             if not objs:
                 print '=== Indexing is over. Will repeat an hour later. ==='
@@ -94,6 +94,7 @@ if __name__ == '__main__':
     import config
     import bnw_core.base
     bnw_core.base.config.register(config)
-    r = BnwSearchService('bnw_xapian', 'russian')
-    reactor.listenTCP(7850, server.Site(r), interface='127.0.0.1')
+    r = BnwSearchService(config.search_db, config.search_language)
+    reactor.listenTCP(
+        config.search_port, server.Site(r), interface='127.0.0.1')
     reactor.run()

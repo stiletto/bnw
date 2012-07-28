@@ -3,6 +3,7 @@ import traceback
 from twisted.python import log
 from twisted.internet import defer
 from twisted.web.xmlrpc import Proxy
+from bnw_core.base import config
 from bnw_handlers.base import require_auth
 
 
@@ -11,7 +12,7 @@ from bnw_handlers.base import require_auth
 def cmd_search(request, text):
     if len(text) > 2048:
         defer.returnValue(dict(ok=False, desc='Search query is too long.'))
-    service = Proxy('http://127.0.0.1:7850/')
+    service = Proxy('http://127.0.0.1:%d/' % config.search_port)
     start = time.time()
     try:
         result = yield service.callRemote('search', text)
