@@ -43,7 +43,9 @@ bnw_core.base.notifiers.add(xmpp_notifier.XmppNotifier())
 serviceCollection = service.IServiceCollection(application)
 sm.setServiceParent(serviceCollection)
 
-ensure_indexes.index().addCallback(lambda ign: print "Indexes updated.")
+def indexes_updated(ign):
+    print "Indexes updated."
+ensure_indexes.index().addCallback(indexes_updated)
 
 if config.rpc_enabled:
     internet.TCPServer(
