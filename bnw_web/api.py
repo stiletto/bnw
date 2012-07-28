@@ -16,6 +16,7 @@ class ApiRequest(BnwWebRequest):
 class ApiHandler(BnwWebHandler):
     @defer.inlineCallbacks
     def respond_post(self, cmd_name):
+        stime = time.time()
         user = yield objs.User.find_one(
             {'login_key': self.get_argument('login', '')})
         if not cmd_name:
@@ -26,8 +27,8 @@ class ApiHandler(BnwWebHandler):
             defer.returnValue(json.dumps(dict(
                 ok=False,
                 desc='unknown command')))
-        callogtuple = (cmd_name,user['name'] if user else '')
-        print "API call '%s' by '%s' started." % callogtuple
+        callogtuple = (id(self),cmd_name,user['name'] if user else '')
+        print "API call %d '%s' by '%s' started." % callogtuple
         handler = api_handlers.handlers[cmd_name]
         args = dict(
             (utf8(k), _unicode(v[0])) \
@@ -38,11 +39,11 @@ class ApiHandler(BnwWebHandler):
         try:
             result = yield handler(ApiRequest(user), **args)
         except BnwResponse as br:
-            print "API call '%s' by '%s' failed with exception." % callogtuple
+            print "API call %d '%s' by '%s' failed with exception. %f.s" % (callogtuple + (time.time()-stime))
             defer.returnValue(json.dumps(dict(
                 ok=False,
                 desc=str(br)), ensure_ascii=False))
-        print "API call '%s' by '%s' completed." % callogtuple
+        print "API call %d '%s' by '%s' completed. %f.s" % (callogtuple + (time.time()-stime))
         defer.returnValue(json.dumps(result, ensure_ascii=False))
 
     # GET handler is the same as POST.
