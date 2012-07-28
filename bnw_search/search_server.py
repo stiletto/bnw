@@ -55,9 +55,10 @@ class BnwSearchService(xmlrpc.XMLRPC):
                 return
 
         yield threads.deferToThread(self.indexer.create_index, objs)
-        for obj in objs:
-            yield bnw_o.mupdate(
-                {'id': obj['id']}, {'$set': {'indexed': True}}, safe=True)
+        ids = [obj['_id'] for obj in objs]
+        yield bnw_o.mupdate(
+            {'_id': {'$in': ids}}, {'$set': {'indexed': True}},
+            safe=True, multi=True)
         self.indexed += len(objs)
         print 'Indexed %d/%d...' % (self.indexed, self.total)
         reactor.callLater(0.01, self._run_incremental_indexing)
