@@ -26,6 +26,8 @@ class ApiHandler(BnwWebHandler):
             defer.returnValue(json.dumps(dict(
                 ok=False,
                 desc='unknown command')))
+        callogtuple = (cmd_name,user['name'] if user else '')
+        print "API call '%s' by '%s' started." % callogtuple
         handler = api_handlers.handlers[cmd_name]
         args = dict(
             (utf8(k), _unicode(v[0])) \
@@ -36,9 +38,11 @@ class ApiHandler(BnwWebHandler):
         try:
             result = yield handler(ApiRequest(user), **args)
         except BnwResponse as br:
+            print "API call '%s' by '%s' failed with exception." % callogtuple
             defer.returnValue(json.dumps(dict(
                 ok=False,
                 desc=str(br)), ensure_ascii=False))
+        print "API call '%s' by '%s' completed." % callogtuple
         defer.returnValue(json.dumps(result, ensure_ascii=False))
 
     # GET handler is the same as POST.

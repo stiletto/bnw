@@ -19,12 +19,11 @@ def index():
             if issubclass(cls,objs.MongoObject) and cls!=objs.MongoObject:
                 print "---",name
                 _ = yield cls.ensure_indexes()
-    reactor.stop()
     defer.returnValue(None)
 
 if __name__=="__main__":
     #configfile, dbpath, period = sys.argv[1:]
     import config
     base.config.register(config)
-    index()
+    index().addCallback(lambda ign: reactor.stop())
     reactor.run()

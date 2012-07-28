@@ -18,6 +18,7 @@ from twisted.words.protocols.jabber import component
 from twisted.web import server
 import config
 import bnw_core.base
+import bnw_core.ensure_indexes
 import bnw_xmpp.base
 from bnw_xmpp import bnw_component, xmpp_notifier
 
@@ -41,6 +42,8 @@ bnw_core.base.notifiers.add(xmpp_notifier.XmppNotifier())
 
 serviceCollection = service.IServiceCollection(application)
 sm.setServiceParent(serviceCollection)
+
+ensure_indexes.index().addCallback(lambda ign: print "Indexes updated.")
 
 if config.rpc_enabled:
     internet.TCPServer(

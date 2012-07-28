@@ -65,6 +65,8 @@ run:
 
 TEST_CMD=trial tests.test
 test:
+	export PYTHONPATH=`pwd`; \
+	echo "Path: $$PYTHONPATH"; \
 	if test -d .venv; then\
 		bash -c "source .venv/bin/activate && $(TEST_CMD)";\
 	else\
