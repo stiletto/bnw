@@ -1,88 +1,83 @@
-#!/usr/bin/env python
-from datetime import *
 import xapian
+from twisted.internet import defer, reactor, threads
+from twisted.python import log
+from twisted.web import xmlrpc
+from bnw_core import bnw_objects
+from bnw_search.indexer import Indexer
 
-import sys
 
-import time
-from twisted.internet import defer, reactor
-
-import re
-
-from base64 import b64decode
-
-#import zmq
-import sys
-import xapian
-import indexer
- 
-from twisted.web import xmlrpc, server
-
-class BnwSearchService(xmlrpc.XMLRPC):
-    def __init__(self,dbname,language="russian",pulltime=None):
+class RPCSearch(xmlrpc.XMLRPC):
+    def __init__(self, dbpath, language):
         xmlrpc.XMLRPC.__init__(self)
-        self.language = language
-        self.dbname = dbname
-        self.pulltime = pulltime
-        self.database = xapian.Database(self.dbname)
-        self.stemmer = xapian.Stem(self.language)
+        self.indexer = Indexer(dbpath, language)
+        self.db = xapian.Database(dbpath)
+        self.stemmer = xapian.Stem(language)
         self.query_parser = xapian.QueryParser()
         self.query_parser.set_stemmer(self.stemmer)
         self.query_parser.set_stemming_strategy(xapian.QueryParser.STEM_ALL)
-        self.last_index = 0
+        self.query_parser.add_boolean_prefix('author', 'A')
+        self.query_parser.add_boolean_prefix('user', 'A')
+        self.query_parser.add_boolean_prefix('type', 'XTYPE')
+        self.query_parser.add_prefix('clubs', 'XCLUBS')
+        self.query_parser.add_prefix('tags', 'XTAGS')
+        date_proc = xapian.DateValueRangeProcessor(Indexer.DATE)
+        self.query_parser.add_valuerangeprocessor(date_proc)
+        self.run_incremental_indexing()
 
-    def reindex(self):
-        self.last_index = time.time()
-        db = xapian.WritableDatabase(self.dbname, xapian.DB_CREATE_OR_OPEN)
-        indexer.index(db, 100)
-        print 'Index updated. Will reopen the database on a next query.'
+    @defer.inlineCallbacks
+    def run_incremental_indexing(self):
+        self.indexed = 0
+        c1 = yield bnw_objects.Message.count({'indexed': {'$exists': False}})
+        c2 = yield bnw_objects.Comment.count({'indexed': {'$exists': False}})
+        self.total = c1 + c2
+        self._run_incremental_indexing()
 
-    def xmlrpc_search(self,query):
-        print "Received msg:", query
-        if type(query)!=unicode: query = unicode(query,'utf-8','replace')
-        query = self.query_parser.parse_query(query.encode('utf-8','replace'),
-                    xapian.QueryParser.FLAG_PHRASE|xapian.QueryParser.FLAG_PHRASE)
-        retry = True
-        enquire = xapian.Enquire(self.database)
-        while retry:
-            try:
-                retry = False
-                #print dir(query)
-                print "Performing query", query
-                enquire.set_query(query)
-                matches = enquire.get_mset(0, 10)
-                print "%i results found" % matches.get_matches_estimated()
-            except xapian.DatabaseModifiedError:
-                self.database.reopen()
-                print "Database reopened"
-                retry = True
+    @defer.inlineCallbacks
+    def _run_incremental_indexing(self):
+        bnw_o = bnw_objects.Message
+        objs = yield bnw_o.find({'indexed': {'$exists': False}}, limit=500)
+        objs = list(objs)
+        if not objs:
+            bnw_o = bnw_objects.Comment
+            objs = yield bnw_o.find({'indexed': {'$exists': False}}, limit=500)
+            objs = list(objs)
+            if not objs:
+                log.msg('=== Indexing is over. Will repeat an hour later. ===')
+                reactor.callLater(3600, self.run_incremental_indexing)
+                return
 
+        yield threads.deferToThread(self.indexer.create_index, objs)
+        ids = [obj['_id'] for obj in objs]
+        yield bnw_o.mupdate(
+            {'_id': {'$in': ids}}, {'$set': {'indexed': True}},
+            safe=True, multi=True)
+        self.indexed += len(objs)
+        log.msg('Indexed %d/%d...' % (self.indexed, self.total))
+        reactor.callLater(0.01, self._run_incremental_indexing)
+
+    def xmlrpc_search(self, text):
+        # TODO: Run queries in threads because it's blocking operation.
+        try:
+            query = self.query_parser.parse_query(text)
+        except xapian.QueryParserError:
+            return 0, []
+        enquire = xapian.Enquire(self.db)
+        enquire.set_query(query)
         results = []
+        self.db.reopen()
+        matches = enquire.get_mset(0, 10)
         for match in matches:
-            msgid=match.document.get_value(0)
-            msg=match.document.get_data()
-            if len(msg)>2048:
-                msg=msg[:2048]+"..."
-            results.append([msgid,match.percent,unicode(msg,'utf-8','replace')])
-
-        if self.pulltime and (time.time() > self.pulltime + self.last_index):
-            reactor.callLater(0,self.reindex)
-        #print 'returning:',results
-        return results
-
-def main():
-    r=BnwSearchService('test/',pulltime=100)
-    from twisted.internet import reactor
-    reactor.listenTCP(7850, server.Site(r), interface="127.0.0.1")
-    reactor.run()
-
-if __name__ == "__main__":
-    try:
-        from bnw_core import base
-    except:
-        sys.path.append('..')
-        import bnw_shell
-    import config
-    import bnw_core.base
-    bnw_core.base.config.register(config)
-    main()
+            doc = match.document
+            res = {}
+            res['id'] = doc.get_value(Indexer.ID)
+            res['user'] = doc.get_value(Indexer.USER)
+            res['date'] = float(doc.get_value(Indexer.DATE_ORIG))
+            res['type'] = doc.get_value(Indexer.TYPE)
+            res['tags_info'] = doc.get_value(Indexer.TAGS_INFO)
+            text = doc.get_data().decode('utf-8')
+            if len(text) > 2048:
+                text = text[:2048] + u'\u2026'
+            res['text'] = text
+            res['percent'] = match.percent
+            results.append(res)
+        return matches.get_matches_estimated(), results

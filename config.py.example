@@ -44,14 +44,15 @@ database = 'bnw'
 database_fs = 'bnw_fs'
 
 ## Is BnW's web interface should be enabled. In case of default
-## settings it can be reached on http://localhost:7808
+## settings it can be reached at http://localhost:7808/
 webui_enabled = True
 
-## BnW's web interface port.
+## BnW's web interface port. It's ok to keep default.
 webui_port = 7808
 
-## Web base URL, used for http links producing.
-## In case of public service you should write here domain name:
+## Web base URL, used for http links producing. In case of
+## public service accessible at http://example.com/ you
+## should write here domain name:
 ## webui_base = 'example.com'
 webui_base = 'localhost:7808'
 
@@ -59,6 +60,22 @@ webui_base = 'localhost:7808'
 ## In case of public service you should write here domain name:
 ## webui_wsbase = 'example.com'
 webui_wsbase = 'localhost:7808'
+
+## Path to xapian database used for keep searching index.
+## It will be placed relative to /path/to/bnw/bnw_search/
+## directory or you can specify absolute path.
+search_db = 'bnw_xapian'
+
+## Search language used for linguistic normalisation when
+## creating index and searching.
+## Available languages:
+##     danish dutch english finnish french german german2 hungarian italian
+##     kraaij_pohlmann lovins norwegian porter portuguese romanian russian
+##     spanish swedish turkish
+search_language = 'english'
+
+## Search service port. It's ok to keep default.
+search_port = 7850
 
 ## Enable or disable BnW's local RPC for debug and specify it's port.
 rpc_enabled = False
