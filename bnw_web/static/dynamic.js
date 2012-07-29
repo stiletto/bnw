@@ -44,6 +44,8 @@ function add_node(html, to, at_top) {
     });
     if (at_top) {
         node.prependTo(to);
+        // Remove last message.
+        $(to+">div.outerborder").last().remove();
     } else {
         node.appendTo(to);
     }
