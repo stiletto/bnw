@@ -180,7 +180,7 @@ simple_handlers = (
         (ur'(?i)interface (?P<iface>\S+)',command_interface.cmd_interface),
         (ur'(?i)vcard', command_vcard.cmd_vcard),
         (ur'(?i)userlist(?: (?P<page>\S+))?', command_userlist.cmd_userlist),
-        (ur'\? (?P<text>\S+)',command_search.cmd_search),
+        (ur'\? (?P<text>.+)',command_search.cmd_search),
         (ur'(?i)[DВ] #(?P<message>.+)',command_delete.cmd_delete),
         (ur'(?i)[DВ] L',command_delete.cmd_delete,{'last':True}),
         (ur'(?i)[SЫ]',command_subscription.cmd_subscriptions),

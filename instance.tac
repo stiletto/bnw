@@ -25,6 +25,9 @@ from bnw_xmpp import bnw_component, xmpp_notifier
 bnw_core.base.config.register(config)
 application = service.Application("BnW")
 
+from twisted.internet import reactor
+reactor.callWhenRunning(bnw_core.ensure_indexes.index)
+
 # Set up XMPP component.
 sm = component.buildServiceManager(
     config.srvc_name, config.srvc_pwd,
@@ -42,10 +45,6 @@ bnw_core.base.notifiers.add(xmpp_notifier.XmppNotifier())
 
 serviceCollection = service.IServiceCollection(application)
 sm.setServiceParent(serviceCollection)
-
-def indexes_updated(ign):
-    print "Indexes updated."
-ensure_indexes.index().addCallback(indexes_updated)
 
 if config.rpc_enabled:
     internet.TCPServer(

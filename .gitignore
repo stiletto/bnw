@@ -12,6 +12,6 @@ mongo-async-python-driver
 config.py
 passwords.py
 flashshit.py
-bnw_search/test
 bnwach.log*
 _trial_temp/
+bnw_search/bnw_xapian/

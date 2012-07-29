@@ -1,4 +1,5 @@
 import json
+import time
 from twisted.internet import defer
 from tornado.escape import utf8, _unicode
 from bnw_core.base import BnwResponse
@@ -39,11 +40,11 @@ class ApiHandler(BnwWebHandler):
         try:
             result = yield handler(ApiRequest(user), **args)
         except BnwResponse as br:
-            print "API call %d '%s' by '%s' failed with exception. %f.s" % (callogtuple + (time.time()-stime))
+            print "API call %d '%s' by '%s' failed with exception. %f.s" % (callogtuple + ((time.time()-stime),))
             defer.returnValue(json.dumps(dict(
                 ok=False,
                 desc=str(br)), ensure_ascii=False))
-        print "API call %d '%s' by '%s' completed. %f.s" % (callogtuple + (time.time()-stime))
+        print "API call %d '%s' by '%s' completed. %f.s" % (callogtuple + ((time.time()-stime),))
         defer.returnValue(json.dumps(result, ensure_ascii=False))
 
     # GET handler is the same as POST.
