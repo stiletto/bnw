@@ -47,10 +47,10 @@ class Indexer(object):
             doc.add_term('XTYPEm')
             doc.add_value(self.TYPE, 'message')
             for tag in obj['tags']:
-                doc.add_term('XTAGS'+self.make_stem_term(tag))
+                doc.add_term(self.make_stem_term('XTAGS'+tag))
                 tags_info.append('*'+tag)
             for club in obj['clubs']:
-                doc.add_term('XCLUBS'+self.make_stem_term(club))
+                doc.add_term(self.make_stem_term('XCLUBS'+club))
                 tags_info.append('!'+club)
         else:
             # Comment object.
