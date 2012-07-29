@@ -12,8 +12,10 @@ class Indexer(object):
         self.db = xapian.WritableDatabase(dbpath, xapian.DB_CREATE_OR_OPEN)
         self.stemmer = xapian.Stem(language)
 
-    def make_stem_term(self, text):
+    def make_stem_term(self, text, prefix=None):
         term = text.lower()
+        if prefix:
+            term = prefix + term
         term_e = term.encode('utf-8')
         # Max term length is 245 bytes.
         if len(term_e) > 245:
@@ -47,10 +49,10 @@ class Indexer(object):
             doc.add_term('XTYPEm')
             doc.add_value(self.TYPE, 'message')
             for tag in obj['tags']:
-                doc.add_term('XTAGS'+self.make_stem_term(tag))
+                doc.add_term(self.make_stem_term(tag, 'XTAGS'))
                 tags_info.append('*'+tag)
             for club in obj['clubs']:
-                doc.add_term('XCLUBS'+self.make_stem_term(club))
+                doc.add_term(self.make_stem_term(club, 'XCLUBS'))
                 tags_info.append('!'+club)
         else:
             # Comment object.
