@@ -279,6 +279,13 @@ class MessageHandler(BnwWebHandler,AuthMixin):
                     bl.append(e[1])
             if bl:
                 qdict['user'] = {'$nin': bl}
+            is_subscribed = yield objs.Subscription.count({
+                'user': user['name'],
+                'type': 'sub_message',
+                'target': msgid,
+            })
+        else:
+            is_subscribed = False
         # TODO: Converting generator to list may be inefficient.
         comments = list((yield objs.Comment.find(qdict, filter=f)))
         self.set_header("Cache-Control", "max-age=5")
@@ -289,6 +296,7 @@ class MessageHandler(BnwWebHandler,AuthMixin):
             'msg': msg,
             'auth_user': user,
             'comments': comments,
+            'is_subscribed': is_subscribed,
         })
 
 
