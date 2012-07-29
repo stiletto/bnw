@@ -183,6 +183,32 @@ var actions = {
         var button = is_recommended ? u_button() : r_button();
         $("#"+message_id).find(".msgb").append(" ").append(button);
     },
+    subscribe: function(message_id, is_subscribed) {
+        function s_button() {
+            // TODO: Helper title.
+            button = $("<a/>").text("S").click(function() {
+                api_call("subscriptions/add", {message: message_id}, true,
+                    function() {
+                        button.replaceWith(u_button());
+                    });
+            });
+            button.css("cursor", "pointer");
+            return button;
+        }
+        function u_button() {
+            button = $("<a/>").text("U").click(function() {
+                api_call("subscriptions/del", {message: message_id}, true,
+                    function() {
+                        button.replaceWith(s_button());
+                    });
+            });
+            button.css("cursor", "pointer");
+            return button;
+        }
+
+        var button = is_subscribed ? u_button() : s_button();
+        $("#"+message_id).find(".sign").prepend(" ").prepend(button);
+    },
     message_delete: function(message_id, message_user) {
         if (auth_user == message_user) {
             $("#"+message_id).find(".msgb").append(" "
@@ -431,6 +457,7 @@ function add_message_page_actions(comment_id, comment_user) {
         textarea();
         dynamic_submit();
         message_reply();
+        actions.subscribe(message_id, is_subscribed);
         actions.message_delete(message_id, message_user);
         actions.message_update(message_id, message_user);
         actions.recommendation(message_id, message_user, is_recommended);

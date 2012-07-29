@@ -10,6 +10,7 @@
         var is_recommended = {%
             if msg and auth_user['name'] in msg['recommendations']
             %}true{% else %}false{% end %};
+        var is_subscribed = {% if is_subscribed %}true{% else %}false{% end %};
         {% end %}
         var comment_count = {{ len(comments) }};
         var comment_info = {
