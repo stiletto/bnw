@@ -127,10 +127,10 @@ function api_call(func, args, verbose, onsuccess, onerror) {
         dataType: "json",
         success: function(d) {
             if (d.ok) {
-                if (onsuccess) onsuccess();
+                if (onsuccess) onsuccess(d);
                 if (verbose) info_dialog("OK. "+escapeHTML(d.desc));
             } else {
-                if (onerror) onerror();
+                if (onerror) onerror(d);
                 info_dialog("ERROR. "+escapeHTML(d.desc));
             }
         },
@@ -381,8 +381,7 @@ function add_message_page_actions(comment_id, comment_user) {
         form2.submit(function() {
             if (ws.readyState != ws.OPEN) {
                 // Use non-ajax submit if websocket not opened.
-                form2.submit();
-                return;
+                return true;
             }
             var id = message_id;
             if (comment_text.val()) {
@@ -524,8 +523,7 @@ function new_post() {
     post_form.submit(function() {
         if (ws.readyState != ws.OPEN) {
             // Use non-ajax submit if websocket not opened.
-            post_form.submit();
-            return;
+            return true;
         }
         before();
         api_call(

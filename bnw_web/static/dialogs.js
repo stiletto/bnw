@@ -54,7 +54,7 @@ function login_win() {
         api_call(
             "passlogin", {user: l, password: p}, false,
             // onsuccess
-            function() {
+            function(d) {
                 window.location = "/login?key="+d.desc;
             });
         return false;
