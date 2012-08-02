@@ -1,15 +1,25 @@
 # coding: utf-8
 import re
 from re import compile as rec
+from bnw_core.base import config
 from bnw_web.linkshit import LinkParser, _URL_RE, shittypes
 from tornado.escape import _unicode,xhtml_escape,url_escape
 
+
+def make_thumbnail_link(match, proto='http'):
+    if config.thumbnailer_base:
+        return '%s://%s/thumb?img=%s' %(
+            proto, config.thumbnailer_base, url_escape(match(0)))
+
 linkhostings = [
-    (ur'(?i)http://rghost.ru/([0-9]+)', lambda m: 'http://rghost.ru/%s/thumb.png' % (m(1),)),
-    (ur'(?i)http://imgur.com/([A-Za-z0-9]+)', lambda m: 'http://i.imgur.com/%ss.png' % (m(1),)),
-    (ur'http://ompldr.org/v([A-Za-z0-9]+)(/.+)?', lambda m: 'http://ompldr.org/t%s' % (m(1),)),
-    (ur'http://2-ch.ru/([a-z]+)/src/([0-9]+).(png|gif|jpg)', lambda m: 'http://2-ch.ru/%s/thumb/%ss.%s' % (m(1),m(2),m(3))),
-    (ur'(?i)http://(.+.(?:png|gif|jpg|jpeg))', lambda m: 'http://fuck.blasux.ru/thumb?img=%s' % (url_escape(m(0)),)),
+    (ur'(?i)http://rghost.ru/([0-9]+)',
+     lambda m, p: 'http://rghost.ru/%s/thumb.png' % m(1)),
+    (ur'(?i)http://imgur.com/([A-Za-z0-9]+)',
+     lambda m, p: 'http://i.imgur.com/%ss.png' % m(1)),
+    (ur'http://ompldr.org/v([A-Za-z0-9]+)(/.+)?',
+     lambda m, p: 'http://ompldr.org/t%s' % m(1)),
+    (ur'(?i)http://(.+.(?:png|gif|jpg|jpeg))',
+     make_thumbnail_link),
 ]
 
 linkhostings=[(re.compile('^'+k+'$'),v,k) for (k,v) in linkhostings]
@@ -27,10 +37,9 @@ formatting_tags = {
 
 parser = LinkParser(types=bnwtypes+shittypes)
 
-def thumbify(text, permitted_protocols=None):
+def thumbify(text, proto='http'):
     text = _unicode(xhtml_escape(text))
-    if not permitted_protocols:
-        permitted_protocols = ["http", "https"]
+    permitted_protocols = ["http", "https"]
     texta = []
     thumbs = []
     stack = []
@@ -43,17 +52,18 @@ def thumbify(text, permitted_protocols=None):
                 # in linkshit module? Matching twice is bad.
                 up = _URL_RE.match(m[2])
                 url = m[2] if up is None else up.group(1)
-                proto = None if up is None else up.group(2)
-                if proto and proto not in permitted_protocols:
+                link_proto = None if up is None else up.group(2)
+                if link_proto and link_proto not in permitted_protocols:
                     texta.append('%s<!-- proto! -->' % (m[1],))
                 else:
-                    if not proto:
+                    if not link_proto:
                         url = "http://" + url
                     for lh in linkhostings:
                         mn = lh[0].match(url)
                         if mn:
-                            thumb = lh[1](mn.group)
-                            thumbs.append((url,thumb))
+                            thumb = lh[1](mn.group, proto)
+                            if thumb:
+                                thumbs.append((url,thumb))
                             break
                     texta.append('<a href="%s">%s</a>' % (url, m[3]))
             elif m[0] in formatting_tags.keys():

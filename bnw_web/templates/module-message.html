@@ -1,19 +1,15 @@
-<div class='outerborder hentry message' id='{{ msg['id'] }}'>
+<div class='outerborder hentry' id='{{ msg['id'] }}'>
     <div class='msg'>
         <img class='avatar avatar_ps' alt='avatar' src='/u/{{ msg['user'] }}/avatar/thumb' />
         {{ w.tags(msg['tags'], msg['clubs'], username) }}
-        {% if msg.get('loltroll') %}
-            <pre class='pw entry-title entry-content'>{{ msg.get('loltroll') }}</pre>
-        {% else %}
-            {% set linkified, thumbs = thumbify(msg['text']) %}
-            {% if thumbs %}<div class="imgpreviews">
-                {% for thumb in thumbs %}<a class="imglink" href="{{ thumb[0] }}">
-                    <img class="imgpreview imgpreview_ps" src="{{ thumb[1] }}"/>
-                </a>{% end %}
-                </div>{% end %}
-            <pre class='pw entry-title entry-content{{ ' hasthumbs' if thumbs else ''
-            }}'>{{ linkified }}</pre>
-        {% end %}
+        {% set linkified, thumbs = thumbify(msg['text'], proto) %}
+        {% if thumbs %}<div class="imgpreviews">
+            {% for thumb in thumbs %}<a class="imglink" href="{{ thumb[0] }}">
+                <img class="imgpreview imgpreview_ps" src="{{ thumb[1] }}"/>
+            </a>{% end %}
+            </div>{% end %}
+        <pre class='pw entry-title entry-content{{ ' hasthumbs' if thumbs else ''
+        }}'>{{ linkified }}</pre>
         {% if msg['recommendations'] and full %}
             <div class='recos'>
                 Рекомендовали:

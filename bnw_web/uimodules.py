@@ -9,6 +9,7 @@ class Message(tornado.web.UIModule):
         args['msg'] = msg
         args['full'] = full
         args['username'] = username
+        args['proto'] = self.request.protocol
         return self.render_string('module-message.html', **args)
 
 
@@ -16,4 +17,5 @@ class Comment(tornado.web.UIModule):
     def render(self, comment):
         args = get_defargs()
         args['comment'] = comment
+        args['proto'] = self.request.protocol
         return self.render_string('module-comment.html', **args)
