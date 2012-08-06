@@ -5,13 +5,10 @@ from bnw_core.delayed_global import DelayedGlobal
 import bnw_core.base
 
 class XmppMessage(object):
-    def __init__(self,body,to,jid=None,bare_jid=None,user=None):
+    def __init__(self,body,to,jid=None,user=None):
         self.body=body
         self.to=to
         self.jid=jid
-        if bare_jid is None:
-            bare_jid=jid.split('/',1)[0]
-        self.bare_jid=bare_jid
         self.user=user
         self.type='xmpp'
 

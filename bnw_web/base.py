@@ -2,6 +2,7 @@
 
 import traceback
 from twisted.internet import defer
+from twisted.words.protocols.jabber.jid import JID
 import tornado.web
 import txmongo
 import bnw_core.base
@@ -14,8 +15,7 @@ class BnwWebRequest(object):
     def __init__(self, user=None):
         self.body = None
         self.to = None
-        self.jid = user['jid'] if user else ''
-        self.bare_jid = self.jid.split('/', 1)[0]
+        self.jid = JID(user['jid']) if user else None
         self.user = user
 
 
