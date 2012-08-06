@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #from twisted.words.xish import domish
+from twisted.words.protocols.jabber.xmpp_stringprep import nodeprep
 
 from base import *
 import random
@@ -34,10 +35,10 @@ def cmd_register(request,name=""):
                    'name': name,
                    'login_key': uuid4().hex,
                    'regdate': int(time.time()),
-                   'jid': request.bare_jid,
+                   'jid': request.jid.userhost(),
                    'interface': 'redeye',
-                   'settings': { 
-                       'servicejid': request.to.split('/',1)[0]
+                   'settings': {
+                       'servicejid': request.to.userhost()
                    },
                  })
             if not (yield objs.User.find_one({'name':name})):

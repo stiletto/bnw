@@ -2,6 +2,7 @@
 import traceback
 from twisted.internet import defer
 from twisted.internet.defer import _DefGen_Return
+from twisted.words.protocols.jabber.jid import JID
 
 import bnw_core.bnw_objects as objs
 from base import CommandParserException, XmppMessage
@@ -13,11 +14,11 @@ def idiotic(msg):
         """Suck some cocks."""
                                                                                                     
         #return str(request.body)
-        message_from=msg['from']
-        message_bare_from=message_from.split('/',1)[0]
-        message_user=(yield objs.User.find_one({'jids':message_bare_from.lower()}))
+        message_from=JID(msg['from'])
+        message_bare_from=message_from.userhost()
+        message_user=(yield objs.User.find_one({'jids':message_bare_from}))
         if not message_user:
-            message_user=(yield objs.User.find_one({'jid':message_bare_from.lower()}))
+            message_user=(yield objs.User.find_one({'jid':message_bare_from}))
         
         #if message.body is None:
         #    return ''
@@ -42,7 +43,7 @@ def idiotic(msg):
         message_body=message_body.strip()
         if type(message_body)!=unicode:
             message_body=unicode(message_body,'utf-8','replace')
-        xmsg=XmppMessage(message_body,msg['to'],message_from,message_bare_from,message_user)
+        xmsg=XmppMessage(message_body,JID(msg['to']),message_from,message_user)
 
         try:
             iparser='redeye'
@@ -68,8 +69,12 @@ def idiotic(msg):
 def iq(msg):
     """Process incoming IQ stanza."""
     try:
-        iq_bare_from=msg['from'].split('/',1)[0]
-        iq_user=yield objs.User.find_one({'jid':iq_bare_from.lower()})
+        iq_from=JID(msg['from'])
+        iq_bare_from=iq_from.userhost()
+        iq_user=(yield objs.User.find_one({'jids':iq_bare_from}))
+        if not iq_user:
+            iq_user=(yield objs.User.find_one({'jid':iq_bare_from}))
+
         for handler in iq_handlers.handlers:
             if (yield handler(msg,iq_user)):
                 defer.returnValue(True)

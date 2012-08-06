@@ -217,7 +217,7 @@
         #post_textarea, #comment_textarea {
             width: 100%;
         }
-        #send_post, #send_comment {
+        #hide_post, #send_post, #send_comment {
             float: right;
         }
 

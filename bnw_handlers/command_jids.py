@@ -52,7 +52,7 @@ def cmd_jids(request, add="", delete="", select=""):
             defer.returnValue(dict(ok=False, desc='No such JID.'))
     if select:
         if select == 'this':
-            select = request.bare_jid
+            select = request.jid.userhost()
         if select in request.user['jids']:
             request.user['jid']=select
             _ = yield request.user.save()
@@ -72,10 +72,10 @@ def cmd_confirm(request, code):
     if request.user:
         defer.returnValue(dict(ok=False, desc='You are already registered.'))
 
-    teh_user=yield objs.User.find_one({'pending_jids': request.bare_jid, 'name': code})
+    teh_user=yield objs.User.find_one({'pending_jids': request.jid.userhost(), 'name': code})
     if not teh_user:
         defer.returnValue(dict(ok=False, desc='This JID wasn''t added for this user.'))
-    teh_user['pending_jids'].remove(request.bare_jid)
-    teh_user['jids'].append(request.bare_jid)
+    teh_user['pending_jids'].remove(request.jid.userhost())
+    teh_user['jids'].append(request.jid.userhost())
     _ = yield teh_user.save()
     defer.returnValue(dict(ok=True, desc='JID added.'))
