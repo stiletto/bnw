@@ -32,8 +32,9 @@ def throttle_update(user,post_throttle):
 @defer.inlineCallbacks
 def postMessage(request,tags,clubs,text,anon=False,anoncomments=False):
         post_throttle=yield throttle_check(request.user['name'])
+        sfrom = request.to.userhost() if request.to else None
         ok,rest = yield bnw_core.post.postMessage(
-            request.user,tags,clubs,text,anon,anoncomments,sfrom=request.to)
+            request.user,tags,clubs,text,anon,anoncomments,sfrom=sfrom)
         _ = yield throttle_update(request.user['name'],post_throttle)
         if ok:
             msgid,qn,recepients = rest
@@ -79,8 +80,9 @@ def cmd_comment(request,message="",anonymous="",text=""):
         message_id=message.split('/')[0]
         comment_id=message if '/' in message else None
         post_throttle=yield throttle_check(request.user['name'])
+        sfrom = request.to.userhost() if request.to else None
         ok,rest = yield bnw_core.post.postComment(
-            message_id,comment_id,text,request.user,anonymous,sfrom=request.to)
+            message_id,comment_id,text,request.user,anonymous,sfrom=sfrom)
         _ = yield throttle_update(request.user['name'],post_throttle)
         if ok:
             msgid,num,qn,recepients = rest

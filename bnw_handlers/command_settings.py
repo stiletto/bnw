@@ -24,7 +24,7 @@ class ServiceJidSetting(SimpleSetting):
         setts = request.user.get('settings',{})
         return setts.get(name,config.srvc_name)
     def write(self,request,name,value):
-        return SimpleSetting.write(self,request,name,request.to)
+        return SimpleSetting.write(self,request,name,request.to.userhost())
 
 optionnames = {
     'usercss': SimpleSetting(),

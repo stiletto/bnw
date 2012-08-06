@@ -53,7 +53,7 @@ def cmd_subscribe(request,message="",user="",tag="",club="",newtab=None):
             subc = ''.join(c for c in starget[:10] if (c>='a' and c<='z'))
             sfrom = stype[4]+'-'+subc
         else:
-            sfrom = request.to
+            sfrom = request.to.userhost() if request.to else None
         ok,desc = (yield bnw_core.post.subscribe(request.user, stype, starget,sfrom=sfrom))
         defer.returnValue(dict(ok=ok,desc=desc))
 
