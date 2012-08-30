@@ -43,7 +43,7 @@
         {% end %}
         {% if 'desc' in vcard %}
         <tr><td>О себе:</td>
-            <td style='white-space: pre-wrap; word-wrap: break-word;'>{{ thumbify(vcard['desc'])[0] }}</td>
+            <td class='pw'>{{ thumbify(vcard['desc'])[0] }}</td>
         </tr>
         {% end %}
         <tr><td>Подписки:</td>
