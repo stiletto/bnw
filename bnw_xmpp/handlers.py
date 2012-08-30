@@ -136,6 +136,7 @@ redeye_handlers = (
                 ("p", "password", True, u"Password."),
                 ("s", "servicejid", False, u"Set service's jid."),
                 ("b", "baseurl", True, u"Set base url for links."),
+                ("a", "about", True, u'Set "about me".'),
             ),
             command_settings.cmd_set,
         ),
