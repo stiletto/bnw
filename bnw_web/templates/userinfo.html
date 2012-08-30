@@ -43,7 +43,7 @@
         {% end %}
         {% if 'desc' in vcard %}
         <tr><td>О себе:</td>
-            <td>{{ escape(vcard['desc']) }}</td>
+            <td>{{ thumbify(vcard['desc'])[0] }}</td>
         </tr>
         {% end %}
         <tr><td>Подписки:</td>
