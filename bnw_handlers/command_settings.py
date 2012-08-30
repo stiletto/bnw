@@ -31,6 +31,7 @@ optionnames = {
     'password': SimpleSetting(),
     'servicejid': ServiceJidSetting(),
     'baseurl': SimpleSetting(),
+    'about': SimpleSetting(),
 }
 
 @require_auth
