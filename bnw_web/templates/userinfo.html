@@ -41,9 +41,12 @@
             <td><a href="{{ escape(vcard['url']) }}">{{ escape(vcard['url']) }}</a></td>
         </tr>
         {% end %}
-        {% if 'desc' in vcard %}
+        {% set about = user.get('settings',{}).get('about','') %}
+        {% if ('desc' in vcard) or about %}
         <tr><td>О себе:</td>
-            <td class='pw'>{{ thumbify(vcard['desc'])[0] }}</td>
+            <td class='pw'>{% if about %}{{ thumbify(about)[0] }}
+
+            {% end %}{% if 'desc' in vcard %}{{ thumbify(vcard['desc'])[0] }}{% end %}</td>
         </tr>
         {% end %}
         <tr><td>Подписки:</td>
