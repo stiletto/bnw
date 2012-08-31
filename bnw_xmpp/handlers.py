@@ -214,7 +214,7 @@ simple_handlers = (
         (ur'(?i)jid',command_jids.cmd_jids),
 
         (ur'(?i)set',command_settings.cmd_set),
-        (ur'(?i)set +(?P<name>\w+)(?: +(?P<value>\S+))?',command_settings.cmd_set),
+        (ur'(?i)set +(?P<name>\w+)(?: +(?P<value>.+))?',command_settings.cmd_set),
 
         (ur'(?i)today',command_show.cmd_today),
         (ur'[#№]',command_show.cmd_feed),
