@@ -132,8 +132,8 @@ def postMessage(user,tags,clubs,text,anon=False,anoncomments=False,sfrom=None):
               'date': time.time(),
               'replycount': 0,
               'text': text,
-              'anonymous': anon,
-              'anoncomments': anoncomments,
+              'anonymous': bool(anon),
+              'anoncomments': bool(anoncomments),
               'recommendations': [],
             }
     if anon:
@@ -187,7 +187,7 @@ def postComment(message_id,comment_id,text,user,anon=False,sfrom=None):
               'num': message['replycount']+1,
               'replytotext': cropstring(old_comment['text'] if comment_id else message['text'],128),
               'text': ('@'+old_comment['user']+' 'if comment_id else '')+text,
-              'anonymous': anon,
+              'anonymous': bool(anon),
             }
 #              'depth': old_comment.get('depth',0)+1 if old_comment else 0,
     if anon:

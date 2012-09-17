@@ -59,7 +59,7 @@ def formatter_search(request, result):
         return 'No results found.'
     info = 'Found %d results' % total
     if total > 10:
-        info += ' (displaing first 10)'
+        info += ' (displaying first 10)'
     print repr(info)
     out = [info+':']
     for res in results:
