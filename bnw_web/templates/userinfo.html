@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}BnW - @{{ username }} info{% end %}
+{% block body_extraclass %}vcard{% end %}
 {% block body %}
 {% if not user %}
     <div id="err_outer">
@@ -16,10 +17,10 @@
     <div class='outerborder'>
         <div class='msg'>
             <div style='display: table-cell;'>
-                <img src='/u/{{ username }}/avatar' alt='avatar' class='avatar_big' />
+                <img src='/u/{{ username }}/avatar' alt='avatar' class='avatar_big photo' />
             </div>
             <div style='display: table-cell; vertical-align: top; padding-left: 1em;'>
-                Пользователь {{ w.userl(user['name']) }} — няшка.
+                Пользователь <a href="/u/{{ user['name'] }}" class="usrid">@<span class="nickname">{{ user['name'] }}</span></a> — няшка.
                 Он зарегистрировался здесь {{ w.time(regdate) }} и написал с тех пор
                 <a href="/u/{{ username }}/">{{ messages_count }}
                 {{ w.messages(messages_count) }}</a>
@@ -33,18 +34,20 @@
     <table class='friendstable'>
         {% if 'fullname' in vcard %}
         <tr><td>Полное имя:</td>
-            <td>{{ escape(vcard['fullname']) }}</td>
+            <td class="fn">{{ escape(vcard['fullname']) }}</td>
         </tr>
+        {% else %}
+            <tr style='display: none;'><td>Никнейм здесь:</td><td class="fn">{{ user['name'] }}</td></tr>
         {% end %}
         {% if 'url' in vcard %}
         <tr><td>Домашняя страница:</td>
-            <td><a href="{{ escape(vcard['url']) }}">{{ escape(vcard['url']) }}</a></td>
+            <td><a href="{{ escape(vcard['url']) }}" class="url">{{ escape(vcard['url']) }}</a></td>
         </tr>
         {% end %}
         {% set about = user.get('settings',{}).get('about','') %}
         {% if ('desc' in vcard) or about %}
         <tr><td>О себе:</td>
-            <td class='pw'>{% if about %}{{ thumbify(about)[0] }}
+            <td class='pw note'>{% if about %}{{ thumbify(about)[0] }}
 
             {% end %}{% if 'desc' in vcard %}{{ thumbify(vcard['desc'])[0] }}{% end %}</td>
         </tr>
