@@ -460,7 +460,7 @@ emptypng = base64.b64decode(
 class AvatarHandler(BnwWebHandler):
     @defer.inlineCallbacks
     def respond(self, username, thumb=''):
-        self.set_header('Cache-Control', 'max-age=36000, public')
+        self.set_header('Cache-Control', 'max-age=3600, public')
         self.set_header('Vary', 'Accept-Encoding')
         user = yield objs.User.find_one({'name': username})
         if not (user and user.get('avatar')):
