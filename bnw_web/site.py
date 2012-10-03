@@ -363,18 +363,21 @@ class FeedHandler(BnwWebHandler,AuthMixin):
     templatename='feed.html'
     @requires_auth
     @defer.inlineCallbacks
-    def respond(self,page=0):
-        req=BnwWebRequest((yield self.get_auth_user()))
-        result = yield cmd_feed(req)
+    def respond(self):
+        page = get_page(self)
+        req = BnwWebRequest((yield self.get_auth_user()))
+        result = yield cmd_feed(req,page=page)
         self.set_header("Cache-Control", "max-age=1")
         defer.returnValue({
             'result': result,
+            'page': page,
+            'hasmes': result['ok'] and len(result['messages'])==20,
         })
 
 class TodayHandler(BnwWebHandler,AuthMixin):
     templatename='today.html'
     @defer.inlineCallbacks
-    def respond(self,page=0):
+    def respond(self):
         req=BnwWebRequest((yield self.get_auth_user()))
         result = yield cmd_today(req)
         self.set_header("Cache-Control", "max-age=300")
@@ -385,7 +388,7 @@ class TodayHandler(BnwWebHandler,AuthMixin):
 class ClubsHandler(BnwWebHandler,AuthMixin):
     templatename='clubs.html'
     @defer.inlineCallbacks
-    def respond(self,page=0):
+    def respond(self):
         user=yield self.get_auth_user()
         req=BnwWebRequest((yield self.get_auth_user()))
         result = yield cmd_clubs(req)
@@ -397,7 +400,7 @@ class ClubsHandler(BnwWebHandler,AuthMixin):
 class BlogHandler(BnwWebHandler,AuthMixin):
     @requires_auth
     @defer.inlineCallbacks
-    def respond(self,page=0):
+    def respond(self):
         user=yield self.get_auth_user()
         self.redirect(str('/u/'+user['name']))
         defer.returnValue('')
