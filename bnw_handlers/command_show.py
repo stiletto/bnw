@@ -77,10 +77,11 @@ def cmd_show(request,message="",user="",tag="",club="",page="0",replies=None):
 
 @require_auth
 @defer.inlineCallbacks
-def cmd_feed(request):
+def cmd_feed(request,page="0"):
     """ Показать ленту """
+    page=int(page) if page else 0
     feed = yield objs.FeedElement.find_sort({'user':request.user['name']},
-                                [('_id',pymongo.DESCENDING)],limit=20)
+                                [('_id',pymongo.DESCENDING)],limit=20,skip=page*20)
     messages = [x.filter_fields() for x in (yield objs.Message.find_sort({'id': { '$in': 
             [f['message'] for f in feed]
         }},[('date',pymongo.ASCENDING)]))]
