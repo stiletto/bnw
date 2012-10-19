@@ -18,6 +18,7 @@ bnwtypes = (
     ("emph", rec(ur'(?<!:)//'), lambda m: ()),
     ("strong", rec(ur'\*\*'), lambda m: ()),
     ("namedlink", rec(ur'''\[\[\s*(?P<link_target>.+?)\s*[|]\s*(?P<link_text>.+?)\s*]]'''), lambda m: (m.group('link_target'),m.group('link_text'))),
+    ("source", rec(ur'''{{{(?:#!(\w+)\W+)?(.*)}}}''', re.MULTILINE), lambda m: (m.group(1),m.group(2))),
 )
 formatting_tags = {
     'emph': ('<i>','</i>'),
@@ -71,6 +72,9 @@ def thumbify(text, permitted_protocols=None):
                 texta.append('<a href="/p/%s">%s</a>' % (m[2].replace('/','#'),m[1]))
             elif m[0]=='user':
                 texta.append('<a href="/u/%s">%s</a>' % (m[2],m[1]))
+            elif m[0]=='source':
+                cs = (' class="language-'+m[1]+'"') if m[1] else ''
+                texta.append('<pre><code%s>%s</code></pre>' % (cs, m[2])
             else:
                 texta.append('%s<!-- %s -->' % (m[1],m[0]))
         else:
