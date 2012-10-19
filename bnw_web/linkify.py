@@ -73,7 +73,7 @@ def thumbify(text, permitted_protocols=None):
             elif m[0]=='user':
                 texta.append('<a href="/u/%s">%s</a>' % (m[2],m[1]))
             elif m[0]=='source':
-                cs = (' class="language-'+m[2]+'"') if m[1] else ''
+                cs = (' class="language-'+m[2]+'"') if m[2] else ''
                 texta.append('<pre><code%s>%s</code></pre>' % (cs, m[3]))
             else:
                 texta.append('%s<!-- %s -->' % (m[1],m[0]))
