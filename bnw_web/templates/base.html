@@ -16,6 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script type="text/javascript" src="{{ static_url("jquery.min.js") }}"></script>
     <script type="text/javascript" src="{{ static_url("jquery.cookie.js") }}"></script>
+    <script type="text/javascript" src="{{ static_url("highlight.min.js") }}"></script>
     <script type="text/javascript" src="{{ static_url("dialogs.js") }}"></script>
     <script type="text/javascript" src="{{ static_url("dynamic.js") }}"></script>
     <script type="text/javascript">
@@ -24,6 +25,7 @@
         $(function() {
             $(".avatar_ps").removeClass("avatar_ps");
             $(".imgpreview_ps").removeClass("imgpreview_ps");
+            $('pre code').each(function(i, e) {hljs.highlightBlock(e)});
         });
     </script>
     {% block extrahead %}
