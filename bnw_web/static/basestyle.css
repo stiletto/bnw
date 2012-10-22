@@ -10,6 +10,11 @@
             font-size: 1em;
         }
 
+        pre code {
+            font-family: HUIPIZDONT, Unifont, Monaco, Terminus, Consolas, monospace;
+            font-size: 1em;
+        }
+
         .bodyshit {
             padding: 1em;
         }
@@ -188,6 +193,11 @@
         }
         .hasthumbs {
             min-height: 4em;
+        }
+
+        .pw pre {
+            font-size: 1em;
+            font-family: ZALOOPA;
         }
 
         /* Dialogs styles */
