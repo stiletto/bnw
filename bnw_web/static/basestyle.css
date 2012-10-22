@@ -200,6 +200,11 @@
             font-family: ZALOOPA;
         }
 
+        code .comment {
+            border: none;
+            padding: 0;
+        }
+
         /* Dialogs styles */
         .dlg_outer {
             position: absolute;
