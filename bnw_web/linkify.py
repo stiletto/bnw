@@ -18,7 +18,7 @@ bnwtypes = (
     ("emph", rec(ur'(?<!:)//'), lambda m: ()),
     ("strong", rec(ur'\*\*'), lambda m: ()),
     ("namedlink", rec(ur'''\[\[\s*(?P<link_target>.+?)\s*[|]\s*(?P<link_text>.+?)\s*]]'''), lambda m: (m.group('link_target'),m.group('link_text'))),
-    ("source", rec(ur'''{{{(?:#!(\w+)\W+)?(.*?)}}}''', re.MULTILINE|re.DOTALL), lambda m: (m.group(1),m.group(2))),
+    ("source", rec(ur'''{{{(?:#!(\w+)\s+)?(.*?)}}}''', re.MULTILINE|re.DOTALL), lambda m: (m.group(1),m.group(2))),
 )
 formatting_tags = {
     'emph': ('<i>','</i>'),
