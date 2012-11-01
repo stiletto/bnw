@@ -140,10 +140,10 @@ class BnwService(component.Service):
         Act on the message stanza that has just been received.
 
         """
-        try:
-            if msg['type'] != 'chat' or not msg.body:
-                return
-        except KeyError:  # somebody plz kick ma ass 4 dat
+        msg_type = msg.getAttribute('type')
+        if msg_type != 'chat' or not msg.body:
+            if msg_type=='error':
+                stupid_handler.failure(msg)
             return
         stime = time.time()
         if msg.request and msg.request.getAttribute("xmlns", "urn:xmpp:receipts"):
@@ -191,7 +191,11 @@ class BnwService(component.Service):
             msg.addElement("status", content=termctrl)
             self.xmlstream.send(msg)
 
+    def send_raw(self, content):
+        self.xmlstream.send(content)
+
     def getRPC(self):
         r = xmlrpc.XMLRPC(allowNone=True)
         r.xmlrpc_send_plain = self.send_plain
+        r.xmlrpc_send_raw = self.send_raw
         return r
