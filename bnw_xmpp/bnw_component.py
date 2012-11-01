@@ -191,11 +191,11 @@ class BnwService(component.Service):
             msg.addElement("status", content=termctrl)
             self.xmlstream.send(msg)
 
-    def send_raw(self, content):
+    def send_raw_string(self, content):
         self.xmlstream.send(content)
 
     def getRPC(self):
         r = xmlrpc.XMLRPC(allowNone=True)
         r.xmlrpc_send_plain = self.send_plain
-        r.xmlrpc_send_raw = self.send_raw
+        r.xmlrpc_send_raw_string = self.send_raw_string
         return r
