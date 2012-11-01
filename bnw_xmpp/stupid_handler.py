@@ -75,7 +75,7 @@ def failure(msg):
     if not user:
         return
     if msg.error:
-        if msg.error.getAttribute('code')=='500' and msg.error.resource-constraint:
+        if msg.error.getAttribute('code')=='500' and msg.error.__getattr__('resource-constraint'):
             print 'User %s automatically set off because his offline storage is full.' % (user['name'],)
             objs.User.mupdate({'name':user['name']},{'$set':{'off':True}})
             return
