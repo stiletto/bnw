@@ -66,6 +66,22 @@ def idiotic(msg):
         defer.returnValue(result)
 
 @defer.inlineCallbacks
+def failure(msg):
+    _from=JID(msg['from'])
+    bare_from=_from.userhost()
+    user=(yield objs.User.find_one({'jids':bare_from}))
+    if not user:
+            user=(yield objs.User.find_one({'jid':bare_from}))
+    if not user:
+        return
+    if msg.error:
+        if msg.error.getAttribute('code')=='500' and msg.error.resource-constraint:
+            print 'User %s automatically set off because his offline storage is full.' % (user['name'],)
+            objs.User.mupdate({'name':user['name']},{'$set':{'off':True}})
+            return
+    print 'Unknown delivery failure'
+
+@defer.inlineCallbacks
 def iq(msg):
     """Process incoming IQ stanza."""
     try:
