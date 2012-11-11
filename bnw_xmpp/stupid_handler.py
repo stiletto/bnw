@@ -69,9 +69,7 @@ def idiotic(msg):
 def failure(msg):
     _from=JID(msg['from'])
     bare_from=_from.userhost()
-    user=(yield objs.User.find_one({'jids':bare_from}))
-    if not user:
-            user=(yield objs.User.find_one({'jid':bare_from}))
+    user=(yield objs.User.find_one({'jid':bare_from})) # only active jid
     if not user:
         return
     if msg.error:
