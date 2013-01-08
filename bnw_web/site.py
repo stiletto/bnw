@@ -182,7 +182,7 @@ class UserHandler(BnwWebHandler,AuthMixin):
         reco = self.get_argument("reco","")
         if reco=="only":
             qdict = { 'recommendations': username }
-        elif reco="included":
+        elif reco=="included":
             qdict = {'$or': [{ 'user': username }, { 'recommendations': username }]}
         else:
             qdict = { 'user': username }
