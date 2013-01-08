@@ -510,7 +510,7 @@ def get_site():
     application = tornado.web.Application([
         (r"/p/([A-Z0-9]+)/?", MessageHandler),
         (r"/p/([A-Z0-9]+)/ws/?", MessageWsHandler),
-        (r"/u/([0-9a-z_-]+)(?:/(recommendations|messages))?", UserHandler),
+        (r"/u/([0-9a-z_-]+)(?:/(recommendations|messages))?/?", UserHandler),
         (r"/u/([0-9a-z_-]+)/ws/?", UserWsHandler),
         (r"/u/([0-9a-z_-]+)/avatar(/thumb)?/?", AvatarHandler),
         (r"/u/([0-9a-z_-]+)/info/?", UserInfoHandler),
