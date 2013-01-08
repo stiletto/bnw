@@ -426,8 +426,16 @@ class PostHandler(BnwWebHandler,AuthMixin):
     def respond(self):
         user = yield self.get_auth_user()
         default_text = self.get_argument("url","")
+        if not default_text:
+            default_text = self.get_argument("text","")
+        default_clubs = self.get_argument("clubs","")
+        default_tags = self.get_argument("tags","")
         self.set_header("Cache-Control", "max-age=1")
-        defer.returnValue({ 'auth_user': user, 'default_text': default_text, 'error':None })
+        defer.returnValue({ 'auth_user': user,
+            'default_text': default_text,
+            'default_tags': default_tags,
+            'default_clubs': default_clubs,
+            'error':None })
 
 
 class CommentHandler(BnwWebHandler,AuthMixin):

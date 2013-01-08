@@ -11,7 +11,7 @@ import bnw_core.bnw_objects as objs
 def cmd_on(request):
     """ Включение доставки сообщений """
     _ = yield objs.User.mupdate({'name':request.user['name']},{'$set':{'off':False}},safe=True)
-    if request.user['off']:
+    if request.user.get('off',False):
         defer.returnValue(
             dict(ok=True,desc='Welcome back!')
         )
@@ -25,7 +25,7 @@ def cmd_on(request):
 def cmd_off(request):
     """ Выключение доставки сообщений """
     _ = yield objs.User.mupdate({'name':request.user['name']},{'$set':{'off':True}},safe=True)
-    if request.user['off']:
+    if request.user.get('off',False):
         defer.returnValue(
             dict(ok=True,desc='See you later.')
         )
