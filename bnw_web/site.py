@@ -182,10 +182,10 @@ class UserHandler(BnwWebHandler,AuthMixin):
         reco = self.get_argument("reco","")
         if reco=="recommendations":
             qdict = { 'recommendations': username }
-        elif reco=="messages":
-            qdict = { 'user': username }
-        else:
+        elif reco=="all":
             qdict = {'$or': [{ 'user': username }, { 'recommendations': username }]}
+        else:
+            qdict = { 'user': username }
 
         if tag:
             tag = tornado.escape.url_unescape(tag)
@@ -510,11 +510,11 @@ def get_site():
     application = tornado.web.Application([
         (r"/p/([A-Z0-9]+)/?", MessageHandler),
         (r"/p/([A-Z0-9]+)/ws/?", MessageWsHandler),
-        (r"/u/([0-9a-z_-]+)(?:/(recommendations|messages))?/?", UserHandler),
+        (r"/u/([0-9a-z_-]+)(?:/(recommendations|all))?/?", UserHandler),
         (r"/u/([0-9a-z_-]+)/ws/?", UserWsHandler),
         (r"/u/([0-9a-z_-]+)/avatar(/thumb)?/?", AvatarHandler),
         (r"/u/([0-9a-z_-]+)/info/?", UserInfoHandler),
-        (r"/u/([0-9a-z_-]+)(?:/(recommendations|messages))?/t/(.*)/?", UserHandler),
+        (r"/u/([0-9a-z_-]+)(?:/(recommendations|all))?/t/(.*)/?", UserHandler),
         (r"/", MainHandler),
         (r"/ws/?", MainWsHandler),
         (r"/t/()(.*)/?", MainHandler),
