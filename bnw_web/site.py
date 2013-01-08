@@ -178,7 +178,15 @@ class UserHandler(BnwWebHandler,AuthMixin):
         f = txmongo.filter.sort(txmongo.filter.DESCENDING("date"))
         user = (yield objs.User.find_one({'name': username}))
         page = get_page(self)
-        qdict = { 'user': username }
+
+        reco = self.get_argument("reco","")
+        if reco=="only":
+            qdict = { 'recommendations': username }
+        elif reco="included":
+            qdict = {'$or': [{ 'user': username }, { 'recommendations': username }]}
+        else:
+            qdict = { 'user': username }
+
         if tag:
             tag = tornado.escape.url_unescape(tag)
             qdict['tags'] = tag
