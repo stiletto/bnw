@@ -173,19 +173,19 @@ def is_hasmes(qdict, page):
 class UserHandler(BnwWebHandler,AuthMixin):
     templatename='user.html'
     @defer.inlineCallbacks
-    def respond(self,username,tag=None):
+    def respond(self,username,reco=None,tag=None):
         _ = yield self.get_auth_user()
         f = txmongo.filter.sort(txmongo.filter.DESCENDING("date"))
         user = (yield objs.User.find_one({'name': username}))
         page = get_page(self)
 
         reco = self.get_argument("reco","")
-        if reco=="only":
+        if reco=="recommendations":
             qdict = { 'recommendations': username }
-        elif reco=="included":
-            qdict = {'$or': [{ 'user': username }, { 'recommendations': username }]}
-        else:
+        elif reco=="messages":
             qdict = { 'user': username }
+        else:
+            qdict = {'$or': [{ 'user': username }, { 'recommendations': username }]}
 
         if tag:
             tag = tornado.escape.url_unescape(tag)
@@ -510,12 +510,11 @@ def get_site():
     application = tornado.web.Application([
         (r"/p/([A-Z0-9]+)/?", MessageHandler),
         (r"/p/([A-Z0-9]+)/ws/?", MessageWsHandler),
-        (r"/u/([0-9a-z_-]+)/?", UserHandler),
+        (r"/u/([0-9a-z_-]+)(?:/(recommendations|messages))?", UserHandler),
         (r"/u/([0-9a-z_-]+)/ws/?", UserWsHandler),
-        (r"/u/([0-9a-z_-]+)/recommendations/?", UserRecoHandler),
         (r"/u/([0-9a-z_-]+)/avatar(/thumb)?/?", AvatarHandler),
         (r"/u/([0-9a-z_-]+)/info/?", UserInfoHandler),
-        (r"/u/([0-9a-z_-]+)/t/(.*)/?", UserHandler),
+        (r"/u/([0-9a-z_-]+)(?:/(recommendations|messages))?/t/(.*)/?", UserHandler),
         (r"/", MainHandler),
         (r"/ws/?", MainWsHandler),
         (r"/t/()(.*)/?", MainHandler),
