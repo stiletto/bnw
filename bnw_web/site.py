@@ -179,7 +179,6 @@ class UserHandler(BnwWebHandler,AuthMixin):
         user = (yield objs.User.find_one({'name': username}))
         page = get_page(self)
 
-        reco = self.get_argument("reco","")
         if reco=="recommendations":
             qdict = { 'recommendations': username }
         elif reco=="all":
