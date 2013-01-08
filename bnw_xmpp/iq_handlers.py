@@ -40,7 +40,7 @@ def get_and_resize_avatar(iq):
 
 @defer.inlineCallbacks
 def vcard(iq, iq_user):
-    if not iq.vCard:
+    if (not iq.vCard) or iq['type']!='result':
         defer.returnValue(False)
     if not iq_user:
         # User which have been sent IQ not registered.
