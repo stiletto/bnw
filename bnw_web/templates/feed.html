@@ -13,7 +13,7 @@
         </div>
     </div>
 {% else %}
-    <div class='outerborder'>
+    <div class='outerborder info'>
         <div class='msg'>
             Лента пользователя
             <a href="/u/{{ auth_user['name'] }}">@{{ auth_user['name'] }}</a>.<br />
@@ -22,10 +22,12 @@
         </div>
     </div>
     <hr/>
+    <div id='messages'>
     <!-- {{ result['messages'].reverse() }} да, я ем говно -->
     {% for msg in result['messages'] %}
         {{ modules.Message(msg) }}
     {% end %}
+    </div>
 {% end %}
 {% end %}
 {% block footerrow %}{% include "pagination.html" %}{% end %}
