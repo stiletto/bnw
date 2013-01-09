@@ -20,9 +20,11 @@
         </div>
     </div>
     <hr/>
-    {% set result['messages'].reverse() %}
-    {% for msg in result['messages'] %}
-        {{ modules.Message(msg) }}
-    {% end %}
+    <div id='messages'>
+        {% set result['messages'].reverse() %}
+        {% for msg in result['messages'] %}
+            {{ modules.Message(msg) }}
+        {% end %}
+    </div>
 {% end %}
 {% end %}
