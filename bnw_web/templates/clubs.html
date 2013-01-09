@@ -13,13 +13,13 @@
         </div>
     </div>
 {% else %}
-    <div class='outerborder'>
+    <div class='outerborder info'>
         <div class='msg'>
             На этой странице отображается топ 20 клубов по количеству сообщений.
         </div>
     </div>
     <hr/>
-    <div class='outerborder'>
+    <div class='outerborder clublist'>
     <div class='msg'>
     {% for club in result['clubs'] %}
         <div style='width: 10em; display: inline-block;'> {{ w.club(club['_id']) }}<sup>{{ int(club['value']) }}</sup></div>
