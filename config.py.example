@@ -61,6 +61,11 @@ webui_base = 'localhost:7808'
 ## webui_wsbase = 'example.com'
 webui_wsbase = 'localhost:7808'
 
+## Thumbnailer service's base URL.
+## Keep empty if you have not such service.
+## TODO: Link to service's sources and description.
+thumbnailer_base = ''
+
 ## Path to xapian database used for keep searching index.
 ## It will be placed relative to /path/to/bnw/bnw_search/
 ## directory or you can specify absolute path.
