@@ -17,6 +17,7 @@ from bnw_handlers import command_userlist
 from bnw_handlers import command_bl
 from bnw_handlers import command_stat
 from bnw_handlers import command_update
+from bnw_handlers import command_userinfo
 
 
 # TODO: Auto-import all avialable handlers?
@@ -45,4 +46,5 @@ handlers = {
     "blacklist":            command_bl.cmd_blacklist,
     "stat":                 command_stat.cmd_stat,
     "update":               command_update.cmd_update,
+    "userinfo":             command_userinfo.cmd_userinfo,
 }

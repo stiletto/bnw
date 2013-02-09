@@ -27,6 +27,7 @@ import bnw_core.base
 from bnw_core.bnw_mongo import get_db, get_fs
 from bnw_handlers.command_show import cmd_feed, cmd_today
 from bnw_handlers.command_clubs import cmd_clubs, cmd_tags
+from bnw_handlers.command_userinfo import cmd_userinfo
 
 from bnw_web.base import BnwWebHandler, BnwWebRequest
 from bnw_web.auth import LoginHandler, LogoutHandler, requires_auth, AuthMixin
@@ -242,33 +243,10 @@ class UserRecoHandler(BnwWebHandler,AuthMixin):
 class UserInfoHandler(BnwWebHandler,AuthMixin):
     templatename='userinfo.html'
     @defer.inlineCallbacks
-    def respond(self,username):
-        _ = yield self.get_auth_user()
-        user = yield objs.User.find_one({'name': username})
-        subscribers = set([x['user'] for x in
-                    (yield objs.Subscription.find({'target':username,'type':'sub_user'}))])
-        subscriptions = set([x['target'] for x in
-                    (yield objs.Subscription.find({'user':username,'type':'sub_user'}))])
-        friends = list(subscribers & subscriptions)
-        friends.sort()
-        subscribers_only = list(subscribers - subscriptions)
-        subscribers_only.sort()
-        subscriptions_only = list(subscriptions - subscribers)
-        subscriptions_only.sort()
-        messages_count = int((yield objs.Message.count({'user': username})))
-        comments_count = int((yield objs.Comment.count({'user': username})))
-        self.set_header("Cache-Control", "max-age=10")
-        defer.returnValue({
-            'username': username,
-            'user': user,
-            'regdate': user.get('regdate', 0),
-            'messages_count': messages_count,
-            'comments_count': comments_count,
-            'subscribers': subscribers_only,
-            'subscriptions': subscriptions_only,
-            'friends': friends,
-            'vcard': user.get('vcard', {}),
-        })
+    def respond(self,user):
+        req = BnwWebRequest((yield self.get_auth_user()))
+        self.set_header('Cache-Control', 'max-age=10')
+        defer.returnValue((yield cmd_userinfo(req, user)))
 
 
 class MessageHandler(BnwWebHandler,AuthMixin):
