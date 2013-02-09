@@ -28,7 +28,7 @@ handlers = {
     "subscriptions/del":    command_subscription.cmd_unsubscribe,
     "subscriptions":        command_subscription.cmd_subscriptions,
     "feed":                 command_show.cmd_feed,
-    "today":                 command_show.cmd_today,
+    "today":                command_show.cmd_today,
     "show":                 command_show.cmd_show,
     "post":                 command_post.cmd_post,
     "comment":              command_post.cmd_comment,

@@ -54,18 +54,20 @@ def showComments(msgid):
             )
         ) # suck cocks, be LISP :3
 
-@check_arg(message=MESSAGE_COMMENT_RE,page='[0-9]+')
+@check_arg(message=MESSAGE_COMMENT_RE, page='[0-9]+')
 @defer.inlineCallbacks
-def cmd_show(request,message="",user="",tag="",club="",page="0",replies=None):
-    """ Показать сообщения """
-    message=canonic_message_comment(message).upper()
+def cmd_show(request, message='', user='', tag='', club='', page='0',
+             replies=None):
+    """Show messages by specified parameters."""
+    message = canonic_message_comment(message).upper()
     if '/' in message:
         defer.returnValue((yield showComment(message)))
     if replies:
         if not message:
-            defer.returnValue(
-                dict(ok=False,desc='Error: ''replies'' is allowed only with ''message''.',cache=3600)
-            )
+            defer.returnValue(dict(
+                ok=False,
+                desc="Error: 'replies' is allowed only with 'message'.",
+                cache=3600))
         defer.returnValue((yield showComments(message)))
     else:
         parameters=( ('user', user.lower()),
@@ -73,7 +75,7 @@ def cmd_show(request,message="",user="",tag="",club="",page="0",replies=None):
                      ('clubs', club),
                      ('id', message.upper()) )
         parameters = dict((p[0],p[1]) for p in parameters if p[1])
-        defer.returnValue((yield showSearch(parameters,int(page))))
+        defer.returnValue((yield showSearch(parameters, int(page))))
 
 @require_auth
 @defer.inlineCallbacks
