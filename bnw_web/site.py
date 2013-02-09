@@ -84,9 +84,9 @@ class MainWsHandler(WsHandler, AuthMixin):
         if user and ['user', msg['user']] in user.get('blacklist', []):
             return
         html = uimodules.Message(self).render(msg)
-        self.write_message(json.dumps({
-            'type': 'new_message', 'id': msg['id'],
-            'user': msg['user'], 'html': html}))
+        msg = msg.copy()
+        msg.update(dict(type='new_message', html=html))
+        self.write_message(json.dumps(msg))
 
     @defer.inlineCallbacks
     def new_message_compat(self, msg):
@@ -140,9 +140,9 @@ class MessageWsHandler(WsHandler, AuthMixin):
         if user and ['user', comment['user']] in user.get('blacklist', []):
             return
         html = uimodules.Comment(self).render(comment)
-        self.write_message(json.dumps({
-            'type': 'new_comment', 'id': comment['id'],
-            'user': comment['user'], 'html': html}))
+        comment = comment.copy()
+        comment.update(dict(type='new_comment', html=html))
+        self.write_message(json.dumps(comment))
 
     def new_comment_compat(self, comment):
         self.write_message(json.dumps(comment))
