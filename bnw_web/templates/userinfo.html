@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}BnW - @{{ username }} info{% end %}
+{% block title %}BnW - @{{ user }} info{% end %}
 {% block body_extraclass %}vcard{% end %}
 {% block body %}
 {% if not user %}
@@ -17,12 +17,12 @@
     <div class='outerborder info'>
         <div class='msg'>
             <div style='display: table-cell;'>
-                <img src='/u/{{ username }}/avatar' alt='avatar' class='avatar_big photo' />
+                <img src='/u/{{ user }}/avatar' alt='avatar' class='avatar_big photo' />
             </div>
             <div style='display: table-cell; vertical-align: top; padding-left: 1em;'>
-                Пользователь <a href="/u/{{ user['name'] }}" class="usrid">@<span class="nickname">{{ user['name'] }}</span></a> — няшка.
+                Пользователь <a href="/u/{{ user }}" class="usrid">@<span class="nickname">{{ user }}</span></a> — няшка.
                 Он зарегистрировался здесь {{ w.time(regdate) }} и написал с тех пор
-                <a href="/u/{{ username }}/">{{ messages_count }}
+                <a href="/u/{{ user }}/">{{ messages_count }}
                 {{ w.messages(messages_count) }}</a>
                 и {{ comments_count }} {{ w.comments(comments_count) }}.
             </div>
@@ -37,19 +37,17 @@
             <td class="fn">{{ escape(vcard['fullname']) }}</td>
         </tr>
         {% else %}
-            <tr style='display: none;'><td>Никнейм здесь:</td><td class="fn">{{ user['name'] }}</td></tr>
+            <tr style='display: none;'><td>Никнейм здесь:</td><td class="fn">{{ user }}</td></tr>
         {% end %}
         {% if 'url' in vcard %}
         <tr><td>Домашняя страница:</td>
             <td><a href="{{ escape(vcard['url']) }}" class="url">{{ escape(vcard['url']) }}</a></td>
         </tr>
         {% end %}
-        {% set about = user.get('settings',{}).get('about','') %}
-        {% if ('desc' in vcard) or about %}
-        <tr><td>О себе:</td>
-            <td class='pw note'>{% if about %}{{ thumbify(about)[0] }}
-
-            {% end %}{% if 'desc' in vcard %}{{ thumbify(vcard['desc'])[0] }}{% end %}</td>
+        {% if about %}
+        <tr>
+          <td>О себе:</td>
+          <td class='pw note'>{{ thumbify(about)[0] }}</td>
         </tr>
         {% end %}
         <tr><td>Подписки:</td>

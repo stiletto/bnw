@@ -17,6 +17,7 @@ from bnw_handlers import command_userlist
 from bnw_handlers import command_bl
 from bnw_handlers import command_stat
 from bnw_handlers import command_update
+from bnw_handlers import command_userinfo
 
 
 # TODO: Auto-import all avialable handlers?
@@ -28,7 +29,7 @@ handlers = {
     "subscriptions/del":    command_subscription.cmd_unsubscribe,
     "subscriptions":        command_subscription.cmd_subscriptions,
     "feed":                 command_show.cmd_feed,
-    "today":                 command_show.cmd_today,
+    "today":                command_show.cmd_today,
     "show":                 command_show.cmd_show,
     "post":                 command_post.cmd_post,
     "comment":              command_post.cmd_comment,
@@ -45,4 +46,5 @@ handlers = {
     "blacklist":            command_bl.cmd_blacklist,
     "stat":                 command_stat.cmd_stat,
     "update":               command_update.cmd_update,
+    "userinfo":             command_userinfo.cmd_userinfo,
 }
