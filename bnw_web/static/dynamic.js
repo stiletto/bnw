@@ -46,7 +46,9 @@ function add_node(html, to, at_top) {
     if (at_top) {
         node.prependTo(to);
         // Remove last message.
-        $(to+">div.outerborder").last().remove();
+        if ($(to+">:visible").length > 19) {
+            $(to).children().slice(-1).remove();
+        }
     } else {
         node.appendTo(to);
     }
