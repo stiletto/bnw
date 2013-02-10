@@ -55,7 +55,7 @@ class MongoObject(WrappedDict):
     Это чтобы опечатки не убивали."""
     __metaclass__ = MongoObjectCollectionProxy
     # any subclass MUST define "collection"
-    # 
+    #
     dangerous_fields=('_id',)
     indexes = (
         (txmongo.filter.ASCENDING("id"), True, False),
@@ -68,7 +68,7 @@ class MongoObject(WrappedDict):
             self.doc=src
         else:
             self.doc={}
-    
+
     @classmethod
     @defer.inlineCallbacks
     def find_one(cls, *args,**kwargs):
@@ -120,8 +120,8 @@ class Message(MongoObject):
     collection = CollectionWrapper("messages")
     dangerous_fields = ('_id','real_user')
     indexes = MongoObject.indexes + (
-        (txmongo.filter.DESCENDING("date"), False, False), 
-        
+        (txmongo.filter.DESCENDING("date"), False, False),
+
         (txmongo.filter.ASCENDING("user") + txmongo.filter.ASCENDING("tags") + txmongo.filter.DESCENDING("date"),
             False, False),
         (txmongo.filter.ASCENDING("user") + txmongo.filter.DESCENDING("date"), False, False),
@@ -153,7 +153,7 @@ class Message(MongoObject):
             defer.returnValue(0)
 
 class FeedElement(MongoObject):
-    """ Элемент ленты. 
+    """ Элемент ленты.
         id: id сообщения
         user: пользователь-обладатель ленты."""
     collection = CollectionWrapper("feeds")
@@ -168,6 +168,7 @@ class Comment(MongoObject):
     dangerous_fields = ('_id','real_user')
     indexes = MongoObject.indexes + (
         (txmongo.filter.ASCENDING("message"), False, False),
+        (txmongo.filter.ASCENDING("user"), False, False),
     )
 
     def save(self,safe=True):
@@ -188,7 +189,7 @@ class User(MongoObject):
     indexes = (
         (txmongo.filter.ASCENDING("name"), True, False),
     )
-    
+
     def send_plain(self,message,sfrom=None):
         if not sfrom:
             sfrom = self.get('settings',{}).get('servicejid',None)
