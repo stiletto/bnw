@@ -30,7 +30,7 @@ parser = LinkParser(types=bnwtypes+shittypes)
 def thumbify(text, permitted_protocols=None):
     text = _unicode(xhtml_escape(text))
     if not permitted_protocols:
-        permitted_protocols = ["http", "https"]
+        permitted_protocols = ["http", "https",   "ftp", "git", "gopher", "magnet", "mailto", "xmpp"]
     texta = []
     thumbs = []
     stack = []
@@ -41,9 +41,14 @@ def thumbify(text, permitted_protocols=None):
             if m[0] in ('url','namedlink'):
                 # TODO: Move checking for permitted protocols
                 # in linkshit module? Matching twice is bad.
-                up = _URL_RE.match(m[2])
-                url = m[2] if up is None else up.group(1)
-                proto = None if up is None else up.group(2)
+                if m[0]=='namedlink':
+                    up = m[2].split(':', 1)
+                    proto = up[0] if len(up)==2 else None
+                    url = m[2]
+                else:
+                    up = _URL_RE.match(m[2])
+                    url = m[2] if up is None else up.group(1)
+                    proto = None if up is None else up.group(2)
                 if proto and proto not in permitted_protocols:
                     texta.append('%s<!-- proto! -->' % (m[1],))
                 else:
