@@ -18,6 +18,7 @@ from bnw_handlers import command_bl
 from bnw_handlers import command_stat
 from bnw_handlers import command_update
 from bnw_handlers import command_userinfo
+from bnw_handlers import command_whoami
 
 
 # TODO: Auto-import all avialable handlers?
@@ -47,4 +48,5 @@ handlers = {
     "stat":                 command_stat.cmd_stat,
     "update":               command_update.cmd_update,
     "userinfo":             command_userinfo.cmd_userinfo,
+    "whoami":               command_whoami.cmd_whoami,
 }
