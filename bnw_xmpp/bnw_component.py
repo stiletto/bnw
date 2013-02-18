@@ -106,7 +106,7 @@ class BnwService(component.Service):
         self.xmlstream.send(content)
 
     def callbackIq(self, result, original):
-        if not (result or original['type'] == 'error'):
+        if not (result or original['type'] in ('error','result')):
             elem = original
             frm = elem['from']
             elem['from'] = elem['to']
