@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}BnW — {{ msg.get('user','None') if msg else 'None' }}: {{ w.shorttext(msg['text']) if msg else 'None' }}{% end %}
+{% block title %}BnW — {{ msg.get('user','None') if msg else 'None' }}: {{ escape(w.shorttext(msg['text'])) if msg else 'None' }}{% end %}
 {% block extrahead %}
     <link rel="canonical" href="http://{{ config.webui_base }}/p/{{ msgid }}" />
     <script type="text/javascript">

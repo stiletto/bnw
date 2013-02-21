@@ -20,6 +20,7 @@ class ApiHandler(BnwWebHandler):
         stime = time.time()
         user = yield objs.User.find_one(
             {'login_key': self.get_argument('login', '')})
+        self.set_header('Content-Type', 'application/json; charset=utf-8')
         if not cmd_name:
             defer.returnValue(json.dumps(dict(
                 ok=True,
@@ -37,6 +38,10 @@ class ApiHandler(BnwWebHandler):
         if 'login' in args:
             del args['login']
         self.set_header('Cache-Control', 'no-cache')
+        cors_origin = self.request.headers.get('Origin',None)
+        if cors_origin:
+            self.set_header('Access-Control-Allow-Origin', '*')
+            print "API call %d '%s' by '%s' is CORS from '%s'" % (callogtuple + (cors_origin,))
         try:
             result = yield handler(ApiRequest(user), **args)
         except BnwResponse as br:
