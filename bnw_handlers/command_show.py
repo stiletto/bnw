@@ -1,28 +1,32 @@
-# -*- coding: utf-8 -*-
-#from twisted.words.xish import domish
+# coding: utf-8
+
+import time
+
+import pymongo
 
 from base import *
 import bnw_core.bnw_objects as objs
 
-import pymongo
-import time
 
-def _(s,user):
-    return s
-
-def findMessages(query,sort,limit):
-    return objs.Message.find_sort(query,sort,limit=limit)
-    
 @defer.inlineCallbacks
-def showSearch(parameters,page):    
-    # THIS COMMAND IS FUCKING SLOW SLOW SLOW AND WAS WRITTEN BY A BRAIN-DAMAGED IDIOT
+def showSearch(parameters, page, auth_user=None):
+    # FIXME: THIS COMMAND IS FUCKING SLOW SLOW SLOW AND WAS WRITTEN BY A
+    # BRAIN-DAMAGED IDIOT
     messages=[x.filter_fields() for x in  (yield objs.Message.find_sort(
         parameters,[('date',pymongo.DESCENDING)],limit=20,skip=page*20))]
+    # Get subscriptions info
+    if auth_user is not None:
+        ids = [m['id'] for m in messages]
+        subscriptions = yield objs.Subscription.find({
+            'user': auth_user, 'type': 'sub_message', 'target': {'$in': ids}})
+        sub_ids = [s['target'] for s in subscriptions]
+        for msg in messages:
+            msg['subscribed'] = True if msg['id'] in sub_ids else False
     messages.reverse()
-    defer.returnValue(
-        dict(ok=True,format="messages", cache=5,cache_public=True,
-             messages=messages)
-    )
+    defer.returnValue(dict(
+        ok=True, format="messages", cache=5, cache_public=True,
+        messages=messages))
+
 
 @defer.inlineCallbacks
 def showComment(commentid):
@@ -36,30 +40,41 @@ def showComment(commentid):
                 comment=comment.filter_fields(),
                     ))
 
+
 @defer.inlineCallbacks
-def showComments(msgid):
-        message=yield objs.Message.find_one({'id': msgid})
-        if message is None:
-            defer.returnValue(
-                dict(ok=False,desc='No such message',cache=5,cache_public=True)
-            )
-        defer.returnValue(
-            dict(ok=True,format='message_with_replies', cache=5, cache_public=True,
-                msgid=msgid, message=message.filter_fields(),
-                replies=[comment.filter_fields() for comment in (
-                    yield objs.Comment.find_sort(
-                        {'message': msgid.upper()},[('date',pymongo.ASCENDING)]
-                    ))
-                ]
-            )
-        ) # suck cocks, be LISP :3
+def showComments(msgid, auth_user=None, bl=None):
+    message=yield objs.Message.find_one({'id': msgid})
+    if message is None:
+        defer.returnValue(dict(
+            ok=False, desc='No such message', cache=5, cache_public=True))
+    if auth_user is not None:
+        subscribed = yield objs.Subscription.count({
+            'user': auth_user, 'type': 'sub_message', 'target': msgid})
+        message['subscribed'] = bool(subscribed)
+    qdict = {'message': msgid.upper()}
+    if bl:
+        qdict['user'] = {'$nin': bl}
+    comments = yield objs.Comment.find_sort(
+        qdict, [('date', pymongo.ASCENDING)])
+    defer.returnValue(dict(
+        ok=True, format='message_with_replies', cache=5, cache_public=True,
+        msgid=msgid, message=message.filter_fields(),
+        replies=[comment.filter_fields() for comment in comments]))
+
 
 @check_arg(message=MESSAGE_COMMENT_RE, page='[0-9]+')
 @defer.inlineCallbacks
 def cmd_show(request, message='', user='', tag='', club='', page='0',
-             show='messages', replies=None):
+             show='messages', replies=None, use_bl=False):
     """Show messages by specified parameters."""
     message = canonic_message_comment(message).upper()
+    auth_user = request.user['name'] if request.user else None
+    # Get user's blacklist
+    if use_bl and request.user:
+        bl = request.user.get('blacklist', [])
+        bl = [el[1] for el in bl if el[0] == 'user']
+    else:
+        bl = []
     if '/' in message:
         defer.returnValue((yield showComment(message)))
     if replies:
@@ -68,7 +83,7 @@ def cmd_show(request, message='', user='', tag='', club='', page='0',
                 ok=False,
                 desc="Error: 'replies' is allowed only with 'message'.",
                 cache=3600))
-        defer.returnValue((yield showComments(message)))
+        defer.returnValue((yield showComments(message, auth_user, bl)))
     else:
         if show not in ['messages', 'recommendations', 'all']:
             defer.returnValue(dict(
@@ -84,7 +99,10 @@ def cmd_show(request, message='', user='', tag='', club='', page='0',
             else:
                 user_spec = {'$or': [{'user': user}, {'recommendations': user}]}
             parameters.update(user_spec)
-        defer.returnValue((yield showSearch(parameters, int(page))))
+        elif bl:
+            parameters['user'] = {'$nin': bl}
+        defer.returnValue((yield showSearch(parameters, int(page), auth_user)))
+
 
 @require_auth
 @defer.inlineCallbacks
@@ -103,9 +121,11 @@ def cmd_feed(request,page="0"):
              cache=5)
     )
 
+
 TODAY_REBUILD_PERIOD = 300
 TODAY_MAP = 'function() { emit(this.message, 1); }'
 TODAY_REDUCE = 'function(k,vals) { var sum=0; for(var i in vals) sum += vals[i]; return sum; }'
+
 
 @defer.inlineCallbacks
 def cmd_today(request):
@@ -134,6 +154,7 @@ def cmd_today(request):
     else:
         defer.returnValue(dict(ok=False,desc='Map/Reduce failed'))
 
+
 @defer.inlineCallbacks
 def cmd_today2(request):
     """ Показать обсуждаемое за последние 24 часа """
@@ -146,4 +167,3 @@ def cmd_today2(request):
              desc='Today''s most discussed',
              cache=300)
     )
-
