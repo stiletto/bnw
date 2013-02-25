@@ -1,5 +1,5 @@
 
-#import command_parsers
+# import command_parsers
 
-#def handleCommand(jid,bare_jid,user,message):
+# def handleCommand(jid,bare_jid,user,message):
 #    pass

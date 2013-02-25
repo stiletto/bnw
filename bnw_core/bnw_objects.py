@@ -137,20 +137,12 @@ class Message(MongoObject):
     collection = CollectionWrapper("messages")
     dangerous_fields = ('_id', 'real_user')
     indexes = MongoObject.indexes + (
-        (txmongo.filter.DESCENDING("date"), False, False),
-
         (txmongo.filter.ASCENDING("user") + txmongo.filter.ASCENDING("tags") + txmongo.filter.DESCENDING("date"),
             False, False),
-        (txmongo.filter.ASCENDING(
-            "user") + txmongo.filter.DESCENDING("date"), False, False),
-        (txmongo.filter.ASCENDING("user") + txmongo.filter.ASCENDING(
-            "clubs") + txmongo.filter.DESCENDING("date"), False, False),
-        (txmongo.filter.ASCENDING(
-            "clubs") + txmongo.filter.DESCENDING("date"), False, False),
-        (txmongo.filter.ASCENDING(
-            "tags") + txmongo.filter.DESCENDING("date"), False, False),
-        (txmongo.filter.DESCENDING("date") +
-         txmongo.filter.DESCENDING("recommendations"), False, False),
+        (txmongo.filter.ASCENDING("user") + txmongo.filter.ASCENDING("clubs") + txmongo.filter.DESCENDING("date"),
+            False, False),
+        (txmongo.filter.DESCENDING("date") + txmongo.filter.DESCENDING("recommendations"),
+            False, False),
     )
 
     def save(self, safe=True):

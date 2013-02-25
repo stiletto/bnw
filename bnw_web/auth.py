@@ -38,7 +38,7 @@ class AuthMixin(object):
 def requires_auth(fun):
     @defer.inlineCallbacks
     def newfun(self, *args, **kwargs):
-        user=yield self.get_auth_user()
+        user = yield self.get_auth_user()
         if not user:
             self.set_status(403)
             defer.returnValue(self.render('noauth.html'))

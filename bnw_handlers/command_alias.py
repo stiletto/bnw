@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#from twisted.words.xish import domish
+# from twisted.words.xish import domish
 
 from base import *
 import random
@@ -7,29 +7,32 @@ import random
 import bnw_core.bnw_objects as objs
 
 ALIAS_RE = '[a-zA-Z0-9_-]+'
+
+
 @require_auth
-@check_arg(set=ALIAS_RE,delete=ALIAS_RE)
+@check_arg(set=ALIAS_RE, delete=ALIAS_RE)
 @defer.inlineCallbacks
-def cmd_alias(request,set="",delete="",value=""):
+def cmd_alias(request, set="", delete="", value=""):
     """ Список алиасов """
     if not (delete or (set and value)):
         defer.returnValue(
-            dict(ok=False,desc='Usage: alias -s <alias> <command>\n\t\tor alias -d <alias>\nFor example, "alias -s fag pm -u %1 YOU ARE A FAG!" will make it easy to tell someone that he is a fag. Just "fag <user>"!')
+            dict(
+                ok=False, desc='Usage: alias -s <alias> <command>\n\t\tor alias -d <alias>\nFor example, "alias -s fag pm -u %1 YOU ARE A FAG!" will make it easy to tell someone that he is a fag. Just "fag <user>"!')
         )
-    
+
     if set:
-        assert len(set)<=32 and len(value)<=1024
-        _ = yield objs.User.mupdate({'name':request.user['name']},{'$set':{'aliases.%s' % (set,):value}},safe=True)
+        assert len(set) <= 32 and len(value) <= 1024
+        _ = yield objs.User.mupdate({'name': request.user['name']}, {'$set': {'aliases.%s' % (set,): value}}, safe=True)
         defer.returnValue(
-            dict(ok=True, 
-                desc='Alias %s updated.' % (set,)
-            )
+            dict(ok=True,
+                         desc='Alias %s updated.' % (set,)
+                 )
         )
     elif delete:
-        assert len(delete)<=32
-        _ = yield objs.User.mupdate({'name':request.user['name']},{'$unset':{'aliases.%s' % (set,):1}},safe=True)
+        assert len(delete) <= 32
+        _ = yield objs.User.mupdate({'name': request.user['name']}, {'$unset': {'aliases.%s' % (set,): 1}}, safe=True)
         defer.returnValue(
-            dict(ok=True, 
-                desc='Alias %s deleted.' % (delete,)
-            )
+            dict(ok=True,
+                         desc='Alias %s deleted.' % (delete,)
+                 )
         )

@@ -11,7 +11,7 @@ import api_handlers
 class ApiRequest(BnwWebRequest):
     def __init__(self, user=None):
         super(ApiRequest, self).__init__(user)
-        self.type='http-api'
+        self.type = 'http-api'
 
 
 class ApiHandler(BnwWebHandler):
@@ -29,27 +29,27 @@ class ApiHandler(BnwWebHandler):
             defer.returnValue(json.dumps(dict(
                 ok=False,
                 desc='unknown command')))
-        callogtuple = (id(self),cmd_name,user['name'] if user else '')
+        callogtuple = (id(self), cmd_name, user['name'] if user else '')
         print "API call %d '%s' by '%s' started." % callogtuple
         handler = api_handlers.handlers[cmd_name]
         args = dict(
-            (utf8(k), _unicode(v[0])) \
+            (utf8(k), _unicode(v[0]))
             for k, v in self.request.arguments.iteritems())
         if 'login' in args:
             del args['login']
         self.set_header('Cache-Control', 'no-cache')
-        cors_origin = self.request.headers.get('Origin',None)
+        cors_origin = self.request.headers.get('Origin', None)
         if cors_origin:
             self.set_header('Access-Control-Allow-Origin', '*')
             print "API call %d '%s' by '%s' is CORS from '%s'" % (callogtuple + (cors_origin,))
         try:
             result = yield handler(ApiRequest(user), **args)
         except BnwResponse as br:
-            print "API call %d '%s' by '%s' failed with exception. %f.s" % (callogtuple + ((time.time()-stime),))
+            print "API call %d '%s' by '%s' failed with exception. %f.s" % (callogtuple + ((time.time() - stime),))
             defer.returnValue(json.dumps(dict(
                 ok=False,
                 desc=str(br)), ensure_ascii=False))
-        print "API call %d '%s' by '%s' completed. %f.s" % (callogtuple + ((time.time()-stime),))
+        print "API call %d '%s' by '%s' completed. %f.s" % (callogtuple + ((time.time() - stime),))
         defer.returnValue(json.dumps(result, ensure_ascii=False))
 
     # GET handler is the same as POST.
