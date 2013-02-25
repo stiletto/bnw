@@ -103,9 +103,10 @@ class MainWsHandler(WsHandler, AuthMixin):
         self.write_message(json.dumps({
             'type': 'upd_comments_count', 'id': msg_id, 'num': num}))
 
-    def upd_recommendations_count(self, msg_id, num):
+    def upd_recommendations_count(self, msg_id, num, recommendations):
         self.write_message(json.dumps({
-            'type': 'upd_recommendations_count', 'id': msg_id, 'num': num}))
+            'type': 'upd_recommendations_count', 'id': msg_id, 'num': num,
+            'recommendations': recommendations}))
 
 
 class UserWsHandler(MainWsHandler):

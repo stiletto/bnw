@@ -258,8 +258,9 @@ def recommendMessage(user, message, comment="", sfrom=None):
                 yield objs.Message.mupdate(
                     {'id': message['id']},
                     {'$addToSet': {'recommendations': user['name']}})
+                all_recos = message['recommendations'] + [user['name']]
                 publish('upd_recommendations_count', message['id'],
-                        recos_count + 1)
+                        recos_count + 1, all_recos)
 
     defer.returnValue((True, (qn, recipients, message['replycount'])))
 
