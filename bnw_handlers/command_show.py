@@ -42,32 +42,39 @@ def showComment(commentid):
 
 
 @defer.inlineCallbacks
-def showComments(msgid, auth_user=None):
-        message=yield objs.Message.find_one({'id': msgid})
-        if message is None:
-            defer.returnValue(
-                dict(ok=False,desc='No such message',cache=5,cache_public=True)
-            )
-        if auth_user is not None:
-            subscribed = yield objs.Subscription.count({
-                'user': auth_user, 'type': 'sub_message', 'target': msgid})
-            message['subscribed'] = bool(subscribed)
+def showComments(msgid, auth_user=None, bl=None):
+    message=yield objs.Message.find_one({'id': msgid})
+    if message is None:
         defer.returnValue(dict(
-            ok=True, format='message_with_replies', cache=5, cache_public=True,
-            msgid=msgid, message=message.filter_fields(),
-            replies=[comment.filter_fields() for comment in (
-                yield objs.Comment.find_sort(
-                    {'message': msgid.upper()},[('date',pymongo.ASCENDING)]))
-            ]))
+            ok=False, desc='No such message', cache=5, cache_public=True))
+    if auth_user is not None:
+        subscribed = yield objs.Subscription.count({
+            'user': auth_user, 'type': 'sub_message', 'target': msgid})
+        message['subscribed'] = bool(subscribed)
+    qdict = {'message': msgid.upper()}
+    if bl:
+        qdict['user'] = {'$nin': bl}
+    comments = yield objs.Comment.find_sort(
+        qdict, [('date', pymongo.ASCENDING)])
+    defer.returnValue(dict(
+        ok=True, format='message_with_replies', cache=5, cache_public=True,
+        msgid=msgid, message=message.filter_fields(),
+        replies=[comment.filter_fields() for comment in comments]))
 
 
 @check_arg(message=MESSAGE_COMMENT_RE, page='[0-9]+')
 @defer.inlineCallbacks
 def cmd_show(request, message='', user='', tag='', club='', page='0',
-             show='messages', replies=None):
+             show='messages', replies=None, use_bl=False):
     """Show messages by specified parameters."""
     message = canonic_message_comment(message).upper()
     auth_user = request.user['name'] if request.user else None
+    # Get user's blacklist
+    if use_bl and request.user:
+        bl = request.user.get('blacklist', [])
+        bl = [el[1] for el in bl if el[0] == 'user']
+    else:
+        bl = []
     if '/' in message:
         defer.returnValue((yield showComment(message)))
     if replies:
@@ -76,7 +83,7 @@ def cmd_show(request, message='', user='', tag='', club='', page='0',
                 ok=False,
                 desc="Error: 'replies' is allowed only with 'message'.",
                 cache=3600))
-        defer.returnValue((yield showComments(message, auth_user)))
+        defer.returnValue((yield showComments(message, auth_user, bl)))
     else:
         if show not in ['messages', 'recommendations', 'all']:
             defer.returnValue(dict(
@@ -92,6 +99,8 @@ def cmd_show(request, message='', user='', tag='', club='', page='0',
             else:
                 user_spec = {'$or': [{'user': user}, {'recommendations': user}]}
             parameters.update(user_spec)
+        elif bl:
+            parameters['user'] = {'$nin': bl}
         defer.returnValue((yield showSearch(parameters, int(page), auth_user)))
 
 
