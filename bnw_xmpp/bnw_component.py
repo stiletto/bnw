@@ -48,14 +48,14 @@ class LogService(component.Service):
 
     def rawDataIn(self, buf):
         log.msg("%s - RECV: %s" % (str(time.time()),
-            unicode(buf, 'utf-8').encode('utf-8', 'replace')))
+                                   unicode(buf, 'utf-8').encode('utf-8', 'replace')))
 
     def rawDataOut(self, buf):
         log.msg("%s - SEND: %s" % (str(time.time()),
-            unicode(buf, 'utf-8').encode('utf-8', 'replace')))
+                                   unicode(buf, 'utf-8').encode('utf-8', 'replace')))
 
 
-#class MessageSender(xmlrpc.XMLRPC):
+# class MessageSender(xmlrpc.XMLRPC):
 #    """An example object to be published.
 #
 #    Has five methods accessable by XML-RPC, 'echo', 'hello', 'defer',
@@ -106,7 +106,7 @@ class BnwService(component.Service):
         self.xmlstream.send(content)
 
     def callbackIq(self, result, original):
-        if not (result or original['type'] in ('error','result')):
+        if not (result or original['type'] in ('error', 'result')):
             elem = original
             frm = elem['from']
             elem['from'] = elem['to']
@@ -126,11 +126,14 @@ class BnwService(component.Service):
         if result:
             etime = time.time() - stime
             self.send_plain(jid, src, str(result))
-            t = objs.Timing({'date': stime, 'time': etime, 'command': unicode(body), 'jid': jid})
+            t = objs.Timing({'date': stime, 'time': etime,
+                            'command': unicode(body), 'jid': jid})
             t.save().addCallback(lambda x: None)
-            log.msg("%s - PROCESSING TIME (from %s): %f" % (str(time.time()), jid, etime))
-            if jid.split('/',1)[0] == config.admin_jid:
-                self.send_plain(jid, src, 'I did it in %f seconds.' % (etime, ))
+            log.msg("%s - PROCESSING TIME (from %s): %f" % (
+                str(time.time()), jid, etime))
+            if jid.split('/', 1)[0] == config.admin_jid:
+                self.send_plain(
+                    jid, src, 'I did it in %f seconds.' % (etime, ))
 
     def errbackMessage(self, result, jid, src):
         self.send_plain(jid, src, 'Early error: ' + str(result))
@@ -142,7 +145,7 @@ class BnwService(component.Service):
         """
         msg_type = msg.getAttribute('type')
         if msg_type != 'chat' or not msg.body:
-            if msg_type=='error':
+            if msg_type == 'error':
                 stupid_handler.failure(msg)
             return
         stime = time.time()
@@ -160,13 +163,17 @@ class BnwService(component.Service):
             cmsg["to"] = msg['from']
             cmsg["from"] = msg['to']
             cmsg["type"] = 'chat'
-            cmsg.addChild(domish.Element(('http://jabber.org/protocol/chatstates', 'composing')))
+            cmsg.addChild(domish.Element(
+                ('http://jabber.org/protocol/chatstates', 'composing')))
             self.xmlstream.send(cmsg)
 
         gp = stupid_handler.idiotic(msg)
-        #self.send_plain(msg['from'],'processing...')
-        #gp=getPage('http://localhost:8080/xmpp_rpc/message', method='POST',postdata=msg.toXml().encode('utf-8','replace'),headers={'Content-Type':'application/octet-stream'})
-        gp.addCallback(self.callbackMessage, jid=msg['from'], stime=stime, src=msg['to'], body=msg.body)
+        # self.send_plain(msg['from'],'processing...')
+        # gp=getPage('http://localhost:8080/xmpp_rpc/message',
+        # method='POST',postdata=msg.toXml().encode('utf-8','replace'),headers
+        # ={'Content-Type':'application/octet-stream'})
+        gp.addCallback(self.callbackMessage, jid=msg['from'],
+                       stime=stime, src=msg['to'], body=msg.body)
         gp.addErrback(self.errbackMessage, jid=msg['from'], src=msg['to'])
 
     def onPresence(self, prs):
@@ -176,18 +183,21 @@ class BnwService(component.Service):
         """
         prs_type = prs.getAttribute("type", "")
         send_status = False
-        #print prs_type
+        # print prs_type
         if prs_type == "subscribe":
-            self.xmlstream.send(create_presence(prs["to"], prs["from"], _type="subscribed"))
+            self.xmlstream.send(
+                create_presence(prs["to"], prs["from"], _type="subscribed"))
             send_status = True
         elif prs_type == "unsubscribe":
-            self.xmlstream.send(create_presence(prs["to"], prs["from"], _type="unsubscribed"))
+            self.xmlstream.send(
+                create_presence(prs["to"], prs["from"], _type="unsubscribed"))
         elif prs_type == "error":
             return
         if prs_type == "probe" or send_status:
             msg = create_presence(prs["to"], prs["from"])
             tm = time.gmtime()
-            termctrl = "9600 0010 1110 0000 %02d %02d %02d" % (tm.tm_hour, tm.tm_min, tm.tm_sec)
+            termctrl = "9600 0010 1110 0000 %02d %02d %02d" % (
+                tm.tm_hour, tm.tm_min, tm.tm_sec)
             msg.addElement("status", content=termctrl)
             self.xmlstream.send(msg)
 

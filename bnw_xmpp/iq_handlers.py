@@ -38,9 +38,10 @@ def get_and_resize_avatar(iq):
         return
     return avatar, mimetype, thumb_f.getvalue()
 
+
 @defer.inlineCallbacks
 def vcard(iq, iq_user):
-    if (not iq.vCard) or iq['type']!='result':
+    if (not iq.vCard) or iq['type'] != 'result':
         defer.returnValue(False)
     if not iq_user:
         # User which have been sent IQ not registered.
@@ -67,10 +68,10 @@ def vcard(iq, iq_user):
             if update_needed:
                 extension = mimetype.split('/')[1]
                 avid = fs.put(
-                    avatar, filename=iq_user['name']+'.'+extension,
+                    avatar, filename=iq_user['name'] + '.' + extension,
                     contentType=mimetype)
                 thumbid = fs.put(
-                    thumb, filename=iq_user['name']+'_thumb.png',
+                    thumb, filename=iq_user['name'] + '_thumb.png',
                     contentType='image/png')
                 yield objs.User.mupdate(
                     {'name': iq_user['name']},
@@ -86,17 +87,21 @@ def vcard(iq, iq_user):
     vcard = {}
     if v.N and v.N.GIVEN and str(v.N.GIVEN) and v.N.FAMILY and str(v.N.FAMILY):
         vcard['fullname'] = '%s %s' % (v.N.GIVEN, v.N.FAMILY)
-    if v.URL and str(v.URL): vcard['url'] = str(v.URL)
-    if v.DESC and str(v.DESC): vcard['desc'] = str(v.DESC)
+    if v.URL and str(v.URL):
+        vcard['url'] = str(v.URL)
+    if v.DESC and str(v.DESC):
+        vcard['desc'] = str(v.DESC)
     yield objs.User.mupdate(
         {'name': iq_user['name']},
         {'$set': {'vcard': vcard}})
     defer.returnValue(True)
 
 VERSION_XMLNS = 'jabber:iq:version'
+
+
 def version(iq, iq_user):
     if iq.query and iq.query.uri == VERSION_XMLNS:
-        reply = domish.Element((None,'iq'))
+        reply = domish.Element((None, 'iq'))
         reply['type'] = 'result'
         if iq.getAttribute('id'):
             reply['id'] = iq['id']
@@ -108,9 +113,11 @@ def version(iq, iq_user):
         return True
 
 DISCO_ITEMS_XMLNS = 'http://jabber.org/protocol/disco#items'
+
+
 def disco_items(iq, iq_user):
     if iq.query and iq.query.uri == DISCO_ITEMS_XMLNS:
-        reply = domish.Element((None,'iq'))
+        reply = domish.Element((None, 'iq'))
         reply['type'] = 'result'
         if iq.getAttribute('id'):
             reply['id'] = iq['id']
@@ -124,23 +131,25 @@ FEATURES = ('jabber:iq:version',
             'http://jabber.org/protocol/disco#info',
             'http://jabber.org/protocol/disco#items',
             'urn:xmpp:receipts',
-)
+            )
+
+
 def disco_info(iq, iq_user):
     if iq.query and iq.query.uri == DISCO_INFO_XMLNS:
-        reply = domish.Element((None,'iq'))
+        reply = domish.Element((None, 'iq'))
         reply['type'] = 'result'
         if iq.getAttribute('id'):
             reply['id'] = iq['id']
         reply.addElement('query', DISCO_INFO_XMLNS)
         reply.query.addElement('identity')
-        reply.query.identity['category'] = 'client' # not pretty sure
+        reply.query.identity['category'] = 'client'  # not pretty sure
         reply.query.identity['type'] = 'bot'
         reply.query.identity['name'] = 'BnW'
 
         for feature_name in FEATURES:
             feature = reply.query.addElement('feature')
             feature['var'] = feature_name
-    
+
         send_raw(iq['from'], iq['to'], reply)
         return True
 

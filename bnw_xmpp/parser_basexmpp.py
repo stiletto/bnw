@@ -5,6 +5,7 @@ from twisted.internet import defer
 import re
 import base
 
+
 class BaseXmppParser(base.BaseParser):
     def formatResult(self, request, result):
         if not isinstance(result, dict):
