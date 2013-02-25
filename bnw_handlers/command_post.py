@@ -117,7 +117,12 @@ def cmd_recommend(request, message="", comment="", unrecommend=""):
                     {'id': message_id},
                     {'$pull': {'recommendations': request.user['name']}})
                 rcount = len(message_obj['recommendations']) - 1
-                publish('upd_recommendations_count', message_id, rcount)
+                all_recos = list(message_obj['recommendations'])
+                all_recos.remove(request.user['name'])
+                publish('upd_recommendations_count',
+                        message_id, rcount, all_recos)
+                publish('upd_recommendations_count_in_'+message_id,
+                        message_id, rcount, all_recos)
                 defer.returnValue(dict(
                     ok=True,
                     desc='Message deleted from your recommendations list.'))

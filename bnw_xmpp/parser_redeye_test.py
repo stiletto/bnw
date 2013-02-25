@@ -1,49 +1,55 @@
 # -*- coding: utf-8 -*-
 from parser_redeye import *
 
-if __name__=="__main__":
+if __name__ == "__main__":
     # This is some sort of parser test.
 
     subscribe_args = (
-                ("m", "message", True, u"Subscribe to message."),
-                ("u", "user", True, u"Subscribe to user."),
-                ("t", "tag", True, u"Subscribe to tag."),
-                ("c", "club", True, u"Subscribe to club."),
-                ("n", "newtab", False, u"Receive messages for this subscription from into tab"),
-            )
-    show_args =  (
+        ("m", "message", True, u"Subscribe to message."),
+        ("u", "user", True, u"Subscribe to user."),
+        ("t", "tag", True, u"Subscribe to tag."),
+        ("c", "club", True, u"Subscribe to club."),
+        ("n", "newtab", False,
+         u"Receive messages for this subscription from into tab"),
+    )
+    show_args = (
                 ("m", "message", True, u"Show specified message."),
                 ("u", "user", True, u"Show user's posts."),
                 ("t", "tag", True, u"Show posts with tag."),
                 ("c", "club", True, u"Show club posts."),
                 ("p", "page", True, u"Results page (from 0)."),
-                ("r", "replies", False, u"Include replies in output (only with -m)."),
-            )
+                ("r", "replies", False,
+                 u"Include replies in output (only with -m)."),
+    )
     post_args = (
-                ("s", "notop", False, u"Post cannot be bumped to top."), # no-op
-                ("t", "tags", True, u"Mark post with this tag(s) (comma-separated)."),
-                ("c", "clubs", True, u"Post to this club(s) (comma-separated)."),
+                ("s", "notop", False,
+                 u"Post cannot be bumped to top."),  # no-op
+                ("t", "tags", True,
+                 u"Mark post with this tag(s) (comma-separated)."),
+                ("c", "clubs", True,
+                 u"Post to this club(s) (comma-separated)."),
                 ("a", "anonymous", False, u"Anonymous post."),
-                ("q", "anonymous-comments", False, u"Make all comments to this post anonymous (doesn''t work at all yet)."),
-            )
+                ("q", "anonymous-comments", False,
+                 u"Make all comments to this post anonymous (doesn''t work at all yet)."),
+    )
     comment_args = (
-                ("m", "message", True, u"Message to comment."),
-                ("a", "anonymous", False, u"Anonymous comment."),
-            )
+        ("m", "message", True, u"Message to comment."),
+        ("a", "anonymous", False, u"Anonymous comment."),
+    )
     recommend_args = (
-                ("m", "message", True, u"Message to recommend."),
-            )
+        ("m", "message", True, u"Message to recommend."),
+    )
     delete_args = (
-                ('m',   'message',True,'Message or comment to delete.'),
-            )
+        ('m', 'message', True, 'Message or comment to delete.'),
+    )
 
     handlers = (
-        ("ping", 
+        ("ping",
             (
                 ("s", "safe", False, u"Do not vyebyvatsya."),
             ),
             "ping",
-        ),
+         ),
 
         ("except", (), "except", ),
         ("register", (), "register", "name", ),
@@ -60,7 +66,7 @@ if __name__=="__main__":
         ("post", post_args, "post", "text", ),
         ("p", post_args, "post", "text", ),
         ("comment", comment_args, "comment", "text", ),
-        ("c",  comment_args, "comment", "text", ),
+        ("c", comment_args, "comment", "text", ),
         ("recommend", recommend_args, "recommend", "comment", ),
         ("r", recommend_args, "recommend", "comment", ),
         ("on", (), "on", ),
@@ -70,32 +76,33 @@ if __name__=="__main__":
         ("login", (), "login", ),
     )
 
-    p=RedEyeParser(handlers,[])
+    p = RedEyeParser(handlers, [])
     test = (
         ("post --tags=linux,anime,mplayer ваш ляликс - говно для просмотра аниме!",
-            ("post","text",{"tags": "linux,anime,mplayer"},"ваш ляликс - говно для просмотра аниме!")),
+            ("post", "text", {"tags": "linux,anime,mplayer"}, "ваш ляликс - говно для просмотра аниме!")),
         ("comment -m 123456 ТЫ ГОВНО",
-            ("comment","text",{"message":"123456"},"ТЫ ГОВНО")),
+            ("comment", "text", {"message": "123456"}, "ТЫ ГОВНО")),
         ("c --message=123456/123",
-            ("comment","text",{"message":"123456/123"},"")),
+            ("comment", "text", {"message": "123456/123"}, "")),
         ("subscribe -t mytag",
-            ("subscribe",None,{"tag":"mytag"},"")),
+            ("subscribe", None, {"tag": "mytag"}, "")),
         ("subscriptions",
-            ("subscriptions",None,{},"")),
+            ("subscriptions", None, {}, "")),
 
         ("show -t lol --club=fuck",
-            ("show",None,{"tag":"lol","club":"fuck"},"")),
+            ("show", None, {"tag": "lol", "club": "fuck"}, "")),
         ("interface simplified",
-            ("interface","iface",{},"simplified")),
-        )
+            ("interface", "iface", {}, "simplified")),
+    )
+
     class ShitMsg(object):
-        def __init__(self,b):
-            self.body=b
-    for t,r in test:
-        msg=ShitMsg(t)
-        res=p.resolve(msg)
-        print msg,res,r
-        assert r==res
+        def __init__(self, b):
+            self.body = b
+    for t, r in test:
+        msg = ShitMsg(t)
+        res = p.resolve(msg)
+        print msg, res, r
+        assert r == res
     print "Done ok."
 else:
     raise Exception("Do not import this shit, just run it!")

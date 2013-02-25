@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#from twisted.words.xish import domish
+# from twisted.words.xish import domish
 
 import formatters_redeye
 import formatters_simple
@@ -16,7 +16,6 @@ simple_formatters = {
     'recommendation': formatters_simple.formatter_recommendation,
 }
 
-parsers={}
-parsers['redeye']=redeye_formatters
-parsers['simplified']=simple_formatters
-
+parsers = {}
+parsers['redeye'] = redeye_formatters
+parsers['simplified'] = simple_formatters
