@@ -68,7 +68,6 @@ class MainWsHandler(WsHandler, AuthMixin):
     def get_handlers(self):
         if self.version=='2':
             return (
-                # TODO: Should we check page to reduce sending data?
                 ('new_message', self.new_message),
                 ('del_message', self.del_message),
                 ('upd_comments_count', self.upd_comments_count),
@@ -122,7 +121,7 @@ class UserWsHandler(MainWsHandler):
         )
 
 
-class MessageWsHandler(WsHandler, AuthMixin):
+class MessageWsHandler(MainWsHandler):
     """Deliver new events on message page via websockets."""
 
     def get_handlers(self, msgid):
@@ -130,6 +129,9 @@ class MessageWsHandler(WsHandler, AuthMixin):
             return (
                 ('new_comment_in_'+msgid, self.new_comment),
                 ('del_comment_in_'+msgid, self.del_comment),
+                ('upd_comments_count_in_'+msgid, self.upd_comments_count),
+                ('upd_recommendations_count_in_'+msgid,
+                 self.upd_recommendations_count),
             )
         else:
             return (

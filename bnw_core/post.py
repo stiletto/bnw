@@ -221,6 +221,7 @@ def postComment(message_id, comment_id, text, user, anon=False, sfrom=None):
     qn, recipients = yield send_to_subscribers([{'target': message_id, 'type': 'sub_message'}], comment)
     publish('new_comment_in_' + message_id, comment.filter_fields())  # ALARM
     publish('upd_comments_count', message_id, comment['num'])
+    publish('upd_comments_count_in_'+message_id, message_id, comment['num'])
     defer.returnValue((True, (comment['id'], comment['num'], qn, recipients)))
 
 
@@ -261,6 +262,8 @@ def recommendMessage(user, message, comment="", sfrom=None):
                 all_recos = message['recommendations'] + [user['name']]
                 publish('upd_recommendations_count', message['id'],
                         recos_count + 1, all_recos)
+                publish('upd_recommendations_count_in_'+message['id'],
+                        message['id'], recos_count + 1, all_recos)
 
     defer.returnValue((True, (qn, recipients, message['replycount'])))
 
