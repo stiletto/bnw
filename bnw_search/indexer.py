@@ -29,6 +29,7 @@ class Indexer(object):
     TYPE = 3
     TAGS_INFO = 4
     DATE_ORIG = 5
+
     def create_document(self, obj):
         """Get an message or comment object and
         return a tuple of unique term and Xapian
@@ -40,9 +41,9 @@ class Indexer(object):
         # Go word by word, stem it and add to the document.
         for index, match in enumerate(self.WORD_REC.finditer(text)):
             doc.add_posting(self.make_stem_term(match.group()), index)
-        id_term = 'Q'+obj['id']
+        id_term = 'Q' + obj['id']
         doc.add_term(id_term)
-        doc.add_term('A'+obj['user'])
+        doc.add_term('A' + obj['user'])
         tags_info = []
         if 'replycount' in obj:
             # Message object.
@@ -50,10 +51,10 @@ class Indexer(object):
             doc.add_value(self.TYPE, 'message')
             for tag in obj['tags']:
                 doc.add_term(self.make_stem_term(tag, 'XTAGS'))
-                tags_info.append('*'+tag)
+                tags_info.append('*' + tag)
             for club in obj['clubs']:
                 doc.add_term(self.make_stem_term(club, 'XCLUBS'))
-                tags_info.append('!'+club)
+                tags_info.append('!' + club)
         else:
             # Comment object.
             doc.add_term('XTYPEc')
