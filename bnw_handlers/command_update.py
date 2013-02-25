@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
-#from twisted.words.xish import domish
+# from twisted.words.xish import domish
 
 from base import *
 import bnw_core.bnw_objects as objs
 from twisted.internet import defer
 
 
-def _(s,user):
+def _(s, user):
     return s
 
 
 @defer.inlineCallbacks
-def update_internal(message,what,delete,text):
+def update_internal(message, what, delete, text):
     action = '$pull' if delete else '$addToSet'
-    defer.returnValue((yield objs.Message.mupdate({'id':message},{action: { what: text}},safe=True)))
+    defer.returnValue((yield objs.Message.mupdate({'id': message}, {action: {what: text}}, safe=True)))
+
 
 @check_arg(message=MESSAGE_COMMENT_RE)
 @require_auth
@@ -21,7 +22,7 @@ def update_internal(message,what,delete,text):
 def cmd_update(request, message='', text='', club=False, tag=False,
                delete=False, clubs=None, tags=None, api=False):
     """Update message's clubs and tags."""
-    message=canonic_message(message).upper()
+    message = canonic_message(message).upper()
     if (not message or not ((text and (club or tag)) or
                             (clubs is not None) or
                             (tags is not None) or api)):
@@ -31,15 +32,15 @@ def cmd_update(request, message='', text='', club=False, tag=False,
                  '[--delete] <tag|club> [--clubs=club1,club2] '
                  '[--tags=tag1,tag2]'))
 
-    post=yield objs.Message.find_one({'id':message})
+    post = yield objs.Message.find_one({'id': message})
 
     if not post:
         defer.returnValue(
-            dict(ok=False,desc='No such message.')
+            dict(ok=False, desc='No such message.')
         )
-    if post['user']!=request.user['name']:
+    if post['user'] != request.user['name']:
         defer.returnValue(
-            dict(ok=False,desc='Not your message.')
+            dict(ok=False, desc='Not your message.')
         )
 
     if api:
@@ -71,18 +72,18 @@ def cmd_update(request, message='', text='', club=False, tag=False,
         defer.returnValue(dict(ok=True, desc='Message updated.'))
 
     if club:
-        if not delete and len(post['clubs'])>=5:
+        if not delete and len(post['clubs']) >= 5:
             defer.returnValue(
-                dict(ok=False,desc='Too many clubs.')
+                dict(ok=False, desc='Too many clubs.')
             )
-        _ = yield update_internal(message,'clubs',delete,text)
+        _ = yield update_internal(message, 'clubs', delete, text)
     if tag:
-        if not delete and len(post['tags'])>=5:
+        if not delete and len(post['tags']) >= 5:
             defer.returnValue(
-                dict(ok=False,desc='Too many tags.')
+                dict(ok=False, desc='Too many tags.')
             )
-        _ = yield update_internal(message,'tags',delete,text)
+        _ = yield update_internal(message, 'tags', delete, text)
 
     defer.returnValue(
-        dict(ok=True,desc='Message updated.')
+        dict(ok=True, desc='Message updated.')
     )
