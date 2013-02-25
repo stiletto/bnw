@@ -13,10 +13,11 @@ _USER_RE = re.compile(ur"""(?:(?<=[\s\W])|^)@(%s)""" % USER_RE)
 _MSG_RE = re.compile(ur"""(?:(?<=[\s\W])|^)#([0-9A-Za-z]+(?:/[0-9A-Za-z]+)?)""")
 
 shittypes = (
-    ('url',  _URL_RE,  lambda m: (m.group(1), clip_long_url(m))),
-    ('msg',  _MSG_RE,  lambda m: (m.group(1),)),
+    ('url', _URL_RE, lambda m: (m.group(1), clip_long_url(m))),
+    ('msg', _MSG_RE, lambda m: (m.group(1),)),
     ('user', _USER_RE, lambda m: (m.group(1),)),
 )
+
 
 def clip_long_url(m):
     """Clip long urls."""
@@ -26,11 +27,12 @@ def clip_long_url(m):
         url = url[:40] + "....." + url[-10:]
     return url
 
+
 class LinkParser(object):
     def __init__(self, types=shittypes):
         self.types = types
 
-    def parse(self,text):
+    def parse(self, text):
         # Who the fuck write this piece of shit?
         # TODO: Refactor this shit.
         pos = 0
@@ -51,10 +53,12 @@ class LinkParser(object):
                 return
             else:
                 # TODO: Fix first empty value.
-                yield text[pos:pos+mins]
+                yield text[pos:pos + mins]
                 yield ((minm[0], minm[1].group(0)) + minm[2](minm[1]))
                 pos = pos + minm[1].end()
 
 _shitparser = LinkParser()
+
+
 def linkparse(text):
     return _shitparser.parse(text)

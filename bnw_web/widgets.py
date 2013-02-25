@@ -25,8 +25,8 @@ class Widgets(object):
     def tag(self, tag, user=None):
         pars = {
             'tu': tornado.escape.url_escape(tag),
-            't':  tornado.escape.xhtml_escape(tag[:32]),
-            'u':  user,
+            't': tornado.escape.xhtml_escape(tag[:32]),
+            'u': user,
         }
         if user:
             return '<a href="/u/%(u)s/t/%(tu)s" class="tag">%(t)s</a>' % pars
@@ -36,15 +36,15 @@ class Widgets(object):
     def club(self, club, user=None):
         pars = {
             'tu': tornado.escape.url_escape(club),
-            't':  tornado.escape.xhtml_escape(club[:32]),
-            'u':  user
+            't': tornado.escape.xhtml_escape(club[:32]),
+            'u': user
         }
         return '<a href="/c/%(tu)s" class="club">%(t)s</a>' % pars
 
     def tags(self, tags, clubs, user=None):
         return ('<div class="tags">' +
-                ' '.join(self.club(c,user) for c in clubs) + ' ' +
-                ' '.join(self.tag(t,user) for t in tags)+' </div>')
+                ' '.join(self.club(c, user) for c in clubs) + ' ' +
+                ' '.join(self.tag(t, user) for t in tags) + ' </div>')
 
     def user_url(self, name):
         return '/u/%(u)s' % {'u': name}
@@ -100,7 +100,8 @@ class Widgets(object):
         while words < maxwords and pos < lt:
             prevpos = pos
             pos = txt.find(' ', pos + 1)
-            if pos == -1: pos = lt
+            if pos == -1:
+                pos = lt
             if pos >= maxlen:
                 if ellipsis and pos < lt:
                     return txt[:prevpos] + ellipsis
@@ -164,4 +165,4 @@ class Widgets(object):
         return phrases[int(time.time()) / 10 % len(phrases)]
 
 
-widgets=Widgets()
+widgets = Widgets()
