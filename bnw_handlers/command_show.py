@@ -8,20 +8,50 @@ from base import *
 import bnw_core.bnw_objects as objs
 
 
+def get_user_bl(request, use_bl=False):
+    """Return authed user blacklist or simply an empty list
+    if user not authed.
+
+    :param use_bl: default False. Whether we should return actual
+                   blacklist or just empty list.
+    """
+    if use_bl and request.user:
+        bl = request.user.get('blacklist', [])
+        bl = [el[1] for el in bl if el[0] == 'user']
+        return bl
+    else:
+        return []
+
+
 @defer.inlineCallbacks
-def showSearch(parameters, page, auth_user=None):
+def set_subscriptions_info(request, messages):
+    """Add 'subscribed' param for each message which
+    indicate do the user subscribed on the message or not.
+    Return updated list of messages (update in place actually!).
+    For non-authed users return non-modified list.
+
+    :param request: BnW request object.
+    """
+    if not request.user:
+        defer.returnValue(messages)
+
+    user = request.user['name']
+    ids = [m['id'] for m in messages]
+    subscriptions = yield objs.Subscription.find({
+        'user': user, 'type': 'sub_message', 'target': {'$in': ids}})
+    sub_ids = [s['target'] for s in subscriptions]
+    for msg in messages:
+        msg['subscribed'] = True if msg['id'] in sub_ids else False
+    defer.returnValue(messages)
+
+
+@defer.inlineCallbacks
+def showSearch(parameters, page, request):
     # FIXME: THIS COMMAND IS FUCKING SLOW SLOW SLOW AND WAS WRITTEN BY A
     # BRAIN-DAMAGED IDIOT
     messages = [x.filter_fields() for x in (yield objs.Message.find_sort(
         parameters, [('date', pymongo.DESCENDING)], limit=20, skip=page * 20))]
-    # Get subscriptions info
-    if auth_user is not None:
-        ids = [m['id'] for m in messages]
-        subscriptions = yield objs.Subscription.find({
-            'user': auth_user, 'type': 'sub_message', 'target': {'$in': ids}})
-        sub_ids = [s['target'] for s in subscriptions]
-        for msg in messages:
-            msg['subscribed'] = True if msg['id'] in sub_ids else False
+    messages = yield set_subscriptions_info(request, messages)
     messages.reverse()
     defer.returnValue(dict(
         ok=True, format="messages", cache=5, cache_public=True,
@@ -43,14 +73,15 @@ def showComment(commentid):
 
 
 @defer.inlineCallbacks
-def showComments(msgid, auth_user=None, bl=None):
+def showComments(msgid, request, bl=None):
     message = yield objs.Message.find_one({'id': msgid})
     if message is None:
         defer.returnValue(dict(
             ok=False, desc='No such message', cache=5, cache_public=True))
-    if auth_user is not None:
+    if request.user:
+        user = request.user['name']
         subscribed = yield objs.Subscription.count({
-            'user': auth_user, 'type': 'sub_message', 'target': msgid})
+            'user': user, 'type': 'sub_message', 'target': msgid})
         message['subscribed'] = bool(subscribed)
     qdict = {'message': msgid.upper()}
     if bl:
@@ -69,13 +100,7 @@ def cmd_show(request, message='', user='', tag='', club='', page='0',
              show='messages', replies=None, use_bl=False):
     """Show messages by specified parameters."""
     message = canonic_message_comment(message).upper()
-    auth_user = request.user['name'] if request.user else None
-    # Get user's blacklist
-    if use_bl and request.user:
-        bl = request.user.get('blacklist', [])
-        bl = [el[1] for el in bl if el[0] == 'user']
-    else:
-        bl = []
+    bl = get_user_bl(request, use_bl)
     if '/' in message:
         defer.returnValue((yield showComment(message)))
     if replies:
@@ -84,7 +109,7 @@ def cmd_show(request, message='', user='', tag='', club='', page='0',
                 ok=False,
                 desc="Error: 'replies' is allowed only with 'message'.",
                 cache=3600))
-        defer.returnValue((yield showComments(message, auth_user, bl)))
+        defer.returnValue((yield showComments(message, request, bl)))
     else:
         if show not in ['messages', 'recommendations', 'all']:
             defer.returnValue(dict(
@@ -103,7 +128,7 @@ def cmd_show(request, message='', user='', tag='', club='', page='0',
             parameters.update(user_spec)
         elif bl:
             parameters['user'] = {'$nin': bl}
-        defer.returnValue((yield showSearch(parameters, int(page), auth_user)))
+        defer.returnValue((yield showSearch(parameters, int(page), request)))
 
 
 @require_auth
@@ -131,8 +156,9 @@ TODAY_REDUCE = 'function(k,vals) { var sum=0; for(var i in vals) sum += vals[i];
 
 
 @defer.inlineCallbacks
-def cmd_today(request):
+def cmd_today(request, use_bl=False):
     """ Показать обсуждаемое за последние 24 часа """
+    bl = get_user_bl(request, use_bl)
     last_rebuild = yield objs.GlobalState.find_one({'name': 'today_rebuild'})
     if not last_rebuild:
         last_rebuild = {'name': 'today_rebuild', 'value': 0}
@@ -145,8 +171,13 @@ def cmd_today(request):
         result = yield objs.Comment.map_reduce(TODAY_MAP, TODAY_REDUCE, out='today', query={'date': {'$gte': start}})
     if (not rebuild) or result:
         postids = list(x['_id'] for x in (yield objs.Today.find_sort({}, [('value', -1)], limit=20)))
-        dbposts = dict((x['id'], x.filter_fields()) for x in (yield objs.Message.find({'id': {'$in': postids}})))
+        qdict = {'id': {'$in': postids}}
+        if bl: qdict['user'] = {'$nin': bl}
+        dbposts = dict(
+            (x['id'], x.filter_fields())
+            for x in (yield objs.Message.find(qdict)))
         messages = [dbposts[x] for x in postids if (x in dbposts)]
+        messages = yield set_subscriptions_info(request, messages)
         messages.reverse()
         defer.returnValue(
             dict(ok=True, format="messages",
