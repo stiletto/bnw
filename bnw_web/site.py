@@ -87,6 +87,8 @@ class MainWsHandler(WsHandler, AuthMixin):
             return
         html = uimodules.Message(self).render(msg)
         msg = msg.copy()
+        if user:
+            msg['subscribed'] = user['name'] == msg['user']
         msg.update(dict(type='new_message', html=html))
         self.write_message(json.dumps(msg))
 
