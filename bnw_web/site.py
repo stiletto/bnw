@@ -14,7 +14,6 @@ import json
 import txmongo
 import os
 from widgets import widgets
-from linkify import thumbify
 import uimodules
 import rss
 import base64

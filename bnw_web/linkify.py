@@ -1,9 +1,14 @@
-# coding: utf-8
 import re
 from re import compile as rec
-from bnw_web.linkshit import LinkParser, _URL_RE, shittypes
-from tornado.escape import _unicode, xhtml_escape, url_escape
 
+from tornado.escape import _unicode, xhtml_escape, url_escape
+from misaka import HtmlRenderer, Markdown
+import misaka as m
+
+from bnw_web.linkshit import LinkParser, _URL_RE, shittypes
+
+
+#: Displaying thumbs allowed for the following hostings:
 linkhostings = [
     (ur'(?i)http://rghost.ru/([0-9]+)', lambda m: 'http://rghost.ru/%s/thumb.png' % (m(1),)),
     (ur'(?i)http://imgur.com/([A-Za-z0-9]+)', lambda m: 'http://i.imgur.com/%ss.png' % (m(1),)),
@@ -11,8 +16,95 @@ linkhostings = [
     (ur'http://2-ch.ru/([a-z]+)/src/([0-9]+).(png|gif|jpg)', lambda m: 'http://2-ch.ru/%s/thumb/%ss.%s' % (m(1),m(2),m(3))),
     (ur'(?i)http://(.+.(?:png|gif|jpg|jpeg))', lambda m: 'http://fuck.blasux.ru/thumb?img=%s' % (url_escape(m(0)),)),
 ]
-
 linkhostings = [(re.compile('^' + k + '$'), v, k) for (k, v) in linkhostings]
+
+
+def thumbify(text, format='markdown'):
+    """Format text and generate thumbs using available formatters.
+
+    :param format: default: 'markdown'. Specify text formatter.
+                   Variants: 'moinmoin', 'markdown' or None,
+                   which fallbacks to markdown.
+
+    Return: (formatted_text, thumbs)
+    Thumbs: list of (original_file_url, thumb_url)
+    """
+    if format == 'moinmoin':
+        return moinmoin(text)
+    else:
+        return markdown(text)
+
+
+def linkify(text, format='markdown'):
+    """Only do text formatting. See :py:meth:`thumbify`."""
+    return thumbify(text, format=format)[0]
+
+
+###
+# New markdown formatter with some custom render rules.
+###
+
+
+def ignore_last_newline(text):
+    if text.endswith('\n'):
+        text = text[:-1]
+    return text
+
+
+class BnwRenderer(HtmlRenderer):
+    """Wrapper around default misaka's renderer."""
+
+    def paragraph(self, text):
+        """Use just newlines instead of paragraphs
+        (becase we already in the <pre> tag).
+        """
+        return text + '\n'
+
+    def header(self, text, level):
+        """Don't allow large header levels
+        (it could bother other people).
+        """
+        if level > 2:
+            return '<h{0}>{1}</h{0}>'.format(level, text)
+        else:
+            return '#'*level + text + '\n'
+
+    def image(self, link, title, alt_text):
+        """Don't allow images (they could be big).
+        Use simple links intead.
+        """
+        # Don't forget about escaping
+        return '<a href="{0}">{0}</a>'.format(xhtml_escape(link))
+
+    def block_code(self, code, language):
+        # Don't forget about escaping
+        code = ignore_last_newline(xhtml_escape(code))
+        if language:
+            language = xhtml_escape(language)
+            klass = ' class="language-{0}"'.format(language)
+        else:
+            klass = ''
+        return '<pre><code{0}>{1}</code></pre>'.format(klass, code)
+
+
+# Don't touch HTML_ESCAPE flag!
+renderer = BnwRenderer(m.HTML_ESCAPE)
+markdown_parser = Markdown(
+    renderer,
+    m.EXT_NO_INTRA_EMPHASIS | m.EXT_AUTOLINK | m.EXT_FENCED_CODE)
+
+
+def markdown(raw):
+    raw = _unicode(raw)
+    formatted_text = ignore_last_newline(markdown_parser.render(raw))
+    thumbs = moinmoin(raw)[1]
+    return formatted_text, thumbs
+
+
+###
+# Simple MoinMoin-like formatter. Legacy.
+###
+
 
 bnwtypes = (
     ("emph", rec(ur'(?<!:)//'), lambda m: ()),
@@ -20,19 +112,21 @@ bnwtypes = (
     ("namedlink", rec(ur'''\[\[\s*(?P<link_target>.+?)\s*[|]\s*(?P<link_text>.+?)\s*]]'''), lambda m: (m.group('link_target'),m.group('link_text'))),
     ("source", rec(ur'''{{{(?:#!(\w+)\s+)?(.*?)}}}''', re.MULTILINE|re.DOTALL), lambda m: (m.group(1),m.group(2))),
 )
+
+
 formatting_tags = {
     'emph': ('<i>', '</i>'),
     'strong': ('<b>', '</b>'),
 }
 
+
 parser = LinkParser(types=bnwtypes + shittypes)
 
 
-def thumbify(text, permitted_protocols=None):
+def moinmoin(text):
     text = _unicode(xhtml_escape(text))
-    if not permitted_protocols:
-        permitted_protocols = ["http", "https", "ftp", "git",
-                               "gopher", "magnet", "mailto", "xmpp"]
+    permitted_protocols = ["http", "https", "ftp", "git",
+                           "gopher", "magnet", "mailto", "xmpp"]
     texta = []
     thumbs = []
     stack = []
@@ -90,7 +184,3 @@ def thumbify(text, permitted_protocols=None):
     for i in stack:
         texta.append(formatting_tags[i][1])
     return ''.join(texta), thumbs
-
-
-def linkify(text):
-    return thumbify(text)[0]

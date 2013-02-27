@@ -20,7 +20,7 @@ VENV_DEPS=\
 
 install-deb:
 	sudo apt-get install $(DEBIAN_DEPS)
-	sudo pip install 'git+https://github.com/fiorix/mongo-async-python-driver.git#egg=txmongo'
+	sudo pip install 'git+https://github.com/fiorix/mongo-async-python-driver.git#egg=txmongo' misaka
 
 uninstall-deb:
 	sudo pip uninstall txmongo
@@ -40,7 +40,7 @@ install-venv:
 	# (from python-xapian package) and so we should allow
 	# global site-packages in virtualenv.
 	virtualenv --system-site-packages .venv
-	$(PIP) install twisted tornado PyRSS2Gen PIL
+	$(PIP) install twisted tornado PyRSS2Gen PIL misaka
 	$(PIP) install -e 'git+https://github.com/fiorix/mongo-async-python-driver.git#egg=txmongo'
 
 uninstall-venv:

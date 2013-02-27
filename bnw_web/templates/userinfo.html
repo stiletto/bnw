@@ -47,7 +47,7 @@
         {% if about %}
         <tr>
           <td>О себе:</td>
-          <td class='pw note'>{{ thumbify(about)[0] }}</td>
+          <td class='pw note'>{{ linkify(about) }}</td>
         </tr>
         {% end %}
         <tr><td>Подписки:</td>
