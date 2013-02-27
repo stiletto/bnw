@@ -1,10 +1,16 @@
 # coding: utf-8
 
 from twisted.trial import unittest
-from bnw_web.linkify import linkify as l
+
+from bnw_web.linkify import linkify
+
+
+def l(text):
+    return linkify(text, format="moinmoin")
 
 
 class LinkifyTest(unittest.TestCase):
+
     def test_simple_formatting(self):
         self.assertEqual(
             l('test //test test// test **test test** test'),
