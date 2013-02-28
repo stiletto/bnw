@@ -5,6 +5,28 @@
             padding: 1em;
         }
 
+        h1, h2, h3, h4, h5, h6{
+            margin: 15px 0;
+        }
+
+        /* Fix headers sizes */
+        h1{font-size: 22px;}
+        h2{font-size: 20px;}
+        h3{font-size: 18px;}
+        h4{font-size: 16px;}
+        h5{font-size: 14px;}
+        h6{font-size: 12px;}
+
+        ul, ol {
+            margin: 0;
+            line-height: 0.5em;
+        }
+
+        blockquote {
+            margin: 0;
+            color: #789922;
+        }
+
         body, .pw, .blueinput, .styledbutton {
             font-family: Unifont, Monaco, Terminus, Consolas, monospace;
             font-size: 1em;
@@ -13,6 +35,11 @@
         pre code {
             font-family: HUIPIZDONT, Unifont, Monaco, Terminus, Consolas, monospace;
             font-size: 1em;
+        }
+
+        /* Code blocks */
+        .pw > pre {
+            margin: 0;
         }
 
         /* Inline code */

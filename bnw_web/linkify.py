@@ -5,7 +5,8 @@ from tornado.escape import _unicode, xhtml_escape, url_escape
 from misaka import HtmlRenderer, Markdown
 import misaka as m
 
-from bnw_web.linkshit import LinkParser, _URL_RE, shittypes
+from bnw_web.linkshit import LinkParser, shittypes
+from bnw_web.linkshit import _URL_RE, _USER_RE, _MSG_RE
 
 
 #: Displaying thumbs allowed for the following hostings:
@@ -45,29 +46,58 @@ def linkify(text, format='markdown'):
 ###
 
 
-def ignore_last_newline(text):
-    if text.endswith('\n'):
-        text = text[:-1]
-    return text
+def ignore_trailing_newlines(text):
+    return text.rstrip('\n')
+
+
+def msg_url(match):
+    text = match.group(0)
+    url_part = match.group(1).replace('/', '#')
+    return '[{0}](/p/{1})'.format(text, url_part)
+
+
+def get_thumbs(raw):
+    # Don't forget about escaping
+    text = xhtml_escape(raw)
+    thumbs = []
+    for match in _URL_RE.finditer(text):
+        url = match.group(1)
+        for regexp, handler, _ in linkhostings:
+            m = regexp.match(url)
+            if m:
+                thumb = handler(m.group)
+                thumbs.append((url, thumb))
+                break
+    return thumbs
 
 
 class BnwRenderer(HtmlRenderer):
     """Wrapper around default misaka's renderer."""
 
+    def preprocess(self, text):
+        """Apply some additional BnW's rules."""
+        text = _USER_RE.sub('[\g<0>](/u/\g<1>)', text)
+        text = _MSG_RE.sub(msg_url, text)
+        return text
+
+    def block_quote(self, text):
+        """Do some wakaba-like fixes.
+        Through wakaba parses block quotes in something different
+        manner (they are not stick together).
+        """
+        # TODO: Should we be more wakabic?
+        text = ignore_trailing_newlines(text)
+        return '<blockquote>&gt; {0}</blockquote>\n'.format(text)
+
+    def header(self, text, level):
+        """Fix odd newlines in default header render."""
+        return '<h{0}>{1}</h{0}>'.format(level, text)
+
     def paragraph(self, text):
         """Use just newlines instead of paragraphs
         (becase we already in the <pre> tag).
         """
-        return text + '\n'
-
-    def header(self, text, level):
-        """Don't allow large header levels
-        (it could bother other people).
-        """
-        if level > 2:
-            return '<h{0}>{1}</h{0}>'.format(level, text)
-        else:
-            return '#'*level + text + '\n'
+        return text + '\n\n'
 
     def image(self, link, title, alt_text):
         """Don't allow images (they could be big).
@@ -78,13 +108,13 @@ class BnwRenderer(HtmlRenderer):
 
     def block_code(self, code, language):
         # Don't forget about escaping
-        code = ignore_last_newline(xhtml_escape(code))
+        code = ignore_trailing_newlines(xhtml_escape(code))
         if language:
             language = xhtml_escape(language)
             klass = ' class="language-{0}"'.format(language)
         else:
             klass = ''
-        return '<pre><code{0}>{1}</code></pre>'.format(klass, code)
+        return '<pre><code{0}>{1}</code></pre>\n'.format(klass, code)
 
 
 # Don't touch HTML_ESCAPE flag!
@@ -96,8 +126,8 @@ markdown_parser = Markdown(
 
 def markdown(raw):
     raw = _unicode(raw)
-    formatted_text = ignore_last_newline(markdown_parser.render(raw))
-    thumbs = moinmoin(raw)[1]
+    formatted_text = ignore_trailing_newlines(markdown_parser.render(raw))
+    thumbs = get_thumbs(raw)
     return formatted_text, thumbs
 
 

@@ -1,6 +1,7 @@
 from twisted.trial import unittest
 
 from bnw_web.linkify import linkify as l
+from bnw_web.linkify import thumbify as t
 
 
 class MarkdownTest(unittest.TestCase):
@@ -13,27 +14,17 @@ class MarkdownTest(unittest.TestCase):
     def test_custom_paragraphs(self):
         self.assertEqual(
             l('test\n\ntest'),
-            'test\ntest')
+            'test\n\ntest')
 
     def test_trailing_newlines(self):
         self.assertEqual(
             l('Hi\nHi\nBye\n\n\n'),
             'Hi\nHi\nBye')
 
-    def test_forbidden_header(self):
-        self.assertEqual(
-            l('abc\n#forbidden\ntest'),
-            'abc\n#forbidden\ntest')
-
-    def test_allowed_header(self):
-        self.assertEqual(
-            l('abc\n####allowed\ntest'),
-            'abc\n<h4>allowed</h4>test')
-
     def test_escaping_in_header(self):
         self.assertEqual(
             l('#<bad>&amp'),
-            '#&lt;bad&gt;&amp;amp')
+            '<h1>&lt;bad&gt;&amp;amp</h1>')
         self.assertEqual(
             l('####<bad>&amp'),
             '<h4>&lt;bad&gt;&amp;amp</h4>')
@@ -75,7 +66,46 @@ class MarkdownTest(unittest.TestCase):
             'some\ncode: <code>simple &lt;&amp;bad code&gt;</code> &lt;- code')
         self.assertEqual(
             l('code:\n\n```\n<bad code &&&>&">\n```'),
-            'code:\n<pre><code>&lt;bad code &amp;&amp;&amp;&gt;&amp;&quot;&gt;</code></pre>')
+            'code:\n\n<pre><code>&lt;bad code &amp;&amp;&amp;&gt;&amp;&quot;&gt;</code></pre>')
         self.assertEqual(
             l('```<bad&language>\n<bad code>\n```'),
             '<pre><code class="language-&lt;bad&amp;language&gt;">&lt;bad code&gt;</code></pre>')
+
+    def test_msg_link(self):
+        self.assertEqual(
+            l('test: #0XYNTA'),
+            'test: <a href="/p/0XYNTA">#0XYNTA</a>')
+        self.assertEqual(
+            l('test: #0XYNTA/123'),
+            'test: <a href="/p/0XYNTA#123">#0XYNTA/123</a>')
+        self.assertEqual(
+            l('#0XY>NTA\n\nNyak'),
+            '<a href="/p/0XY">#0XY</a>&gt;NTA\n\nNyak')
+
+    def test_user_link(self):
+        self.assertEqual(
+            l('test: @nyashka'),
+            'test: <a href="/u/nyashka">@nyashka</a>')
+        self.assertEqual(
+            l('Look at this nyashka:\n\n@nyashka\n\nNyak'),
+            'Look at this nyashka:\n\n<a href="/u/nyashka">@nyashka</a>\n\nNyak')
+        self.assertEqual(
+            l('How about this:\n@super-&bad-nyashka\nNyak'),
+            'How about this:\n<a href="/u/super-">@super-</a>&amp;bad-nyashka\nNyak')
+
+    def test_block_quote(self):
+        self.assertEqual(
+            l('> test\n\nNyak'),
+            '<blockquote>&gt; test</blockquote>\nNyak')
+
+    def test_escaping_in_block_quote(self):
+        self.assertEqual(
+            l('> test\nnew line\nnew <bad&> line\nlast line\n\nEnd of quote'),
+            '<blockquote>&gt; test\nnew line\nnew &lt;bad&amp;&gt; line\nlast line</blockquote>\nEnd of quote')
+
+    def test_thumbs(self):
+        self.assertEqual(
+            t('http://example.com/1.gif'),
+            (u'<a href="http://example.com/1.gif">http://example.com/1.gif</a>',
+             [(u'http://example.com/1.gif',
+                'http://fuck.blasux.ru/thumb?img=http%3A%2F%2Fexample.com%2F1.gif')]))
