@@ -5,6 +5,11 @@
             padding: 1em;
         }
 
+        ul, ol {
+            margin: 0;
+            line-height: 0.5em;
+        }
+
         body, .pw, .blueinput, .styledbutton {
             font-family: Unifont, Monaco, Terminus, Consolas, monospace;
             font-size: 1em;
