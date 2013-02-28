@@ -60,7 +60,10 @@ class BnwRenderer(HtmlRenderer):
     """Wrapper around default misaka's renderer."""
 
     def preprocess(self, text):
-        return _MSG_RE.sub(msg_url, text)
+        """Apply some additional BnW's rules."""
+        text = _USER_RE.sub('[\g<0>](/u/\g<1>)', text)
+        text = _MSG_RE.sub(msg_url, text)
+        return text
 
     def paragraph(self, text):
         """Use just newlines instead of paragraphs

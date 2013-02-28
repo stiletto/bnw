@@ -78,5 +78,16 @@ class MarkdownTest(unittest.TestCase):
             l('test: #0XYNTA/123'),
             'test: <a href="/p/0XYNTA#123">#0XYNTA/123</a>')
         self.assertEqual(
-            l('#0XYNTA\n\nNyak'),
-            '<a href="/p/0XYNTA">#0XYNTA</a>\n\nNyak')
+            l('#0XY>NTA\n\nNyak'),
+            '<a href="/p/0XY">#0XY</a>&gt;NTA\n\nNyak')
+
+    def test_user_link(self):
+        self.assertEqual(
+            l('test: @nyashka'),
+            'test: <a href="/u/nyashka">@nyashka</a>')
+        self.assertEqual(
+            l('Look at this nyashka:\n\n@nyashka\n\nNyak'),
+            'Look at this nyashka:\n\n<a href="/u/nyashka">@nyashka</a>\n\nNyak')
+        self.assertEqual(
+            l('How about this:\n@super-&bad-nyashka\nNyak'),
+            'How about this:\n<a href="/u/super-">@super-</a>&amp;bad-nyashka\nNyak')
