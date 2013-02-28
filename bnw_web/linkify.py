@@ -65,6 +65,10 @@ class BnwRenderer(HtmlRenderer):
         text = _MSG_RE.sub(msg_url, text)
         return text
 
+    def header(self, text, level):
+        """Fix odd newlines in default header render."""
+        return '<h{0}>{1}</h{0}>'.format(level, text)
+
     def paragraph(self, text):
         """Use just newlines instead of paragraphs
         (becase we already in the <pre> tag).
