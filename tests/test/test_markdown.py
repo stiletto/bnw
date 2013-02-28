@@ -91,3 +91,13 @@ class MarkdownTest(unittest.TestCase):
         self.assertEqual(
             l('How about this:\n@super-&bad-nyashka\nNyak'),
             'How about this:\n<a href="/u/super-">@super-</a>&amp;bad-nyashka\nNyak')
+
+    def test_block_quote(self):
+        self.assertEqual(
+            l('> test\n\nNyak'),
+            '<blockquote>&gt; test</blockquote>\nNyak')
+
+    def test_escaping_in_block_quote(self):
+        self.assertEqual(
+            l('> test\nnew line\nnew <bad&> line\nlast line\n\nEnd of quote'),
+            '<blockquote>&gt; test\nnew line\nnew &lt;bad&amp;&gt; line\nlast line</blockquote>\nEnd of quote')

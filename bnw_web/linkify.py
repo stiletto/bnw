@@ -65,6 +65,15 @@ class BnwRenderer(HtmlRenderer):
         text = _MSG_RE.sub(msg_url, text)
         return text
 
+    def block_quote(self, text):
+        """Do some wakaba-like fixes.
+        Through wakaba parses block quotes in something different
+        manner (they are not stick together).
+        """
+        # TODO: Should we be more wakabic?
+        text = ignore_trailing_newlines(text)
+        return '<blockquote>&gt; {0}</blockquote>\n'.format(text)
+
     def header(self, text, level):
         """Fix odd newlines in default header render."""
         return '<h{0}>{1}</h{0}>'.format(level, text)
