@@ -46,10 +46,8 @@ def linkify(text, format='markdown'):
 ###
 
 
-def ignore_last_newline(text):
-    if text.endswith('\n'):
-        text = text[:-1]
-    return text
+def ignore_trailing_newlines(text):
+    return text.rstrip('\n')
 
 
 def msg_url(match):
@@ -68,7 +66,7 @@ class BnwRenderer(HtmlRenderer):
         """Use just newlines instead of paragraphs
         (becase we already in the <pre> tag).
         """
-        return text + '\n'
+        return text + '\n\n'
 
     def image(self, link, title, alt_text):
         """Don't allow images (they could be big).
@@ -79,7 +77,7 @@ class BnwRenderer(HtmlRenderer):
 
     def block_code(self, code, language):
         # Don't forget about escaping
-        code = ignore_last_newline(xhtml_escape(code))
+        code = ignore_trailing_newlines(xhtml_escape(code))
         if language:
             language = xhtml_escape(language)
             klass = ' class="language-{0}"'.format(language)
@@ -97,7 +95,7 @@ markdown_parser = Markdown(
 
 def markdown(raw):
     raw = _unicode(raw)
-    formatted_text = ignore_last_newline(markdown_parser.render(raw))
+    formatted_text = ignore_trailing_newlines(markdown_parser.render(raw))
     thumbs = moinmoin(raw)[1]
     return formatted_text, thumbs
 

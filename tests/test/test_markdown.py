@@ -13,7 +13,7 @@ class MarkdownTest(unittest.TestCase):
     def test_custom_paragraphs(self):
         self.assertEqual(
             l('test\n\ntest'),
-            'test\ntest')
+            'test\n\ntest')
 
     def test_trailing_newlines(self):
         self.assertEqual(
@@ -65,7 +65,7 @@ class MarkdownTest(unittest.TestCase):
             'some\ncode: <code>simple &lt;&amp;bad code&gt;</code> &lt;- code')
         self.assertEqual(
             l('code:\n\n```\n<bad code &&&>&">\n```'),
-            'code:\n<pre><code>&lt;bad code &amp;&amp;&amp;&gt;&amp;&quot;&gt;</code></pre>')
+            'code:\n\n<pre><code>&lt;bad code &amp;&amp;&amp;&gt;&amp;&quot;&gt;</code></pre>')
         self.assertEqual(
             l('```<bad&language>\n<bad code>\n```'),
             '<pre><code class="language-&lt;bad&amp;language&gt;">&lt;bad code&gt;</code></pre>')
@@ -79,4 +79,4 @@ class MarkdownTest(unittest.TestCase):
             'test: <a href="/p/0XYNTA#123">#0XYNTA/123</a>')
         self.assertEqual(
             l('#0XYNTA\n\nNyak'),
-            '<a href="/p/0XYNTA">#0XYNTA</a>\nNyak')
+            '<a href="/p/0XYNTA">#0XYNTA</a>\n\nNyak')
