@@ -86,7 +86,7 @@ class BnwRenderer(HtmlRenderer):
             klass = ' class="language-{0}"'.format(language)
         else:
             klass = ''
-        return '<pre><code{0}>{1}</code></pre>'.format(klass, code)
+        return '<pre><code{0}>{1}</code></pre>\n'.format(klass, code)
 
 
 # Don't touch HTML_ESCAPE flag!

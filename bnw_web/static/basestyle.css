@@ -20,6 +20,11 @@
             font-size: 1em;
         }
 
+        /* Code blocks */
+        .pw > pre {
+            margin: 0;
+        }
+
         /* Inline code */
         .pw > code {
             display: inline;
