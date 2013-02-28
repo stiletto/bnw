@@ -5,7 +5,8 @@ from tornado.escape import _unicode, xhtml_escape, url_escape
 from misaka import HtmlRenderer, Markdown
 import misaka as m
 
-from bnw_web.linkshit import LinkParser, _URL_RE, shittypes
+from bnw_web.linkshit import LinkParser, shittypes
+from bnw_web.linkshit import _URL_RE, _USER_RE, _MSG_RE
 
 
 #: Displaying thumbs allowed for the following hostings:
@@ -51,23 +52,23 @@ def ignore_last_newline(text):
     return text
 
 
+def msg_url(match):
+    text = match.group(0)
+    url_part = match.group(1).replace('/', '#')
+    return '[{0}](/p/{1})'.format(text, url_part)
+
+
 class BnwRenderer(HtmlRenderer):
     """Wrapper around default misaka's renderer."""
+
+    def preprocess(self, text):
+        return _MSG_RE.sub(msg_url, text)
 
     def paragraph(self, text):
         """Use just newlines instead of paragraphs
         (becase we already in the <pre> tag).
         """
         return text + '\n'
-
-    def header(self, text, level):
-        """Don't allow large header levels
-        (it could bother other people).
-        """
-        if level > 2:
-            return '<h{0}>{1}</h{0}>'.format(level, text)
-        else:
-            return '#'*level + text + '\n'
 
     def image(self, link, title, alt_text):
         """Don't allow images (they could be big).

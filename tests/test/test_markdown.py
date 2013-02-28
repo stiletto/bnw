@@ -20,20 +20,10 @@ class MarkdownTest(unittest.TestCase):
             l('Hi\nHi\nBye\n\n\n'),
             'Hi\nHi\nBye')
 
-    def test_forbidden_header(self):
-        self.assertEqual(
-            l('abc\n#forbidden\ntest'),
-            'abc\n#forbidden\ntest')
-
-    def test_allowed_header(self):
-        self.assertEqual(
-            l('abc\n####allowed\ntest'),
-            'abc\n<h4>allowed</h4>test')
-
     def test_escaping_in_header(self):
         self.assertEqual(
             l('#<bad>&amp'),
-            '#&lt;bad&gt;&amp;amp')
+            '<h1>&lt;bad&gt;&amp;amp</h1>')
         self.assertEqual(
             l('####<bad>&amp'),
             '<h4>&lt;bad&gt;&amp;amp</h4>')
@@ -79,3 +69,14 @@ class MarkdownTest(unittest.TestCase):
         self.assertEqual(
             l('```<bad&language>\n<bad code>\n```'),
             '<pre><code class="language-&lt;bad&amp;language&gt;">&lt;bad code&gt;</code></pre>')
+
+    def test_msg_link(self):
+        self.assertEqual(
+            l('test: #0XYNTA'),
+            'test: <a href="/p/0XYNTA">#0XYNTA</a>')
+        self.assertEqual(
+            l('test: #0XYNTA/123'),
+            'test: <a href="/p/0XYNTA#123">#0XYNTA/123</a>')
+        self.assertEqual(
+            l('#0XYNTA\n\nNyak'),
+            '<a href="/p/0XYNTA">#0XYNTA</a>\nNyak')
