@@ -56,6 +56,21 @@ def msg_url(match):
     return '[{0}](/p/{1})'.format(text, url_part)
 
 
+def get_thumbs(raw):
+    # Don't forget about escaping
+    text = xhtml_escape(raw)
+    thumbs = []
+    for match in _URL_RE.finditer(text):
+        url = match.group(1)
+        for regexp, handler, _ in linkhostings:
+            m = regexp.match(url)
+            if m:
+                thumb = handler(m.group)
+                thumbs.append((url, thumb))
+                break
+    return thumbs
+
+
 class BnwRenderer(HtmlRenderer):
     """Wrapper around default misaka's renderer."""
 
@@ -112,7 +127,7 @@ markdown_parser = Markdown(
 def markdown(raw):
     raw = _unicode(raw)
     formatted_text = ignore_trailing_newlines(markdown_parser.render(raw))
-    thumbs = moinmoin(raw)[1]
+    thumbs = get_thumbs(raw)
     return formatted_text, thumbs
 
 

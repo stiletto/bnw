@@ -1,6 +1,7 @@
 from twisted.trial import unittest
 
 from bnw_web.linkify import linkify as l
+from bnw_web.linkify import thumbify as t
 
 
 class MarkdownTest(unittest.TestCase):
@@ -101,3 +102,10 @@ class MarkdownTest(unittest.TestCase):
         self.assertEqual(
             l('> test\nnew line\nnew <bad&> line\nlast line\n\nEnd of quote'),
             '<blockquote>&gt; test\nnew line\nnew &lt;bad&amp;&gt; line\nlast line</blockquote>\nEnd of quote')
+
+    def test_thumbs(self):
+        self.assertEqual(
+            t('http://example.com/1.gif'),
+            (u'<a href="http://example.com/1.gif">http://example.com/1.gif</a>',
+             [(u'http://example.com/1.gif',
+                'http://fuck.blasux.ru/thumb?img=http%3A%2F%2Fexample.com%2F1.gif')]))
