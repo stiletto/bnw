@@ -27,6 +27,7 @@ def cmd_userinfo(request, user=''):
     if not about:
         about = vcard.get('desc', '')
     defer.returnValue({
+        'ok': True,
         'user': user,
         'regdate': user_obj.get('regdate', 0),
         'messages_count': messages_count,
