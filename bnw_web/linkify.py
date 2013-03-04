@@ -87,7 +87,8 @@ class BnwRenderer(HtmlRenderer):
         """
         # TODO: Should we be more wakabic?
         text = ignore_trailing_newlines(text)
-        return '<blockquote>&gt; {0}</blockquote>\n'.format(text)
+        text = '\n'.join('&gt; '+s for s in text.split('\n'))
+        return '<blockquote>{0}</blockquote>\n'.format(text)
 
     def header(self, text, level):
         """Fix odd newlines in default header render."""
