@@ -106,7 +106,7 @@ class MarkdownTest(unittest.TestCase):
     def test_escaping_in_block_quote(self):
         self.assertEqual(
             l('> test\nnew line\nnew <bad&> line\nlast line\n\nEnd of quote'),
-            '<blockquote>&gt; test\nnew line\nnew &lt;bad&amp;&gt; line\nlast line</blockquote>\nEnd of quote')
+            '<blockquote>&gt; test\n&gt; new line\n&gt; new &lt;bad&amp;&gt; line\n&gt; last line</blockquote>\nEnd of quote')
 
     def test_thumbs(self):
         self.assertEqual(

@@ -87,7 +87,8 @@ class BnwRenderer(HtmlRenderer):
         """
         # TODO: Should we be more wakabic?
         text = ignore_trailing_newlines(text)
-        return '<blockquote>&gt; {0}</blockquote>\n'.format(text)
+        text = '\n'.join('&gt; '+s for s in text.split('\n'))
+        return '<blockquote>{0}</blockquote>\n'.format(text)
 
     def header(self, text, level):
         """Fix odd newlines in default header render."""
@@ -118,7 +119,7 @@ class BnwRenderer(HtmlRenderer):
 
 
 # Don't touch HTML_ESCAPE flag!
-renderer = BnwRenderer(m.HTML_ESCAPE)
+renderer = BnwRenderer(m.HTML_ESCAPE | m.HTML_SAFELINK)
 markdown_parser = Markdown(
     renderer,
     m.EXT_NO_INTRA_EMPHASIS | m.EXT_AUTOLINK | m.EXT_FENCED_CODE)
