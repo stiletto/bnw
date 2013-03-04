@@ -35,7 +35,7 @@ def get_webui_base(user):
         "random string": return this string
         None: return http base url
     """
-    baseurl = user.get('settings', {}).get('baseurl', None)
+    baseurl = user.get('settings', {}).get('baseurl', None) if user else None
     if not baseurl:
         return get_http_webui_base()
     else:

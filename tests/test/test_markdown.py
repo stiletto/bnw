@@ -82,6 +82,11 @@ class MarkdownTest(unittest.TestCase):
             l('#0XY>NTA\n\nNyak'),
             '<a href="/p/0XY">#0XY</a>&gt;NTA\n\nNyak')
 
+    def test_msg_link_anchors(self):
+        self.assertEqual(
+            l('http://example.com/#anchor'),
+            '<a href="http://example.com/#anchor">http://example.com/#anchor</a>')
+
     def test_user_link(self):
         self.assertEqual(
             l('test: @nyashka'),
