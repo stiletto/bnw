@@ -119,7 +119,7 @@ class BnwRenderer(HtmlRenderer):
 
 
 # Don't touch HTML_ESCAPE flag!
-renderer = BnwRenderer(m.HTML_ESCAPE)
+renderer = BnwRenderer(m.HTML_ESCAPE | m.HTML_SAFELINK)
 markdown_parser = Markdown(
     renderer,
     m.EXT_NO_INTRA_EMPHASIS | m.EXT_AUTOLINK | m.EXT_FENCED_CODE)
