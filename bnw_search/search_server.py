@@ -55,29 +55,32 @@ class RPCSearch(xmlrpc.XMLRPC):
         log.msg('Indexed %d/%d...' % (self.indexed, self.total))
         reactor.callLater(0.01, self._run_incremental_indexing)
 
-    def xmlrpc_search(self, text):
+    PAGE_SIZE = 20
+
+    def xmlrpc_search(self, text, page):
         # TODO: Run queries in threads because it's blocking operation.
+        if page < 0:
+            return
         try:
             query = self.query_parser.parse_query(text)
         except xapian.QueryParserError:
-            return 0, []
+            return
         enquire = xapian.Enquire(self.db)
         enquire.set_query(query)
-        results = []
         self.db.reopen()
-        matches = enquire.get_mset(0, 10)
-        for match in matches:
+
+        def process_match(match):
             doc = match.document
-            res = {}
-            res['id'] = doc.get_value(Indexer.ID)
-            res['user'] = doc.get_value(Indexer.USER)
-            res['date'] = float(doc.get_value(Indexer.DATE_ORIG))
-            res['type'] = doc.get_value(Indexer.TYPE)
-            res['tags_info'] = doc.get_value(Indexer.TAGS_INFO)
-            text = doc.get_data().decode('utf-8')
-            if len(text) > 2048:
-                text = text[:2048] + u'\u2026'
-            res['text'] = text
-            res['percent'] = match.percent
-            results.append(res)
-        return matches.get_matches_estimated(), results
+            return dict(
+                id=doc.get_value(Indexer.ID),
+                user=doc.get_value(Indexer.USER),
+                date=float(doc.get_value(Indexer.DATE_ORIG)),
+                type=doc.get_value(Indexer.TYPE),
+                tags_info=doc.get_value(Indexer.TAGS_INFO),
+                text=doc.get_data().decode('utf-8'),
+                percent=match.percent)
+
+        matches = enquire.get_mset(page * self.PAGE_SIZE, self.PAGE_SIZE)
+        estimated = matches.get_matches_estimated()
+        results = map(process_match, matches)
+        return dict(estimated=estimated, results=results)
