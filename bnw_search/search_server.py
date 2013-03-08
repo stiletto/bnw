@@ -8,7 +8,7 @@ from bnw_search.indexer import Indexer
 
 class RPCSearch(xmlrpc.XMLRPC):
     def __init__(self, dbpath, language):
-        xmlrpc.XMLRPC.__init__(self)
+        xmlrpc.XMLRPC.__init__(self, allowNone=True)
         self.indexer = Indexer(dbpath, language)
         self.db = xapian.Database(dbpath)
         self.stemmer = xapian.Stem(language)
