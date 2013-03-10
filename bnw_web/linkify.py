@@ -15,6 +15,7 @@ linkhostings = [
     (ur'(?i)http://imgur.com/([A-Za-z0-9]+)', lambda m: 'http://i.imgur.com/%ss.png' % (m(1),)),
     (ur'http://ompldr.org/v([A-Za-z0-9]+)(/.+)?', lambda m: 'http://ompldr.org/t%s' % (m(1),)),
     (ur'http://2-ch.ru/([a-z]+)/src/([0-9]+).(png|gif|jpg)', lambda m: 'http://2-ch.ru/%s/thumb/%ss.%s' % (m(1),m(2),m(3))),
+    (ur'https?://(?:www\.)?youtube.com/watch\?(?:.+&)?v\=([A-Z0-9a-z_-]+)(?:&.+)?', lambda m: 'http://img.youtube.com/vi/%s/default.jpg' % (m(1),)),
     (ur'(?i)http://(.+.(?:png|gif|jpg|jpeg))', lambda m: 'http://fuck.blasux.ru/thumb?img=%s' % (url_escape(m(0)),)),
 ]
 linkhostings = [(re.compile('^' + k + '$'), v, k) for (k, v) in linkhostings]
