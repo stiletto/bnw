@@ -9,7 +9,6 @@ from bnw_core.base import config
 from bnw_handlers.base import require_auth, check_arg
 
 
-@require_auth
 @check_arg(page='[0-9]+')
 @defer.inlineCallbacks
 def cmd_search(request, query='', page='0'):
@@ -31,5 +30,5 @@ def cmd_search(request, query='', page='0'):
 
     t = time.time() - start
     log.msg('Queried "%s" by %s. Found %s results in %.3fs.' % (
-        query, request.user['name'], result['estimated'], t))
+        query, request.user['name'] if request.user else '*', result['estimated'], t))
     defer.returnValue(dict(ok=True, format='search', **result))
