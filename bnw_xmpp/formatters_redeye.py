@@ -60,14 +60,15 @@ def formatter_message_with_replies(request, result):
         (format_comment(request, c, True) for c in result['replies']))
 
 
-def formatter_search(request, result):
-    total, results = result['search_result']
+def formatter_search(request, search_result):
+    estimated = search_result['estimated']
+    results = search_result['results']
+    results.reverse()  # Most relevant items should be at the bottom
     if not results:
         return 'No results found.'
-    info = 'Found %d results' % total
-    if total > 10:
-        info += ' (displaying first 10)'
-    print repr(info)
+    info = 'Found %d results' % estimated
+    if estimated > 20:
+        info += ' (displaying first 20)'
     out = [info + ':']
     for res in results:
         out.append('@%s: %s (%s%%)\n%s\n\n#%s %s/p/%s' % (
