@@ -34,7 +34,7 @@
                 var matches, that = this;
                 if((matches = regexp.exec($(this).attr('src'))) !== null)
                 {
-                    $.get('http://gdata.youtube.com/feeds/api/videos/'+matches[1], function (data)
+                    $.get('//gdata.youtube.com/feeds/api/videos/'+matches[1], function (data)
                     {
                         $(that).attr('title', $($(data).find('title')[0]).text());
                     });
