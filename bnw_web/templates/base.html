@@ -27,6 +27,9 @@
             $(".imgpreview_ps").removeClass("imgpreview_ps");
             $('pre code').each(function(i, e) {hljs.highlightBlock(e)});
         });
+        function meow() {
+            window.location = "http://meow.bnw.im"+window.location.pathname;
+        }
     </script>
     {% block extrahead %}
     {% end %}
@@ -66,6 +69,7 @@
             <a href="http://bnw.reformal.ru/" class='pagelink'>BnW на Реформале</a>
 
             <a href="http://hive.blasux.ru/u/Stiletto/BnW" class="pagelink">Викивач</a>
+            <a style="background-color: #c5c; color: #fff;" href="#" onclick="meow()" class="pagelink">Котятки</a>
         </div>
     </div>
     <br />
