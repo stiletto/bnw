@@ -28,7 +28,7 @@
             $('pre code').each(function(i, e) {hljs.highlightBlock(e)});
             
             //titles for youtube's previews
-            var regexp = /^http:\/\/img\.youtube\.com\/vi\/([A-z0-9_\-]+)\/default\.jpg$/;
+            var regexp = /^https?:\/\/img\.youtube\.com\/vi\/([A-z0-9_\-]+)\/default\.jpg$/;
             $('.imgpreview').each(function (index, elem)
             {
                 var matches, that = this;
