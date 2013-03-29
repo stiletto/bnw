@@ -26,6 +26,20 @@
             $(".avatar_ps").removeClass("avatar_ps");
             $(".imgpreview_ps").removeClass("imgpreview_ps");
             $('pre code').each(function(i, e) {hljs.highlightBlock(e)});
+            
+            //titles for youtube's previews
+            var regexp = /^http:\/\/img\.youtube\.com\/vi\/([A-z0-9_\-]+)\/default\.jpg$/;
+            $('.imgpreview').each(function (index, elem)
+            {
+                var matches, that = this;
+                if((matches = regexp.exec($(this).attr('src'))) !== null)
+                {
+                    $.get('http://gdata.youtube.com/feeds/api/videos/'+matches[1], function (data)
+                    {
+                        $(that).attr('title', $($(data).find('title')[0]).text());
+                    });
+                }
+            });
         });
     </script>
     {% block extrahead %}
