@@ -13,7 +13,7 @@ def _(s, user):
 @defer.inlineCallbacks
 def update_internal(message, what, delete, text):
     action = '$pull' if delete else '$addToSet'
-    defer.returnValue((yield objs.Message.mupdate({'id': message}, {action: {what: text}}, safe=True)))
+    defer.returnValue((yield objs.Message.mupdate({'id': message}, {action: {what: text}})))
 
 
 @check_arg(message=MESSAGE_COMMENT_RE)
@@ -60,7 +60,7 @@ def cmd_update(request, message='', text='', club=False, tag=False,
             if len(clubs) > 5:
                 defer.returnValue(dict(ok=False, desc='Too many clubs.'))
             yield objs.Message.mupdate(
-                {'id': message}, {'$set': {'clubs': clubs}}, safe=True)
+                {'id': message}, {'$set': {'clubs': clubs}})
         if tags is not None:
             tags = tags.split(',') if tags else []
             if filter(lambda s: not s, tags):
@@ -68,7 +68,7 @@ def cmd_update(request, message='', text='', club=False, tag=False,
             if len(tags) > 5:
                 defer.returnValue(dict(ok=False, desc='Too many tags.'))
             yield objs.Message.mupdate(
-                {'id': message}, {'$set': {'tags': tags}}, safe=True)
+                {'id': message}, {'$set': {'tags': tags}})
         defer.returnValue(dict(ok=True, desc='Message updated.'))
 
     if club:

@@ -27,7 +27,7 @@ def throttle_check(user):
 def throttle_update(user, post_throttle):
         throttledoc = {'user': user, 'time': time.time()}
         if post_throttle:  # TODO: заменить на upsert
-            _ = yield objs.Throttle.mupdate({'user': user}, throttledoc, safe=True)
+            _ = yield objs.Throttle.mupdate({'user': user}, throttledoc)
         else:
             throttle = objs.Throttle(throttledoc)
             _ = yield throttle.save()

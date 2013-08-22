@@ -50,7 +50,7 @@ class RPCSearch(xmlrpc.XMLRPC):
         ids = [obj['_id'] for obj in objs]
         yield bnw_o.mupdate(
             {'_id': {'$in': ids}}, {'$set': {'indexed': True}},
-            safe=True, multi=True)
+            multi=True)
         self.indexed += len(objs)
         log.msg('Indexed %d/%d...' % (self.indexed, self.total))
         reactor.callLater(0.01, self._run_incremental_indexing)

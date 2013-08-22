@@ -3,8 +3,10 @@ from bnw_mongo import get_db
 from bnw_xmpp.base import send_plain
 from base import notifiers, config
 # from bnw_xmpp import deliver_formatters
+from tornado.concurrent import Future
 from twisted.internet import defer
-import txmongo
+from tornado import gen
+from tornado.ioloop import IOLoop
 import time
 
 
@@ -44,17 +46,33 @@ class WrappedDict(object):
         return self.doc.__unicode__()
 
 
+def fudef(future):
+    d = defer.Deferred()
+    def future_callback(f):
+        e = f.exception()
+        if e is None:
+            d.callback(f.result())
+            return
+        #print 'ERRA', e
+        d.errback(e)
+    IOLoop.current().add_future(future, future_callback)
+    return d
+
 class CollectionWrapper(object):
     def __init__(self, collection_name):
         self.collection_name = collection_name
+        self.collection = None
 
     def __getattr__(self, db_method):
+        if self.collection is None:
+            self.collection = get_db(self.collection_name)
+        method = getattr(self.collection, db_method)
         def fn(*args, **kwargs):
-            d = get_db(self.collection_name)
-            d.addCallback(
-                lambda collection:
-                getattr(collection, db_method)(*args, **kwargs))
-            return d
+            print 'method',db_method,args,kwargs
+            f = method(*args, **kwargs)
+            if isinstance(f, Future):
+                return fudef(f)
+            return f
         return fn
 
 INDEX_TTL = 946080000  # one year. i don't think you will ever need to change this
@@ -73,7 +91,7 @@ class MongoObject(WrappedDict):
     #
     dangerous_fields = ('_id',)
     indexes = (
-        (txmongo.filter.ASCENDING("id"), True, False),
+        ((("id",1)), True, False),
     )
 
     def __init__(self, src=None):
@@ -86,6 +104,13 @@ class MongoObject(WrappedDict):
 
     @classmethod
     @defer.inlineCallbacks
+    def count(cls, *args, **kwargs):
+        cursor = yield cls.collection.find(*args, **kwargs)
+        res = yield fudef(cursor.count())
+        defer.returnValue(res)
+
+    @classmethod
+    @defer.inlineCallbacks
     def find_one(cls, *args, **kwargs):
         res = yield cls.collection.find_one(*args, **kwargs)
         defer.returnValue(None if (not res) else cls(res))
@@ -93,14 +118,20 @@ class MongoObject(WrappedDict):
     @classmethod
     @defer.inlineCallbacks
     def find(cls, *args, **kwargs):
-        res = yield cls.collection.find(*args, **kwargs)
+        cursor = yield cls.collection.find(*args, **kwargs)
+        limit = kwargs.get('limit',1000) # TODO: Document this
+        res = yield fudef(cursor.to_list(limit))
         defer.returnValue(
             cls(doc) for doc in res)  # wrap all documents in our class
 
     @classmethod
     @defer.inlineCallbacks
     def find_sort(cls, spec, sort, **kwargs):
-        res = yield cls.collection.find(spec, filter=txmongo.filter.sort(sort), **kwargs)
+        cursor = yield cls.collection.find(spec, **kwargs)
+        cursor.sort(sort)
+        limit = kwargs.get('limit',1000) # TODO: Document this
+        res = yield fudef(cursor.to_list(limit))
+        print 'findsort res ', len(res)
         defer.returnValue(
             cls(doc) for doc in res)  # wrap all documents in our class
 
@@ -111,9 +142,9 @@ class MongoObject(WrappedDict):
         return cls.collection.update(spec, document, *args, **kwargs)
 
     @defer.inlineCallbacks
-    def save(cls, safe=True):
+    def save(cls, w=1):
         # print cls.collection,type(cls.collection)
-        id = yield (cls.collection.save(cls.doc, safe=safe))
+        id = yield (cls.collection.save(cls.doc, w=w))
         cls.doc['_id'] = id
         defer.returnValue(id)
 
@@ -121,7 +152,7 @@ class MongoObject(WrappedDict):
     @defer.inlineCallbacks
     def ensure_indexes(cls):
         for idi, unique, drop_dups in cls.indexes:
-            _ = yield cls.collection.create_index(txmongo.filter.sort(idi), unique=unique, dropDups=drop_dups)
+            _ = yield cls.collection.create_index(list(idi), unique=unique, dropDups=drop_dups)
         defer.returnValue(None)
 
     def filter_fields(self):
@@ -137,17 +168,14 @@ class Message(MongoObject):
     collection = CollectionWrapper("messages")
     dangerous_fields = ('_id', 'real_user')
     indexes = MongoObject.indexes + (
-        (txmongo.filter.ASCENDING("user") + txmongo.filter.ASCENDING("tags") + txmongo.filter.DESCENDING("date"),
-            False, False),
-        (txmongo.filter.ASCENDING("user") + txmongo.filter.ASCENDING("clubs") + txmongo.filter.DESCENDING("date"),
-            False, False),
-        (txmongo.filter.DESCENDING("date") + txmongo.filter.DESCENDING("recommendations"),
-            False, False),
+        ((("user", 1), ("tags", 1), ("date", -1)), False, False),
+        ((("user", 1), ("clubs", 1), ("date", -1)), False, False),
+        ((("date", -1), ("recommendations", -1)), False, False),
     )
 
     def save(self, safe=True):
         print "+MESSAGE:", self.doc
-        return super(Message, self).save(safe=safe)
+        return super(Message, self).save()
 
     @defer.inlineCallbacks
     def deliver(self, target, recommender=None, recocomment=None, sfrom=None):
@@ -172,11 +200,8 @@ class FeedElement(MongoObject):
         id: id сообщения
         user: пользователь-обладатель ленты."""
     collection = CollectionWrapper("feeds")
-    indexes = (
-        (txmongo.filter.ASCENDING(
-            "message") + txmongo.filter.ASCENDING("user"), True, False),
-        (txmongo.filter.ASCENDING(
-            "user") + txmongo.filter.DESCENDING("_id"), True, False),
+    indexes = ( ((("message", 1),("user", 1)), True, False),
+                ((("user", 1),("_id", -1)), True, False),
     )
 
 
@@ -185,13 +210,13 @@ class Comment(MongoObject):
     collection = CollectionWrapper("comments")
     dangerous_fields = ('_id', 'real_user')
     indexes = MongoObject.indexes + (
-        (txmongo.filter.ASCENDING("message"), False, False),
-        (txmongo.filter.ASCENDING("user"), False, False),
+        ((("message", 1)), False, False),
+        ((("user", 1)), False, False),
     )
 
     def save(self, safe=True):
         print "+COMMENT:", self.doc
-        return super(Comment, self).save(safe=safe)
+        return super(Comment, self).save()
 
     @defer.inlineCallbacks
     def deliver(self, target, recommender=None, recocomment=None, sfrom=None):
@@ -207,7 +232,7 @@ class User(MongoObject):
     dangerous_fields = ('_id', 'login_key', 'avatar', 'jid', 'jids',
                         'pending_jids', 'id', 'settings')
     indexes = (
-        (txmongo.filter.ASCENDING("name"), True, False),
+        ((("name", 1)), True, False),
     )
 
     def send_plain(self, message, sfrom=None):
@@ -221,10 +246,8 @@ class Subscription(MongoObject):
     """ Сраная подписка. """
     collection = CollectionWrapper("subscriptions")
     indexes = (
-        (txmongo.filter.ASCENDING(
-            "user") + txmongo.filter.ASCENDING("type"), False, False),
-        (txmongo.filter.ASCENDING(
-            "target") + txmongo.filter.ASCENDING("type"), False, False),
+        ((("user", 1), ("type", 1)), False, False),
+        ((("target", 1), ("type", 1)), False, False),
     )
 
     def is_remote(self):
@@ -235,7 +258,7 @@ class GlobalState(MongoObject):
     """ Всякие глобальные переменные."""
     collection = CollectionWrapper("globalstate")
     indexes = (
-        (txmongo.filter.ASCENDING("name"), True, False),
+        ((("name", 1)), True, False),
     )
 
 
@@ -279,5 +302,5 @@ class Throttle(MongoObject):
     """ Троттлинг."""
     collection = CollectionWrapper("post_throttle")
     indexes = (
-        (txmongo.filter.ASCENDING("user"), True, False),
+        ((("user", 1)), True, False),
     )

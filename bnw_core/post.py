@@ -3,7 +3,7 @@
 """
 import bnw_objects as objs
 from base import genid, cropstring, get_webui_base
-from bnw_mongo import mongo_errors
+#from bnw_mongo import mongo_errors
 from twisted.internet import defer, reactor
 import time
 from twisted.python import log
@@ -206,7 +206,7 @@ def postComment(message_id, comment_id, text, user, anon=False, sfrom=None):
         try:
             comment['id'] = message_id + '/' + genid(3)
             comment_id = yield comment.save()
-        except mongo_errors.OperationFailure, e:
+        except:# mongo_errors.OperationFailure, e:
             pass
             # if e['code']!=11000:
             #    raise

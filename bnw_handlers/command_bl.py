@@ -10,7 +10,7 @@ import bnw_core.bnw_objects as objs
 @defer.inlineCallbacks
 def bl_internal(user, what, delete, text):
     action = '$pull' if delete else '$addToSet'
-    defer.returnValue((yield objs.User.mupdate({'name': user}, {action: {'blacklist': [what, text]}}, safe=True)))
+    defer.returnValue((yield objs.User.mupdate({'name': user}, {action: {'blacklist': [what, text]}})))
 
 
 @require_auth
