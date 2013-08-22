@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from bnw_mongo import get_db
+from bnw_mongo import get_db, mongo_errors
 from bnw_xmpp.base import send_plain
 from base import notifiers, config
 # from bnw_xmpp import deliver_formatters
@@ -242,6 +242,10 @@ class User(MongoObject):
             send_plain(self['jid'], sfrom, message)
 
 
+def massert(condition,code="assert"):
+    if not condition:
+        defer.returnValue((False, code))
+
 class Subscription(MongoObject):
     """ Сраная подписка. """
     collection = CollectionWrapper("subscriptions")
@@ -252,6 +256,44 @@ class Subscription(MongoObject):
 
     def is_remote(self):
         return '@' in self['target']
+
+    @classmethod
+    def subscribe(cls, user, target_type, target, safe=True, sfrom=None):
+        massert(target_type in ('sub_club', 'sub_tag', 'sub_user', 'sub_message'))
+
+        sub_rec = { 'user': user['name'], 'target': target, 'type': target_type }
+
+        if sfrom:
+            sub_rec['from'] = sfrom
+
+        subject = None
+        if not safe:
+            pass
+        elif target_type = 'sub_user':
+            subject = yield User.find_one({ 'name':target })
+            if not subject:
+                defer.returnValue((False, "sub_nouser"))
+        elif target_type = 'sub_message':
+            subject = yield Message.find_one({ 'id':target })
+            if not subject:
+                defer.returnValue((False, "sub_nomessage"))
+        try:
+            yield cls.insert(sub_rec, safe=safe)
+        except mongo_errors.DuplicateKeyError:
+            defer.returnValue((False, "sub_exists"))
+        defer.returnValue((True, subject))
+
+    @classmethod
+    def unsubscribe(self, user, target_type, target, safe=True):
+        massert(target_type in ('sub_club', 'sub_tag', 'sub_user', 'sub_message'))
+        sub_rec = { 'user': user['name'], 'target': target, 'type': target_type }
+        if safe:
+            result = yield cls.find_and_modify(sub_rec, remove=True)
+            if result:
+                defer.returnValue((True, result))
+            defer.returnValue((False, "sub_nosub"))
+        yield cls.remove(sub_rec)
+        defer.returnValue((True, None))
 
 
 class GlobalState(MongoObject):
