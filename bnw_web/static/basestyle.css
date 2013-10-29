@@ -6,7 +6,7 @@
         }
 
         h1, h2, h3, h4, h5, h6{
-            margin: 15px 0;
+            margin: 0.1em 0;
         }
 
         /* Fix headers sizes */
@@ -19,11 +19,16 @@
 
         ul, ol {
             margin: 0;
-            line-height: 0.5em;
+            /* line-height: 0.5em; */
         }
 
-        blockquote {
-            margin: 0;
+        .pw blockquote {
+            border-left: 1px solid green;
+            padding-left: 0.5em;
+            margin-left: 0.5em;
+            margin-top: 0;
+            margin-right: 0;
+            margin-bottom: 0;
             color: #789922;
         }
 
@@ -219,11 +224,12 @@
         }
 
         .pw {
-            white-space: pre-wrap;
-            word-wrap: break-word;
+            /*white-space: pre-wrap;
+            word-wrap: break-word; */
             padding-bottom: 0.5em;
             margin: 0;
         }
+        .pw p { margin: 0; padding-top: 0.25em; padding-bottom: 0.25em; }
         .hasthumbs {
             min-height: 4em;
         }
@@ -279,3 +285,17 @@
         .cancel_button {
             color: #FF0000;
         }
+
+        .ht {
+            position: absolute;
+            left: -100px;
+            top: -100px;
+        }
+        .vt {
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -o-user-select: none;
+            user-select: none;
+        }
+
