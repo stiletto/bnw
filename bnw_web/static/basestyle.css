@@ -279,3 +279,7 @@
         .cancel_button {
             color: #FF0000;
         }
+        
+        pre code {
+            overflow:auto;
+	}
