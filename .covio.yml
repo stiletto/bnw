@@ -1,0 +1,7 @@
+violations:
+  pep8: pep8 . --exclude='*migrations*,*settings*,*components*,*docs*'
+  sloccount: sloccount .
+  #coverage: coverage report
+  pip_review:
+    command: pip-review
+    nofail: true
