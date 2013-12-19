@@ -31,7 +31,7 @@ http://hive.blasux.ru/u/Stiletto/BnW/Установка_BnW_на_Linux
 
 BnW licened under the following terms:
 ```
-Copyright (c) 2010-2012, Stiletto <blasux@blasux.ru>
+Copyright (c) 2010-2014, Stiletto <blasux@blasux.ru>
 Copyright (c) 2012, Kagami Hiiragi <kagami@genshiken.org>
 All rights reserved.
 
