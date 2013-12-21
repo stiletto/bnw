@@ -11,12 +11,12 @@ from bnw_web.linkshit import _URL_RE, _USER_RE, _MSG_RE
 
 #: Displaying thumbs allowed for the following hostings:
 linkhostings = [
-    (ur'(?i)http://rghost.ru/([0-9]+)', lambda m: 'http://rghost.ru/%s/thumb.png' % (m(1),)),
-    (ur'(?i)http://imgur.com/([A-Za-z0-9]+)', lambda m: 'http://i.imgur.com/%ss.png' % (m(1),)),
-    (ur'http://ompldr.org/v([A-Za-z0-9]+)(/.+)?', lambda m: 'http://ompldr.org/t%s' % (m(1),)),
-    (ur'http://2-ch.ru/([a-z]+)/src/([0-9]+).(png|gif|jpg)', lambda m: 'http://2-ch.ru/%s/thumb/%ss.%s' % (m(1),m(2),m(3))),
-    (ur'https?://(?:www\.)?youtube.com/watch\?(?:.+&)?v\=([A-Z0-9a-z_-]+)(?:&.+)?', lambda m: 'http://img.youtube.com/vi/%s/default.jpg' % (m(1),)),
-    (ur'(?i)http://(.+.(?:png|gif|jpg|jpeg))', lambda m: 'http://fuck.blasux.ru/thumb?img=%s' % (url_escape(m(0)),)),
+    (ur'(?i)http://rghost.(net|ru)/([0-9]+)', lambda m: 'http://rghost.%s/%s/thumb.png' % (m(1),m(2))),
+    (ur'(?i)https?://imgur.com/([A-Za-z0-9]+)', lambda m: 'https://i.imgur.com/%ss.png' % (m(1),)),
+    (ur'http://(2ch.hk|2ch.pm|2ch.re|2ch.tf|2ch.wf|2ch.yt|2-ch.so)/([a-z]+)/src/([0-9]+).(png|gif|jpg)', lambda m: 'http://%s/%s/thumb/%ss.gif' % (m(1),m(2),m(3))),
+    (ur'https?://(?:www\.)?youtube.com/watch\?(?:.+&)?v\=([A-Z0-9a-z_-]+)(?:&.+)?', lambda m: 'https://img.youtube.com/vi/%s/default.jpg' % (m(1),)),
+    (ur'(?i)https?://upload.wikimedia.org/wikipedia/commons/([0-9]{1}\/[A-Za-z0-9]+)/([A-Za-z0-9_.]+)', lambda m: 'https://upload.wikimedia.org/wikipedia/commons/thumb/%s/%s/256px-%s' % (m(1),m(2),m(2))),
+    (ur'(?i)https?://(.+.(?:png|gif|jpg|jpeg))', lambda m: 'http://fuck.blasux.ru/thumb?img=%s' % (url_escape(m(0)),)),
 ]
 linkhostings = [(re.compile('^' + k + '$'), v, k) for (k, v) in linkhostings]
 
