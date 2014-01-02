@@ -505,6 +505,24 @@ class AvatarHandler(BnwWebHandler):
         self.set_header('Content-Type', mimetype)
         defer.returnValue(avatar_data)
 
+class SitemapHandler(BnwWebHandler):
+    @defer.inlineCallbacks
+    def respond(self, type_):
+        self.set_header('Cache-Control', 'public')
+        self.set_header('Vary', 'Accept-Encoding')
+
+        f = [("date", -1)]
+        skip = 0
+        self.write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n\n')
+        while True:
+            messages = list((yield objs.Message.find_sort({}, sort=f, fields={'id':1}, limit=20, skip=skip)))
+            for message in messages:
+                self.write('<url><loc>http://%s/p/%s</loc><priority>1.0</priority></url>\n' % (bnw_core.base.config.webui_base, message['id']))
+            if len(messages)==0 or skip>1000:
+                break
+            skip += 20
+        self.write('</urlset>\n')
+        defer.returnValue('')
 
 def get_site():
     settings = {
@@ -513,6 +531,7 @@ def get_site():
         "static_path": os.path.join(os.path.dirname(__file__), "static"),
         "ui_modules": uimodules,
         "autoescape": None,
+        "gzip": False,
     }
     application = tornado.web.Application([
         (r"/p/([A-Z0-9]+)/?", MessageHandler),
@@ -534,6 +553,7 @@ def get_site():
         (r"/clubs", ClubsHandler),
         (r"/blog", BlogHandler),
         (r"/comment", CommentHandler),
+        (r"/sitemap-(messages).xml", SitemapHandler),
         (r"/api/([0-9a-z/]*)", ApiHandler),
     ], **settings)
 
