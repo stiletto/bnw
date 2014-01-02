@@ -61,6 +61,11 @@ webui_base = 'localhost:7808'
 ## webui_wsbase = 'example.com'
 webui_wsbase = 'localhost:7808'
 
+## Static base URL.
+## In case of public service you should write here domain name:
+## webui_wsbase = 'static.example.com'
+webui_static = 'localhost:7808'
+
 ## Path to xapian database used for keep searching index.
 ## It will be placed relative to /path/to/bnw/bnw_search/
 ## directory or you can specify absolute path.

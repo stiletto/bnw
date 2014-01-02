@@ -4,11 +4,12 @@ import traceback
 from twisted.internet import defer
 from twisted.words.protocols.jabber.jid import JID
 import tornado.web
-import txmongo
+#import txmongo
 import bnw_core.base
 import bnw_core.bnw_objects as objs
 import linkify
 from widgets import widgets
+from bnw_core.base import config
 
 
 class BnwWebRequest(object):
@@ -23,7 +24,7 @@ def get_defargs():
     return {
         'linkify': linkify.linkify,
         'thumbify': linkify.thumbify,
-        'config': bnw_core.base.config,
+        'config': config,
         'w': widgets,
     }.copy()
 
@@ -85,3 +86,10 @@ class BnwWebHandler(tornado.web.RequestHandler):
         handlerclass = self.__class__.__name__
         self.set_status(500)
         self.render(self.errortemplate, text=text, handlerclass=handlerclass)
+        self.logperformance()
+
+    def static_url(self, path, include_host=None):
+        if self.request.host in (config.webui_base, 'www'+config.webui_base) and self.request.protocol=="http":
+            path = tornado.web.RequestHandler.static_url(self, path, False)
+            return self.request.protocol + "://" + config.webui_static + path
+        return tornado.web.RequestHandler.static_url(self, path, include_host)
