@@ -7,11 +7,15 @@ os.chdir(os.path.join(root, 'bnw_search'))
 from twisted.application import internet, service
 from twisted.web import server
 import bnw_core.base
+import bnw_core.bnw_mongo
+
 from bnw_search.search_server import RPCSearch
 import config
 
 
 bnw_core.base.config.register(config)
+bnw_core.bnw_mongo.open_db()
+
 application = service.Application('BnW search service')
 r = RPCSearch(config.search_db, config.search_language)
 search_service = internet.TCPServer(
