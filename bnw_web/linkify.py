@@ -71,6 +71,7 @@ def get_thumbs(raw):
                 break
     return thumbs
 
+blockquote_crap = re.compile(ur'(^|\n)\s*>.+(?=\n[^>\n])')
 
 class BnwRenderer(HtmlRenderer):
     """Wrapper around default misaka's renderer."""
@@ -79,6 +80,7 @@ class BnwRenderer(HtmlRenderer):
         """Apply some additional BnW's rules."""
         text = _USER_RE.sub('[\g<0>](/u/\g<1>)', text)
         text = _MSG_RE.sub(msg_url, text)
+        text = blockquote_crap.sub('\g<0>\n', text) # fuck you, kagami
         return text
 
     def block_quote(self, text):
@@ -88,7 +90,6 @@ class BnwRenderer(HtmlRenderer):
         """
         # TODO: Should we be more wakabic?
         text = ignore_trailing_newlines(text)
-        text = '\n'.join('&gt; '+s for s in text.split('\n'))
         return '<blockquote>{0}</blockquote>\n'.format(text)
 
     def header(self, text, level):
@@ -99,7 +100,7 @@ class BnwRenderer(HtmlRenderer):
         """Use just newlines instead of paragraphs
         (becase we already in the <pre> tag).
         """
-        return text + '\n\n'
+        return '<p>'+ text.replace('\n','<br/>') + '</p>'
 
     def image(self, link, title, alt_text):
         """Don't allow images (they could be big).
