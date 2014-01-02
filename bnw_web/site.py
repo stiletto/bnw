@@ -11,7 +11,7 @@ import tornado.escape
 import logging
 import traceback
 import json
-import txmongo
+#import txmongo
 import os
 from widgets import widgets
 import uimodules
@@ -24,7 +24,8 @@ from tornado.options import define, options
 import bnw_core.bnw_objects as objs
 import bnw_core.post as post
 import bnw_core.base
-from bnw_core.bnw_mongo import get_db, get_fs
+from bnw_core.bnw_mongo import get_db
+from bnw_core.bnw_gridfs import get_fs
 from bnw_handlers.command_show import cmd_feed, cmd_today
 from bnw_handlers.command_clubs import cmd_clubs, cmd_tags
 from bnw_handlers.command_userinfo import cmd_userinfo
@@ -183,7 +184,7 @@ class UserHandler(BnwWebHandler, AuthMixin):
     @defer.inlineCallbacks
     def respond(self, username, reco=None, tag=None):
         _ = yield self.get_auth_user()
-        f = txmongo.filter.sort(txmongo.filter.DESCENDING("date"))
+        f = [("date", -1)]
         user = (yield objs.User.find_one({'name': username}))
         page = get_page(self)
 
@@ -198,7 +199,7 @@ class UserHandler(BnwWebHandler, AuthMixin):
         if tag:
             tag = tornado.escape.url_unescape(tag)
             qdict['tags'] = tag
-        messages = list((yield objs.Message.find(qdict, filter=f, limit=20, skip=20 * page)))
+        messages = list((yield objs.Message.find_sort(qdict, sort=f, limit=20, skip=20 * page)))
         hasmes = yield is_hasmes(qdict, page)
 
         format = self.get_argument("format", "")
@@ -229,14 +230,14 @@ class UserRecoHandler(BnwWebHandler, AuthMixin):
     @defer.inlineCallbacks
     def respond(self, username, tag=None):
         _ = yield self.get_auth_user()
-        f = txmongo.filter.sort(txmongo.filter.DESCENDING("date"))
+        f = [("date", -1)]
         user = (yield objs.User.find_one({'name': username}))
         page = get_page(self)
         qdict = {'recommendations': username}
         if tag:
             tag = tornado.escape.url_unescape(tag)
             qdict['tags'] = tag
-        messages = list((yield objs.Message.find(qdict, filter=f, limit=20, skip=20 * page)))
+        messages = list((yield objs.Message.find_sort(qdict, sort=f, limit=20, skip=20 * page)))
         hasmes = yield is_hasmes(qdict, page)
 
         self.set_header("Cache-Control", "max-age=1")
@@ -266,7 +267,7 @@ class MessageHandler(BnwWebHandler, AuthMixin):
     @defer.inlineCallbacks
     def respond(self, msgid):
         user = yield self.get_auth_user()
-        f = txmongo.filter.sort(txmongo.filter.ASCENDING("date"))
+        f = [("date", 1)]
         msg = (yield objs.Message.find_one({'id': msgid}))
         qdict = {'message': msgid}
         if user:
@@ -284,7 +285,7 @@ class MessageHandler(BnwWebHandler, AuthMixin):
         else:
             is_subscribed = False
         # TODO: Converting generator to list may be inefficient.
-        comments = list((yield objs.Comment.find(qdict, filter=f)))
+        comments = list((yield objs.Comment.find(qdict, sort=f, limit=10000)))
         self.set_header("Cache-Control", "max-age=5")
         if not msg:
             self.set_status(404)
@@ -302,7 +303,7 @@ class MainHandler(BnwWebHandler, AuthMixin):
 
     @defer.inlineCallbacks
     def respond(self, club=None, tag=None):
-        f = txmongo.filter.sort(txmongo.filter.DESCENDING("date"))
+        f = [("date", -1)]
 
         user = yield self.get_auth_user()
 
@@ -322,7 +323,7 @@ class MainHandler(BnwWebHandler, AuthMixin):
             if bl:
                 qdict['user'] = {'$nin': bl}
 
-        messages = list((yield objs.Message.find(qdict, filter=f, limit=20, skip=20 * page)))
+        messages = list((yield objs.Message.find_sort(qdict, sort=f, limit=20, skip=20 * page)))
         hasmes = yield is_hasmes(qdict, page)
         uc = (yield objs.User.count())
         format = self.get_argument("format", "")
@@ -487,7 +488,7 @@ class AvatarHandler(BnwWebHandler):
         self.set_header('Cache-Control', 'max-age=3600, public')
         self.set_header('Vary', 'Accept-Encoding')
         user = yield objs.User.find_one({'name': username})
-        if not (user and user.get('avatar')):
+        if not (user and user.get('avatar') and False):
             self.set_header('Content-Type', 'image/png')
             defer.returnValue(emptypng)
         if thumb:
