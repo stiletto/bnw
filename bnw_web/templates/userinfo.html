@@ -1,14 +1,15 @@
 {% extends "base.html" %}
-{% block title %}BnW - @{{ user }} info{% end %}
+{% block title %}BnW - {% if ok %}@{{ user }} info{% else %}Ошибка{% end %}{% end %}
 {% block body_extraclass %}vcard{% end %}
 {% block body %}
-{% if not user %}
+{% if not ok %}
     <div id="err_outer">
         <div id="err_middle">
             <div id="err_inner">
                 <div id="err_inner2">
                     Ошибка<br/>
                     Пользователь с таким id не найден
+                    <!-- {{ escape(desc) }} -->
                 </div>
               </div>
         </div>
@@ -31,6 +32,7 @@
     <hr/>
     <div class='outerborder'>
     <div class='msg' id="none">
+    {% if loltroll %}{{ loltroll }}{% end %}
     <table class='friendstable'>
         {% if 'fullname' in vcard %}
         <tr><td>Полное имя:</td>
