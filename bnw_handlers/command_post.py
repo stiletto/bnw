@@ -38,6 +38,11 @@ def throttle_update(user, post_throttle):
 def postMessage(request, tags, clubs, text, anon=False, anoncomments=False):
         post_throttle = yield throttle_check(request.user['name'])
         sfrom = request.to.userhost() if request.to else None
+        start = text[:10].lower()
+        if start.startswith('?otr'):
+            defer.returnValue(
+                dict(ok=False, desc='?OTR Error: Fuck your OTR, srsly')
+            )
         ok, rest = yield bnw_core.post.postMessage(
             request.user, tags, clubs, text, anon, anoncomments, sfrom=sfrom)
         _ = yield throttle_update(request.user['name'], post_throttle)
