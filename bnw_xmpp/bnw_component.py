@@ -47,12 +47,12 @@ class LogService(component.Service):
         xmlstream.rawDataOutFn = self.rawDataOut
 
     def rawDataIn(self, buf):
-        log.msg("%s - RECV: %s" % (str(time.time()),
-                                   unicode(buf, 'utf-8').encode('utf-8', 'replace')))
+        s = unicode(buf, 'utf-8', 'replace').encode('utf-8', 'replace')
+        log.msg("%s - RECV: %s" % (str(time.time()),s))
 
     def rawDataOut(self, buf):
-        log.msg("%s - SEND: %s" % (str(time.time()),
-                                   unicode(buf, 'utf-8').encode('utf-8', 'replace')))
+        s = unicode(buf, 'utf-8', 'replace').encode('utf-8', 'replace')
+        log.msg("%s - SEND: %s" % (str(time.time()),s))
 
 
 # class MessageSender(xmlrpc.XMLRPC):
