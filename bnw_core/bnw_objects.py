@@ -43,6 +43,17 @@ class WrappedDict(object):
     def __unicode__(self):
         return self.doc.__unicode__()
 
+def fudef(future):
+    d = defer.Deferred()
+    def future_callback(f):
+        e = f.exception()
+        if e is None:
+            d.callback(f.result())
+            return
+        #print 'ERRA', e
+        d.errback(e)
+    IOLoop.current().add_future(future, future_callback)
+    return d
 
 class CollectionWrapper(object):
     def __init__(self, collection_name):
@@ -230,6 +241,45 @@ class Subscription(MongoObject):
     def is_remote(self):
         return '@' in self['target']
 
+    @classmethod
+    @defer.inlineCallbacks
+    def subscribe(cls, user, target_type, target, safe=True, sfrom=None):
+        massert(target_type in ('sub_club', 'sub_tag', 'sub_user', 'sub_message'))
+
+        sub_rec = { 'user': user['name'], 'target': target, 'type': target_type }
+
+        if sfrom:
+            sub_rec['from'] = sfrom
+
+        subject = None
+        if not safe:
+            pass
+        elif target_type == 'sub_user':
+            subject = yield User.find_one({ 'name':target })
+            if not subject:
+                defer.returnValue((False, "sub_nouser"))
+        elif target_type == 'sub_message':
+            subject = yield Message.find_one({ 'id':target })
+            if not subject:
+                defer.returnValue((False, "sub_nomessage"))
+        try:
+            yield cls.insert(sub_rec, safe=safe)
+        except mongo_errors.DuplicateKeyError:
+            defer.returnValue((False, "sub_exists"))
+        defer.returnValue((True, subject))
+
+    @classmethod
+    @defer.inlineCallbacks
+    def unsubscribe(self, user, target_type, target, safe=True):
+        massert(target_type in ('sub_club', 'sub_tag', 'sub_user', 'sub_message'))
+        sub_rec = { 'user': user['name'], 'target': target, 'type': target_type }
+        if safe:
+            result = yield cls.find_and_modify(sub_rec, remove=True)
+            if result:
+                defer.returnValue((True, result))
+            defer.returnValue((False, "sub_nosub"))
+        yield cls.remove(sub_rec)
+        defer.returnValue((True, None))
 
 class GlobalState(MongoObject):
     """ Всякие глобальные переменные."""
@@ -254,6 +304,11 @@ class StatMessages(MongoObject):
 class StatComments(MongoObject):
     """ Статистика по комментам в выхлопе мап-редьюса."""
     collection = CollectionWrapper("stat_comments")
+    indexes = ()
+
+class StatCharacters(MongoObject):
+    """ Статистика по количеству символов в выхлопе мап-редьюса."""
+    collection = CollectionWrapper("stat_talkers")
     indexes = ()
 
 

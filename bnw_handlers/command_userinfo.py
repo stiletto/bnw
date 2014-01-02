@@ -19,6 +19,8 @@ def cmd_userinfo(request, user=''):
     subscriptions = set([x['target'] for x in subscriptions])
     messages_count = int((yield objs.Message.count({'user': user})))
     comments_count = int((yield objs.Comment.count({'user': user})))
+    characters_stat = yield objs.StatCharacters.find_one({'_id': user})
+    characters_count = int(characters_stat['value']) if characters_stat else 0
 
     # Data processing
     subscribers_all = list(subscribers)
@@ -43,6 +45,7 @@ def cmd_userinfo(request, user=''):
         'regdate': user_obj.get('regdate', 0),
         'messages_count': messages_count,
         'comments_count': comments_count,
+        'characters_count': characters_count,
         'subscribers': subscribers_only,
         'subscribers_all': subscribers_all,
         'subscriptions': subscriptions_only,
