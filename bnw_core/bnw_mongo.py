@@ -38,12 +38,8 @@ def get_db_existing(collection=None):
         return db[collection]
 
 
-@defer.inlineCallbacks
-def get_fs(collection="fs"):
-    db = (yield get_connection())[config.database_fs]
-    fs = gridfs.GridFS(db, collection=collection)
-    defer.returnValue(fs)
-
+#def get_fs(collection="fs"):
+#    return motor.MotorGridFS(fs, collection)
 
 def gc(key):
     global config
