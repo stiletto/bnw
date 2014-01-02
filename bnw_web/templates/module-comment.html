@@ -3,12 +3,12 @@
     <img class='avatar avatar_ps' alt='avatar' src='/u/{{ comment['user'] }}/avatar/thumb' />
     {% set linkified, thumbs = thumbify(comment['text'], comment.get('format')) %}
     {% if thumbs %}<div class="imgpreviews">
-        {% for thumb in thumbs %}<a class="imglink" href="{{ thumb[0] }}">
-            <img class="imgpreview imgpreview_ps" src="{{ thumb[1] }}"/>
+        {% for thumb in thumbs %}<a class="imglink" href="{{ escape(thumb[0]) }}">
+            <img class="imgpreview imgpreview_ps" src="{{ escape(thumb[1]) }}"/>
         </a>{% end %}
         </div>{% end %}
-    <pre class='comment_body pw entry-title entry-content{{
-    ' hasthumbs' if thumbs else '' }}'>{{ linkified }}</pre>
+    <div class='comment_body pw entry-title entry-content{{
+    ' hasthumbs' if thumbs else '' }}'>{{ linkified }}</div>
     <div class='sign'>
         {{ w.msgl(comment['id'], True) }}
         <span class='cmtb' id='cmtb-{{ comment['id'] }}'></span>

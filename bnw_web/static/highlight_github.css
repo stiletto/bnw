@@ -9,118 +9,118 @@ pre code {
   color: #333;
 }
 
-pre .comment,
-pre .template_comment,
-pre .diff .header,
-pre .javadoc {
+code .comment,
+code .template_comment,
+code .diff .header,
+code .javadoc {
   color: #998;
   font-style: italic
 }
 
-pre .keyword,
-pre .css .rule .keyword,
-pre .winutils,
-pre .javascript .title,
-pre .nginx .title,
-pre .subst,
-pre .request,
-pre .status {
+code .keyword,
+code .css .rule .keyword,
+code .winutils,
+code .javascript .title,
+code .nginx .title,
+code .subst,
+code .request,
+code .status {
   color: #333;
   font-weight: bold
 }
 
-pre .number,
-pre .hexcolor,
-pre .ruby .constant {
+code .number,
+code .hexcolor,
+code .ruby .constant {
   color: #099;
 }
 
-pre .string,
-pre .tag .value,
-pre .phpdoc,
-pre .tex .formula {
+code .string,
+code .tag .value,
+code .phpdoc,
+code .tex .formula {
   color: #d14
 }
 
-pre .title,
-pre .id {
+code .title,
+code .id {
   color: #900;
   font-weight: bold
 }
 
-pre .javascript .title,
-pre .lisp .title,
-pre .clojure .title,
-pre .subst {
+code .javascript .title,
+code .lisp .title,
+code .clojure .title,
+code .subst {
   font-weight: normal
 }
 
-pre .class .title,
-pre .haskell .type,
-pre .vhdl .literal,
-pre .tex .command {
+code .class .title,
+code .haskell .type,
+code .vhdl .literal,
+code .tex .command {
   color: #458;
   font-weight: bold
 }
 
-pre .tag,
-pre .tag .title,
-pre .rules .property,
-pre .django .tag .keyword {
+code .tag,
+code .tag .title,
+code .rules .property,
+code .django .tag .keyword {
   color: #000080;
   font-weight: normal
 }
 
-pre .attribute,
-pre .variable,
-pre .lisp .body {
+code .attribute,
+code .variable,
+code .lisp .body {
   color: #008080
 }
 
-pre .regexp {
+code .regexp {
   color: #009926
 }
 
-pre .class {
+code .class {
   color: #458;
   font-weight: bold
 }
 
-pre .symbol,
-pre .ruby .symbol .string,
-pre .lisp .keyword,
-pre .tex .special,
-pre .prompt {
+code .symbol,
+code .ruby .symbol .string,
+code .lisp .keyword,
+code .tex .special,
+code .prompt {
   color: #990073
 }
 
-pre .built_in,
-pre .lisp .title,
-pre .clojure .built_in {
+code .built_in,
+code .lisp .title,
+code .clojure .built_in {
   color: #0086b3
 }
 
-pre .preprocessor,
-pre .pi,
-pre .doctype,
-pre .shebang,
-pre .cdata {
+code .codeprocessor,
+code .pi,
+code .doctype,
+code .shebang,
+code .cdata {
   color: #999;
   font-weight: bold
 }
 
-pre .deletion {
+code .deletion {
   background: #fdd
 }
 
-pre .addition {
+code .addition {
   background: #dfd
 }
 
-pre .diff .change {
+code .diff .change {
   background: #0086b3
 }
 
-pre .chunk {
+code .chunk {
   color: #aaa
 }

@@ -38,7 +38,7 @@ function add_node(html, to, at_top) {
     node.find("img.imgpreview_ps").each(function() {
         $(this).removeClass("imgpreview_ps");
     });
-    $("pre code",node).each(function(i, e) {hljs.highlightBlock(e)});
+    $("code",node).each(function(i, e) {hljs.highlightBlock(e)});
     node.mouseover(function() {
         $(this).removeClass("outerborder_added");
         $(this).unbind("mouseover");
