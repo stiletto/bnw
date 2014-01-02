@@ -47,6 +47,7 @@ show_args =  (
                 ("c", "club", True, u"Show club posts."),
                 ("p", "page", True, u"Results page (from 0)."),
                 ("r", "replies", False, u"Include replies in output (only with -m)."),
+                ("a", "after", True, u"Show only replies after this."),
             )
 post_args = (
                 ("s", "notop", False, u"Post cannot be bumped to top."), # no-op
@@ -232,6 +233,7 @@ simple_handlers = (
         (ur'[#№](?P<message>[0-9A-Za-z]+) -!(?P<text>.+)',command_update.cmd_update,{'club':True,'delete':True}),
         (ur'[#№](?P<message>[0-9A-Za-z]+) -\*(?P<text>.+)',command_update.cmd_update,{'tag':True,'delete':True}),
         (ur'[#№](?P<message>[0-9A-Za-z]+)\s(?P<text>.+)',command_post.cmd_comment),
+        (ur'[#№](?P<message>[0-9A-Za-z]+)[/#](?P<after>[0-9A-Za-z]+)\+',command_show.cmd_show,{'replies':True}),
         (ur'[#№](?P<message>[0-9A-Za-z]+[/#][0-9A-Za-z]+)\s(?P<text>.+)',command_post.cmd_comment),
         (ur'! +[#№](?P<message>[0-9A-Za-z]+)(?: (?P<comment>.+))?',command_post.cmd_recommend),
         (ur'!(?P<unrecommend>!) +[#№](?P<message>[0-9A-Za-z]+)',command_post.cmd_recommend),

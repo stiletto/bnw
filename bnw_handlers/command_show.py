@@ -87,7 +87,7 @@ def showComments(msgid, request, bl=None):
     if bl:
         qdict['user'] = {'$nin': bl}
     comments = yield objs.Comment.find_sort(
-        qdict, [('date', pymongo.ASCENDING)])
+        qdict, [('date', pymongo.ASCENDING)], limit=10000)
     defer.returnValue(dict(
         ok=True, format='message_with_replies', cache=5, cache_public=True,
         msgid=msgid, message=message.filter_fields(),
@@ -97,7 +97,7 @@ def showComments(msgid, request, bl=None):
 @check_arg(message=MESSAGE_COMMENT_RE, page='[0-9]+')
 @defer.inlineCallbacks
 def cmd_show(request, message='', user='', tag='', club='', page='0',
-             show='messages', replies=None, use_bl=False):
+             show='messages', replies=None, use_bl=False, after='', before=''):
     """Show messages by specified parameters."""
     message = canonic_message_comment(message).upper()
     bl = get_user_bl(request, use_bl)
@@ -128,6 +128,20 @@ def cmd_show(request, message='', user='', tag='', club='', page='0',
             parameters.update(user_spec)
         elif bl:
             parameters['user'] = {'$nin': bl}
+
+        if before:
+            befmsg = yield objs.Message.find_one({'id': before})
+            if befmsg:
+                parameters['date'] = {'$lt': befmsg['date']}
+            else:
+                defer.returnValue(dict(ok=False, desc="Message to search before doesn't exist."))
+
+        if after:
+            afmsg = yield objs.Message.find_one({'id': after})
+            if afmsg:
+                parameters['date'] = {'$gt': afmsg['date']}
+            else:
+                defer.returnValue(dict(ok=False, desc="Message to search after doesn't exist."))
         defer.returnValue((yield showSearch(parameters, int(page), request)))
 
 
@@ -169,8 +183,11 @@ def cmd_today(request, use_bl=False):
         start = time.time() - 86400
         _ = yield objs.Today.remove({})
         result = yield objs.Comment.map_reduce(TODAY_MAP, TODAY_REDUCE, out='today', query={'date': {'$gte': start}})
+        print 'map_reduce result', result
     if (not rebuild) or result:
-        postids = list(x['_id'] for x in (yield objs.Today.find_sort({}, [('value', -1)], limit=20)))
+        for x in range(10):
+            postids = [x['_id'] for x in (yield objs.Today.find_sort({}, [('value', -1)], limit=20))]
+            if len(postids)>0: break
         qdict = {'id': {'$in': postids}}
         if bl: qdict['user'] = {'$nin': bl}
         dbposts = dict(
