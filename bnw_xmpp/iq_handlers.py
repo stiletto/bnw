@@ -4,7 +4,7 @@ from cStringIO import StringIO
 from twisted.words.xish import domish
 from twisted.internet import defer
 from twisted.internet.threads import deferToThread
-from txmongo import gridfs
+#from txmongo import gridfs
 import Image
 
 from base import send_raw
@@ -55,7 +55,7 @@ def vcard(iq, iq_user):
             avatar, mimetype, thumb = res
             fs = yield bnw_core.bnw_mongo.get_fs('avatars')
             update_needed = True
-            if av_info:
+            if av_info and False:
                 # TODO: Fix fs.get/GridOut.__init__ in txmongo
                 doc = yield fs._GridFS__files.find_one({'_id': av_info[0]})
                 f = yield fs.get(doc)
@@ -65,7 +65,7 @@ def vcard(iq, iq_user):
                 else:
                     fs.delete(av_info[0])
                     fs.delete(av_info[2])
-            if update_needed:
+            if update_needed and False:
                 extension = mimetype.split('/')[1]
                 avid = fs.put(
                     avatar, filename=iq_user['name'] + '.' + extension,
@@ -76,7 +76,7 @@ def vcard(iq, iq_user):
                 yield objs.User.mupdate(
                     {'name': iq_user['name']},
                     {'$set': {'avatar': [avid, mimetype, thumbid]}})
-    elif av_info:
+    elif av_info and False:
         fs = yield bnw_core.bnw_mongo.get_fs('avatars')
         fs.delete(av_info[0])
         fs.delete(av_info[2])
