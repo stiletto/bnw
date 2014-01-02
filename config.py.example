@@ -9,11 +9,11 @@
 ## if your XMPP client complains about wrong jid).
 srvc_name = 'bnw.localhost'
 
-## BnW's XMPP component port.
-srvc_port = 5347
-
 ## Password used for component authorization.
 srvc_pwd = 'surelythisissecureenough'
+
+## XMPP server and port to connect to.
+xmpp_server = '127.0.0.1:5347'
 
 ## Admin jid. For now used only for sending statistics in each bot answer.
 admin_jid = 'admin@localhost'
@@ -80,3 +80,9 @@ search_port = 7850
 ## Enable or disable BnW's local RPC for debug and specify it's port.
 rpc_enabled = False
 rpc_port = 8081
+
+## Set twisted manhole password (disabled if empty)
+manhole = ''
+
+## Enable printing stack trace before shutdown
+trace_shutdown = False
