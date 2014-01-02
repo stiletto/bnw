@@ -78,6 +78,7 @@
                 if (comments_max_depth>50)
                     margin_ratio = 32.0 / 50;
                 if (margin_ratio > 1) margin_ratio = 1;
+                var mobile = screen.width <= 480;
                 $("#comments").children().each(function(i,o) {
                     var cmt_id = comments_order[element_idx][0];
                     var cmt_html = comments_html[cmt_id];
@@ -90,7 +91,10 @@
                         margin=50;
                     margin = margin * margin_ratio;
 
-                    o.setAttribute("style","margin-left: "+margin+"em;");
+                    if (mobile)
+                        o.setAttribute("style","margin-left: "+(margin*3)+"px;");
+                    else
+                        o.setAttribute("style","margin-left: "+margin+"em;");
                     element_idx++;
                 });
                 scroll_to_anchor();

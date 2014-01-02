@@ -13,7 +13,14 @@
         .msg, .comment {
             padding: 0.5em !important;
         }
-        
+
         #hide_post, #send_post, #send_comment {
             float: none !important;
+        }
+
+        .pagelink[rel="prev"], .pagelink[rel="next"] {
+            line-height: 1.5em !important;
+            margin: 0.25em;
+            display: block;
+            width: 100%;
         }
