@@ -34,12 +34,12 @@
 
         body, .pw, .blueinput, .styledbutton {
             font-family: Unifont, Monaco, Terminus, Consolas, monospace;
-            font-size: 1em;
+            font-size: 16px;
         }
 
-        pre code {
+        code {
             font-family: HUIPIZDONT, Unifont, Monaco, Terminus, Consolas, monospace;
-            font-size: 1em;
+            font-size: 16px;
         }
 
         /* Code blocks */
@@ -299,3 +299,6 @@
             user-select: none;
         }
 
+        pre code {
+            overflow:auto;
+        }
