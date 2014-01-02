@@ -15,3 +15,4 @@ flashshit.py
 bnwach.log*
 _trial_temp/
 bnw_search/bnw_xapian/
+bnw_web/static/flot/
