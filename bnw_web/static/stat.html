@@ -10,9 +10,10 @@
     <body> 
     <h1>Статистика, ё!</h1> 
  
-    <div id="placeholder1" style="width:600px;height:300px;"></div> 
-    <div id="placeholder2" style="width:600px;height:300px;"></div> 
-    <div id="placeholder3" style="width:600px;height:300px;"></div> 
+    <div id="placeholder1" style="width:95%;height:300px;margin: 0 auto;"></div> 
+    <div id="placeholder2" style="width:95%;height:300px;margin: 0 auto;"></div> 
+    <div id="placeholder3" style="width:95%;height:300px;margin: 0 auto;"></div> 
+    <div id="placeholder4" style="width:95%;height:300px;margin: 0 auto;"></div> 
     <p></p> 
  
 <script type="text/javascript"> 
@@ -21,17 +22,19 @@ $(function () {
     $.ajax({
         url: "../api/stat",
         success: function(data) {
-            var v=JSON.parse(data);
+            var v=data; //JSON.parse(data);
             var d1 = [];
             var d2 = [];
+            var d3 = [];
             function datereconstruct(i) {
                 var r = new Date(Math.round(i/10000),Math.round(i/100)%100-1,Math.round(i)%100);
                 return r;
             }
             for (var k in v.messages) {
                 var d = v.messages[k];
-                if(d._id>20100418)
+                if(d._id>20100418) {
                     d1.push([datereconstruct(d._id), d.value]);
+                }
             }
             for (var k in v.comments) {
                 var d = v.comments[k];
@@ -39,9 +42,20 @@ $(function () {
                     d2.push([datereconstruct(d._id), d.value]);
             }
 
+            for (var k in v.messages) {
+                var d = v.messages[k];
+                var da = v.comments[k];
+                var dv; var dav;
+                if (d) dv = d.value; else dv=0.0;
+                if (da) dav = da.value; else dav=0.0;
+                if(d._id>20100418)
+                    d3.push([datereconstruct(d._id), dv+dav]);
+            }
+
             var placeholder = $("#placeholder1");
             var placeholder1 = $("#placeholder2");
             var placeholder2 = $("#placeholder3");
+            var placeholder3 = $("#placeholder4");
             var data = [    {   label: 'Сообщения',
                     data: d1
                 },
@@ -56,6 +70,11 @@ $(function () {
             var data2 = [
                 {   label: 'Комментарии',
                     data: d2
+                },
+            ];
+            var data3 = [
+                {   label: 'Сообщения и комментарии',
+                    data: d3
                 },
             ];
             var options = {
@@ -76,6 +95,7 @@ $(function () {
             $.plot(placeholder,  data, options);
             $.plot(placeholder1,  data1, options);
             $.plot(placeholder2,  data2, options);
+            $.plot(placeholder3,  data3, options);
                
             /* $.plot($("#placeholder3"), [ 
                 {   label: 'Комментарии',
