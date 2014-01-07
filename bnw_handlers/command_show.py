@@ -73,7 +73,7 @@ def showComment(commentid):
 
 
 @defer.inlineCallbacks
-def showComments(msgid, request, bl=None):
+def showComments(msgid, request, bl=None, after=''):
     message = yield objs.Message.find_one({'id': msgid})
     if message is None:
         defer.returnValue(dict(
@@ -86,6 +86,10 @@ def showComments(msgid, request, bl=None):
     qdict = {'message': msgid.upper()}
     if bl:
         qdict['user'] = {'$nin': bl}
+    if after:
+        after_comment = yield objs.Comment.find_one({'id':msgid+'/'+after.split('/')[-1]})
+        if after_comment:
+            qdict['date'] = {'$gte': after_comment['date']}
     comments = yield objs.Comment.find_sort(
         qdict, [('date', pymongo.ASCENDING)], limit=10000)
     defer.returnValue(dict(
@@ -109,7 +113,7 @@ def cmd_show(request, message='', user='', tag='', club='', page='0',
                 ok=False,
                 desc="Error: 'replies' is allowed only with 'message'.",
                 cache=3600))
-        defer.returnValue((yield showComments(message, request, bl)))
+        defer.returnValue((yield showComments(message, request, bl, after)))
     else:
         if show not in ['messages', 'recommendations', 'all']:
             defer.returnValue(dict(

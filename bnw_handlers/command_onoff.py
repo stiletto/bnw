@@ -11,7 +11,7 @@ import bnw_core.bnw_objects as objs
 @defer.inlineCallbacks
 def cmd_on(request):
     """ Включение доставки сообщений """
-    _ = yield objs.User.mupdate({'name': request.user['name']}, {'$set': {'off': False}}, safe=True)
+    _ = yield objs.User.mupdate({'name': request.user['name']}, {'$set': {'off': False}})
     if request.user.get('off', False):
         defer.returnValue(
             dict(ok=True, desc='Welcome back!')
@@ -26,7 +26,7 @@ def cmd_on(request):
 @defer.inlineCallbacks
 def cmd_off(request):
     """ Выключение доставки сообщений """
-    _ = yield objs.User.mupdate({'name': request.user['name']}, {'$set': {'off': True}}, safe=True)
+    _ = yield objs.User.mupdate({'name': request.user['name']}, {'$set': {'off': True}})
     if request.user.get('off', False):
         defer.returnValue(
             dict(ok=True, desc='See you later.')

@@ -17,7 +17,7 @@ class SimpleSetting(object):
         if len(value) > 2048:
             defer.returnValue((False, ('%s value is too long.' % (name,))))
         _ = yield objs.User.mupdate({'name': request.user['name']},
-                                    {'$set': {'settings.' + name: value}}, safe=True)
+                                    {'$set': {'settings.' + name: value}})
         defer.returnValue((True,))
 
 

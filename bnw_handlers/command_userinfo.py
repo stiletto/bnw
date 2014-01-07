@@ -53,4 +53,5 @@ def cmd_userinfo(request, user=''):
         'friends': friends,
         'vcard': vcard,
         'about': about,
+        'loltroll': user_obj.get('loltroll', None),
     })
