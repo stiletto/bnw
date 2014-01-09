@@ -8,7 +8,7 @@ setup(name='BnW',
     author='Stiletto',
     author_email='blasux@blasux.ru',
     url='http://github.com/stiletto/bnw',
-    packages=['bnw.core', 'bnw.handlers', 'bnw.scripts', 'bnw.search', 'bnw.web', 'bnw.xmpp'],
+    packages=['bnw', 'bnw.core', 'bnw.handlers', 'bnw.scripts', 'bnw.search', 'bnw.web', 'bnw.xmpp'],
     install_requires=['tornado>=2.0', 'twisted', 'Pillow', 'PyRSS2Gen', 'misaka'],
     entry_points = {
         'console_scripts': [
