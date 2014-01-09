@@ -90,3 +90,8 @@ def checkload(lasttime):
         bnw.core.base.timertime = currenttime - lasttime
     reactor.callLater(1, checkload, currenttime)
 checkload(None)
+
+def runintwistd():
+    sys.argv.insert(1,__file__)
+    sys.argv.insert(1,'-y')
+    from twisted.scripts.twistd import run

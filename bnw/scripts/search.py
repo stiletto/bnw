@@ -21,3 +21,8 @@ r = RPCSearch(config.search_db, config.search_language)
 search_service = internet.TCPServer(
     config.search_port, server.Site(r), interface='127.0.0.1')
 search_service.setServiceParent(application)
+
+def runintwistd():
+    sys.argv.insert(1,__file__)
+    sys.argv.insert(1,'-y')
+    from twisted.scripts.twistd import run
