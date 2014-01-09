@@ -8,7 +8,7 @@
         </a>{% end %}
         </div>{% end %}
     <div class='comment_body pw entry-title entry-content{{
-    ' hasthumbs' if thumbs else '' }}'>{{ linkified }}</div>
+    ' hasthumbs' if thumbs else '' }}'{% if comment.get('format')=='moinmoin' %} style='white-space: pre-wrap;'{% end %}>{{ linkified }}</div>
     <div class='sign'>
         {{ w.msgl(comment['id'], True) }}
         <span class='cmtb' id='cmtb-{{ comment['id'] }}'></span>
