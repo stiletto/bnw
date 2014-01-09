@@ -1,6 +1,0 @@
-# Copy this file to config.py (to tests/ dir) and edit it
-# in accordance with your preferences.
-
-jid = "bot@localhost"
-password = "secret"
-bnw_jid = "bnw@bnw.localhost"
