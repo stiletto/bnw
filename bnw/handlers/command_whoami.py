@@ -1,4 +1,4 @@
-from bnw_handlers.base import require_auth
+from bnw.handlers.base import require_auth
 
 
 @require_auth

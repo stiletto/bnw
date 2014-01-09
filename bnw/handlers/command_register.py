@@ -5,7 +5,7 @@ from twisted.words.protocols.jabber.xmpp_stringprep import nodeprep
 from base import *
 import random
 import time
-import bnw_core.bnw_objects as objs
+import bnw.core.bnw_objects as objs
 
 
 def _(s, user):

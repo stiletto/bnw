@@ -20,19 +20,19 @@ from twisted.manhole.telnet import ShellFactory
 from time import time
 import traceback
 import config
-import bnw_core.base
-import bnw_core.ensure_indexes
-import bnw_xmpp.base
-from bnw_core.bnw_mongo import open_db
-from bnw_xmpp import bnw_component, xmpp_notifier
+import bnw.core.base
+import bnw.core.ensure_indexes
+import bnw.xmpp.base
+from bnw.core.bnw_mongo import open_db
+from bnw.xmpp import bnw_component, xmpp_notifier
 
-bnw_core.base.config.register(config)
+bnw.core.base.config.register(config)
 application = service.Application("BnW")
 
 open_db()
 
 from twisted.internet import reactor
-reactor.callWhenRunning(bnw_core.ensure_indexes.index)
+reactor.callWhenRunning(bnw.core.ensure_indexes.index)
 
 # Set up XMPP component.
 sm = component.buildServiceManager(
@@ -46,8 +46,8 @@ bnw_component.LogService().setServiceParent(sm)
 s = bnw_component.BnwService()
 s.setServiceParent(sm)
 
-bnw_xmpp.base.service.register(s)
-bnw_core.base.notifiers.add(xmpp_notifier.XmppNotifier())
+bnw.xmpp.base.service.register(s)
+bnw.core.base.notifiers.add(xmpp_notifier.XmppNotifier())
 
 serviceCollection = service.IServiceCollection(application)
 sm.setServiceParent(serviceCollection)
@@ -79,14 +79,14 @@ if config.manhole:
     shell_tcp_server.setServiceParent(serviceCollection)
 
 if config.webui_enabled:
-    import bnw_web.site
-    http_server = bnw_web.site.get_site()
+    import bnw.web.site
+    http_server = bnw.web.site.get_site()
     http_server.listen(config.webui_port, "127.0.0.1")
 
-bnw_core.base.timertime = 0
+bnw.core.base.timertime = 0
 def checkload(lasttime):
     currenttime = time()
     if lasttime is not None:
-        bnw_core.base.timertime = currenttime - lasttime
+        bnw.core.base.timertime = currenttime - lasttime
     reactor.callLater(1, checkload, currenttime)
 checkload(None)

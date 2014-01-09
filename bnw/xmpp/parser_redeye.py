@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from base import CommandParserException
-from bnw_core.base import BnwResponse
+from bnw.core.base import BnwResponse
 from twisted.internet import defer
 import parser_basexmpp
 

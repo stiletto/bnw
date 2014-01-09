@@ -3,7 +3,7 @@
 
 from base import *
 
-import bnw_core.bnw_objects as objs
+import bnw.core.bnw_objects as objs
 
 
 @require_auth

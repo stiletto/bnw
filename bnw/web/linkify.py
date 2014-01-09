@@ -5,8 +5,8 @@ from tornado.escape import _unicode, xhtml_escape, url_escape
 from misaka import HtmlRenderer, Markdown
 import misaka as m
 
-from bnw_web.linkshit import LinkParser, shittypes
-from bnw_web.linkshit import _URL_RE, _USER_RE, _MSG_RE
+from bnw.web.linkshit import LinkParser, shittypes
+from bnw.web.linkshit import _URL_RE, _USER_RE, _MSG_RE
 
 
 #: Displaying thumbs allowed for the following hostings:

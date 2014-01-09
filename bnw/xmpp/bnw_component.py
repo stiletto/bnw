@@ -7,8 +7,8 @@ from twisted.words.protocols.jabber.ijabber import IService
 from twisted.words.protocols.jabber import component
 from twisted.web import xmlrpc
 
-import bnw_core.bnw_objects as objs
-from bnw_core.base import config
+import bnw.core.bnw_objects as objs
+from bnw.core.base import config
 import stupid_handler
 
 PRESENCE = '/presence'  # this is an global xpath query to use in an observer

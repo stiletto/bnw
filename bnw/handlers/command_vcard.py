@@ -1,7 +1,7 @@
 from twisted.words.xish import domish
 
 from base import require_auth
-from bnw_xmpp.base import send_raw
+from bnw.xmpp.base import send_raw
 
 
 @require_auth

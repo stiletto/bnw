@@ -1,6 +1,6 @@
 from twisted.internet import defer
 
-import bnw_core.bnw_objects as objs
+import bnw.core.bnw_objects as objs
 
 
 @defer.inlineCallbacks

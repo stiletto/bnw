@@ -8,9 +8,9 @@ from twisted.internet.threads import deferToThread
 import Image
 
 from base import send_raw
-import bnw_core.base
-import bnw_core.bnw_mongo
-from bnw_core import bnw_objects as objs
+import bnw.core.base
+import bnw.core.bnw_mongo
+from bnw.core import bnw_objects as objs
 
 
 def get_and_resize_avatar(iq):
@@ -53,7 +53,7 @@ def vcard(iq, iq_user):
         res = yield deferToThread(get_and_resize_avatar, iq)
         if res:
             avatar, mimetype, thumb = res
-            fs = yield bnw_core.bnw_mongo.get_fs('avatars')
+            fs = yield bnw.core.bnw_mongo.get_fs('avatars')
             update_needed = True
             if av_info and False:
                 # TODO: Fix fs.get/GridOut.__init__ in txmongo
@@ -77,7 +77,7 @@ def vcard(iq, iq_user):
                     {'name': iq_user['name']},
                     {'$set': {'avatar': [avid, mimetype, thumbid]}})
     elif av_info and False:
-        fs = yield bnw_core.bnw_mongo.get_fs('avatars')
+        fs = yield bnw.core.bnw_mongo.get_fs('avatars')
         fs.delete(av_info[0])
         fs.delete(av_info[2])
         yield objs.User.mupdate(

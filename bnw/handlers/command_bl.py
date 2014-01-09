@@ -4,7 +4,7 @@
 from base import *
 import random
 
-import bnw_core.bnw_objects as objs
+import bnw.core.bnw_objects as objs
 
 
 @defer.inlineCallbacks

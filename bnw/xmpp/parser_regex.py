@@ -14,7 +14,7 @@ from twisted.internet import defer
 import re
 import parser_basexmpp
 
-from bnw_core.base import BnwResponse
+from bnw.core.base import BnwResponse
 
 
 class RegexParser(parser_basexmpp.BaseXmppParser):

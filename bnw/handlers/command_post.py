@@ -3,12 +3,12 @@
 from base import *
 import random
 import time
-from bnw_core.base import BnwResponse, get_webui_base
-import bnw_core.bnw_objects as objs
-from bnw_core.post import publish
+from bnw.core.base import BnwResponse, get_webui_base
+import bnw.core.bnw_objects as objs
+from bnw.core.post import publish
 
 from twisted.python import log
-import bnw_core.post
+import bnw.core.post
 
 
 def _(s, user):
@@ -43,7 +43,7 @@ def postMessage(request, tags, clubs, text, anon=False, anoncomments=False):
             defer.returnValue(
                 dict(ok=False, desc='?OTR Error: Fuck your OTR, srsly')
             )
-        ok, rest = yield bnw_core.post.postMessage(
+        ok, rest = yield bnw.core.post.postMessage(
             request.user, tags, clubs, text, anon, anoncomments, sfrom=sfrom)
         _ = yield throttle_update(request.user['name'], post_throttle)
         if ok:
@@ -96,7 +96,7 @@ def cmd_comment(request, message="", anonymous="", text=""):
         comment_id = message if '/' in message else None
         post_throttle = yield throttle_check(request.user['name'])
         sfrom = request.to.userhost() if request.to else None
-        ok, rest = yield bnw_core.post.postComment(
+        ok, rest = yield bnw.core.post.postComment(
             message_id, comment_id, text, request.user, anonymous, sfrom=sfrom)
         _ = yield throttle_update(request.user['name'], post_throttle)
         if ok:
@@ -149,7 +149,7 @@ def cmd_recommend(request, message="", comment="", unrecommend=""):
                     desc='You haven\'t recommended this message.'))
 
         post_throttle = yield throttle_check(request.user['name'])
-        ok, rest = yield bnw_core.post.recommendMessage(
+        ok, rest = yield bnw.core.post.recommendMessage(
             request.user, message_obj, comment)
         yield throttle_update(request.user['name'], post_throttle)
         if ok:

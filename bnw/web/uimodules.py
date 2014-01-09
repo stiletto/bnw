@@ -1,6 +1,6 @@
 import tornado.web
-from bnw_web.base import get_defargs
-from bnw_web.widgets import widgets
+from bnw.web.base import get_defargs
+from bnw.web.widgets import widgets
 
 
 class Message(tornado.web.UIModule):

@@ -1,6 +1,6 @@
 from twisted.internet import defer
-import bnw_core.bnw_objects as objs
-from bnw_web.base import BnwWebHandler
+import bnw.core.bnw_objects as objs
+from bnw.web.base import BnwWebHandler
 
 
 class LoginHandler(BnwWebHandler):

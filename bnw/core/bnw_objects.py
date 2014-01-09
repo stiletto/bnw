@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from bnw_mongo import get_db #, mongo_errors
-from bnw_xmpp.base import send_plain
+from bnw.xmpp.base import send_plain
 from base import notifiers, config
-# from bnw_xmpp import deliver_formatters
+# from bnw.xmpp import deliver_formatters
 from tornado.concurrent import Future
 from twisted.internet import defer
 from tornado import gen

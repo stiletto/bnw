@@ -6,11 +6,11 @@ from twisted.internet import defer
 from twisted.words.protocols.jabber.jid import JID
 import tornado.web
 #import txmongo
-import bnw_core.base
-import bnw_core.bnw_objects as objs
+import bnw.core.base
+import bnw.core.bnw_objects as objs
 import linkify
 from widgets import widgets
-from bnw_core.base import config
+from bnw.core.base import config
 
 
 class BnwWebRequest(object):

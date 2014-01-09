@@ -4,7 +4,7 @@ from twisted.internet import defer
 from twisted.internet.defer import _DefGen_Return
 from twisted.words.protocols.jabber.jid import JID
 
-import bnw_core.bnw_objects as objs
+import bnw.core.bnw_objects as objs
 from base import CommandParserException, XmppMessage
 import handlers
 import iq_handlers

@@ -2,7 +2,7 @@
 
 from twisted.internet import defer
 try:
-    from bnw_core import bnw_objects as objs
+    from bnw.core import bnw_objects as objs
 except ImportError:
     pass
 
@@ -24,10 +24,10 @@ if __name__ == '__main__':
     root = os.path.join(os.path.dirname(__file__), '..')
     sys.path.insert(0, os.path.abspath(root))
     from twisted.internet import reactor
-    import bnw_core.base
-    from bnw_core import bnw_objects as objs
+    import bnw.core.base
+    from bnw.core import bnw_objects as objs
     import config
 
-    bnw_core.base.config.register(config)
+    bnw.core.base.config.register(config)
     index().addCallback(lambda ign: reactor.stop())
     reactor.run()

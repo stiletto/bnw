@@ -2,8 +2,8 @@
 # from twisted.words.xish import domish
 
 from base import *
-from bnw_core.base import get_webui_base
-import bnw_core.bnw_objects as objs
+from bnw.core.base import get_webui_base
+import bnw.core.bnw_objects as objs
 from twisted.internet import defer
 
 

@@ -21,18 +21,18 @@ import math
 
 from tornado.options import define, options
 
-import bnw_core.bnw_objects as objs
-import bnw_core.post as post
-import bnw_core.base
-from bnw_core.bnw_mongo import get_db
-from bnw_core.bnw_gridfs import get_fs
-from bnw_handlers.command_show import cmd_feed, cmd_today
-from bnw_handlers.command_clubs import cmd_clubs, cmd_tags
-from bnw_handlers.command_userinfo import cmd_userinfo
+import bnw.core.bnw_objects as objs
+import bnw.core.post as post
+import bnw.core.base
+from bnw.core.bnw_mongo import get_db
+from bnw.core.bnw_gridfs import get_fs
+from bnw.handlers.command_show import cmd_feed, cmd_today
+from bnw.handlers.command_clubs import cmd_clubs, cmd_tags
+from bnw.handlers.command_userinfo import cmd_userinfo
 
-from bnw_web.base import BnwWebHandler, BnwWebRequest
-from bnw_web.auth import LoginHandler, LogoutHandler, requires_auth, AuthMixin
-from bnw_web.api import ApiHandler
+from bnw.web.base import BnwWebHandler, BnwWebRequest
+from bnw.web.auth import LoginHandler, LogoutHandler, requires_auth, AuthMixin
+from bnw.web.api import ApiHandler
 define("port", default=8888, help="run on the given port", type=int)
 
 wscount = 0
@@ -333,9 +333,9 @@ class MainHandler(BnwWebHandler, AuthMixin):
             self.set_header(
                 "Content-Type", 'application/rss+xml; charset=UTF-8')
             if self.request.protocol == "https":
-                base = bnw_core.base.get_https_webui_base()
+                base = bnw.core.base.get_https_webui_base()
             else:
-                base = bnw_core.base.get_http_webui_base()
+                base = bnw.core.base.get_http_webui_base()
             defer.returnValue(
                 rss.message_feed(
                     messages, link=base,
@@ -517,7 +517,7 @@ class SitemapHandler(BnwWebHandler):
         while True:
             messages = list((yield objs.Message.find_sort({}, sort=f, fields={'id':1}, limit=20, skip=skip)))
             for message in messages:
-                self.write('<url><loc>http://%s/p/%s</loc><priority>1.0</priority></url>\n' % (bnw_core.base.config.webui_base, message['id']))
+                self.write('<url><loc>http://%s/p/%s</loc><priority>1.0</priority></url>\n' % (bnw.core.base.config.webui_base, message['id']))
             if len(messages)==0 or skip>1000:
                 break
             skip += 20

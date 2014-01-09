@@ -5,7 +5,7 @@
 #
 
 import re
-from bnw_handlers.base import USER_RE
+from bnw.handlers.base import USER_RE
 
 
 _URL_RE = re.compile(ur"""\b((?:([\w-]+):(/{1,3})|www[.])(?:(?:(?:[^\s&()]|&amp;|&quot;)*(?:[^!"#$%&'()*+,.:;<=>?@\[\]^`{|}~\s]))|(?:\((?:[^\s&()]|&amp;|&quot;)*\)))+)""")

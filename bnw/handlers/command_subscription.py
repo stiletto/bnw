@@ -4,8 +4,8 @@
 from base import *
 import random
 
-import bnw_core.bnw_objects as objs
-import bnw_core.post
+import bnw.core.bnw_objects as objs
+import bnw.core.post
 import pymongo
 
 
@@ -60,7 +60,7 @@ def cmd_subscribe(request, message="", user="", tag="", club="", newtab=None):
             sfrom = stype[4] + '-' + subc
         else:
             sfrom = request.to.userhost() if request.to else None
-        ok, desc = (yield bnw_core.post.subscribe(request.user, stype, starget, sfrom=sfrom))
+        ok, desc = (yield bnw.core.post.subscribe(request.user, stype, starget, sfrom=sfrom))
         defer.returnValue(dict(ok=ok, desc=desc))
 
 
@@ -80,5 +80,5 @@ def cmd_unsubscribe(request, message="", user="", tag="", club="", newtab=None):
             defer.returnValue(
                 dict(ok=False, desc=usageHelp('unsubscribe'))
             )
-        ok, desc = yield bnw_core.post.unsubscribe(request.user, stype, starget)
+        ok, desc = yield bnw.core.post.unsubscribe(request.user, stype, starget)
         defer.returnValue(dict(ok=ok, desc=desc))

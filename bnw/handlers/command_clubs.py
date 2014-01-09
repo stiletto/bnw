@@ -3,7 +3,7 @@
 import time
 from base import *
 from twisted.internet import defer
-import bnw_core.bnw_objects as objs
+import bnw.core.bnw_objects as objs
 
 CLUBS_MAP = 'function() { this.clubs.forEach(function(z) { emit(z, 1);}); }'
 CLUBS_REDUCE = 'function(k,vals) { var sum=0; for(var i in vals) sum += vals[i]; return sum; }'

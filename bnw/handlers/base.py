@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 from twisted.internet import defer, reactor
-import bnw_core.base
+import bnw.core.base
 
 USER_RE = ur'[0-9A-Za-z_-]+'
 

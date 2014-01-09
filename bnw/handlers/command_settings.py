@@ -1,7 +1,7 @@
 import random
 from base import *
-from bnw_core.base import config
-import bnw_core.bnw_objects as objs
+from bnw.core.base import config
+import bnw.core.bnw_objects as objs
 
 
 class SimpleSetting(object):

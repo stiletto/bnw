@@ -2,9 +2,9 @@ import json
 import time
 from twisted.internet import defer
 from tornado.escape import utf8, _unicode
-from bnw_core.base import BnwResponse
-import bnw_core.bnw_objects as objs
-from bnw_web.base import BnwWebRequest, BnwWebHandler
+from bnw.core.base import BnwResponse
+import bnw.core.bnw_objects as objs
+from bnw.web.base import BnwWebRequest, BnwWebHandler
 import api_handlers
 
 

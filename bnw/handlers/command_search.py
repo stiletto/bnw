@@ -5,8 +5,8 @@ from twisted.python import log
 from twisted.internet import defer
 from twisted.web.xmlrpc import Proxy
 
-from bnw_core.base import config
-from bnw_handlers.base import require_auth, check_arg
+from bnw.core.base import config
+from bnw.handlers.base import require_auth, check_arg
 
 
 @check_arg(page='[0-9]+')

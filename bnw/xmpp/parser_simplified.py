@@ -5,7 +5,7 @@ import re
 import datetime
 
 from base import CommandParserException, BaseParser
-from bnw_core.base import BnwResponse
+from bnw.core.base import BnwResponse
 from twisted.internet import defer
 
 

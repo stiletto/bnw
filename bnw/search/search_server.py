@@ -2,8 +2,8 @@ import xapian
 from twisted.internet import defer, reactor, threads
 from twisted.python import log
 from twisted.web import xmlrpc
-from bnw_core import bnw_objects
-from bnw_search.indexer import Indexer
+from bnw.core import bnw_objects
+from bnw.search.indexer import Indexer
 
 
 class RPCSearch(xmlrpc.XMLRPC):

@@ -3,18 +3,18 @@ import sys
 dirname = os.path.dirname(__file__)
 root = os.path.abspath(dirname)
 sys.path.insert(0, root)
-os.chdir(os.path.join(root, 'bnw_search'))
+os.chdir(os.path.join(root, 'bnw.search'))
 from twisted.application import internet, service
 from twisted.web import server
-import bnw_core.base
-import bnw_core.bnw_mongo
+import bnw.core.base
+import bnw.core.bnw_mongo
 
-from bnw_search.search_server import RPCSearch
+from bnw.search.search_server import RPCSearch
 import config
 
 
-bnw_core.base.config.register(config)
-bnw_core.bnw_mongo.open_db()
+bnw.core.base.config.register(config)
+bnw.core.bnw_mongo.open_db()
 
 application = service.Application('BnW search service')
 r = RPCSearch(config.search_db, config.search_language)

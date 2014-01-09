@@ -5,7 +5,7 @@ import time
 import pymongo
 
 from base import *
-import bnw_core.bnw_objects as objs
+import bnw.core.bnw_objects as objs
 
 
 def get_user_bl(request, use_bl=False):

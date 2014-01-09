@@ -1,5 +1,5 @@
 import datetime
-from bnw_core.base import get_webui_base
+from bnw.core.base import get_webui_base
 
 formatters = {
     'comment': None,

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import re
 from twisted.internet import defer, reactor
-from bnw_core.delayed_global import DelayedGlobal
-import bnw_core.base
+from bnw.core.delayed_global import DelayedGlobal
+import bnw.core.base
 
 
 class XmppMessage(object):

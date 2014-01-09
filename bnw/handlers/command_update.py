@@ -2,7 +2,7 @@
 # from twisted.words.xish import domish
 
 from base import *
-import bnw_core.bnw_objects as objs
+import bnw.core.bnw_objects as objs
 from twisted.internet import defer
 
 

@@ -2,8 +2,8 @@
 # from twisted.words.xish import domish
 
 from base import *
-import bnw_core.bnw_objects as objs
-from bnw_core.post import publish
+import bnw.core.bnw_objects as objs
+from bnw.core.post import publish
 from twisted.internet import defer
 
 
