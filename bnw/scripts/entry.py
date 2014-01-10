@@ -12,5 +12,5 @@ def _entrypoint(name):
         run()
     return entrypoint
 
-instance = _entrypoint('instance.tac')
-search = _entrypoint('search.tac')
+instance = _entrypoint('instance.py')
+search = _entrypoint('search.py')
