@@ -1,7 +1,7 @@
 import random
-from twisted.internet import defer
 
 from delayed_global import DelayedGlobal
+from bnw.core.config import config
 
 idchars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
@@ -23,8 +23,6 @@ notifiers = set()
 
 class BnwResponse(Exception):  # we do it idiotic way!
     pass
-
-config = DelayedGlobal('config')
 
 
 def get_webui_base(user):

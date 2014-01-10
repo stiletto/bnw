@@ -42,6 +42,9 @@ admin_jid = 'admin@localhost'
 ## MongoDB's databases names which will be created and used by BnW.
 database = 'bnw'
 database_fs = 'bnw_fs'
+## MongoDB database URI
+database_uri = 'mongodb://10.254.100.2/bnw'
+database_rs = 'bnw'
 
 ## Is BnW's web interface should be enabled. In case of default
 ## settings it can be reached at http://localhost:7808/

@@ -1,20 +1,18 @@
 #!/usr/bin/env python
 
-from twisted.internet import defer
 try:
     from bnw.core import bnw_objects as objs
 except ImportError:
     pass
 
 
-@defer.inlineCallbacks
 def index():
     for name in dir(objs):
         cls = getattr(objs, name)
         if (isinstance(cls, type) and issubclass(cls, objs.MongoObject) and
                 cls is not objs.MongoObject):
                 print '---', name
-                yield cls.ensure_indexes()
+                cls.ensure_indexes()
     print 'Indexes updated.'
 
 

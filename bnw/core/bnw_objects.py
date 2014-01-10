@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 from bnw_mongo import get_db #, mongo_errors
 from bnw.xmpp.base import send_plain
-from base import notifiers, config
+from base import notifiers
+from config import config
 # from bnw.xmpp import deliver_formatters
-from tornado.concurrent import Future
-from twisted.internet import defer
-from tornado import gen
-from tornado.ioloop import IOLoop
 import time
 
 
@@ -45,49 +42,7 @@ class WrappedDict(object):
     def __unicode__(self):
         return self.doc.__unicode__()
 
-def fudef(future):
-    d = defer.Deferred()
-    def future_callback(f):
-        e = f.exception()
-        if e is None:
-            d.callback(f.result())
-            return
-        #print 'ERRA', e
-        d.errback(e)
-    IOLoop.current().add_future(future, future_callback)
-    return d
-
-def fudef(future):
-    d = defer.Deferred()
-    def future_callback(f):
-        e = f.exception()
-        if e is None:
-            d.callback(f.result())
-            return
-        #print 'ERRA', e
-        d.errback(e)
-    IOLoop.current().add_future(future, future_callback)
-    return d
-
-class CollectionWrapper(object):
-    def __init__(self, collection_name):
-        self.collection_name = collection_name
-        self.collection = None
-
-    def __getattr__(self, db_method):
-        if self.collection is None:
-            self.collection = get_db(self.collection_name)
-        method = getattr(self.collection, db_method)
-        def fn(*args, **kwargs):
-            print 'method',db_method,args,kwargs
-            f = method(*args, **kwargs)
-            if isinstance(f, Future):
-                return fudef(f)
-            return f
-        return fn
-
 INDEX_TTL = 946080000  # one year. i don't think you will ever need to change this
-
 
 class MongoObjectCollectionProxy(type):
     def __getattr__(self, mongo_method):
@@ -95,8 +50,7 @@ class MongoObjectCollectionProxy(type):
 
 
 class MongoObject(WrappedDict):
-    """ Обертка для куска говна хранящегося в бд.
-    Это чтобы опечатки не убивали."""
+    """Smarter wrapper for mongo document"""
     __metaclass__ = MongoObjectCollectionProxy
     # any subclass MUST define "collection"
     #
@@ -114,37 +68,29 @@ class MongoObject(WrappedDict):
             self.doc = {}
 
     @classmethod
-    @defer.inlineCallbacks
     def count(cls, *args, **kwargs):
-        cursor = yield cls.collection.find(*args, **kwargs)
-        res = yield fudef(cursor.count())
-        defer.returnValue(res)
+        cursor = cls.collection.find(*args, **kwargs)
+        return cursor.count()
 
     @classmethod
-    @defer.inlineCallbacks
     def find_one(cls, *args, **kwargs):
-        res = yield cls.collection.find_one(*args, **kwargs)
-        defer.returnValue(None if (not res) else cls(res))
+        res = cls.collection.find_one(*args, **kwargs)
+        return None if (not res) else cls(res)
 
     @classmethod
-    @defer.inlineCallbacks
     def find(cls, *args, **kwargs):
-        cursor = yield cls.collection.find(*args, **kwargs)
+        cursor = cls.collection.find(*args, **kwargs)
         limit = kwargs.get('limit',1000) # TODO: Document this
-        res = yield fudef(cursor.to_list(limit))
-        defer.returnValue(
-            cls(doc) for doc in res)  # wrap all documents in our class
+        res = cursor.to_list(limit)
+        return (cls(doc) for doc in res)  # wrap all documents in our class
 
     @classmethod
-    @defer.inlineCallbacks
     def find_sort(cls, spec, sort, **kwargs):
-        cursor = yield cls.collection.find(spec, **kwargs)
+        cursor = cls.collection.find(spec, **kwargs)
         cursor.sort(sort)
         limit = kwargs.get('limit',1000) # TODO: Document this
-        res = yield fudef(cursor.to_list(limit))
-        print 'findsort res ', len(res)
-        defer.returnValue(
-            cls(doc) for doc in res)  # wrap all documents in our class
+        res = cursor.to_list(limit)
+        return (cls(doc) for doc in res)  # wrap all documents in our class
 
     @classmethod
     def mupdate(cls, spec, document, *args, **kwargs):
@@ -152,19 +98,14 @@ class MongoObject(WrappedDict):
             document = document.doc
         return cls.collection.update(spec, document, *args, **kwargs)
 
-    @defer.inlineCallbacks
-    def save(cls, w=1):
-        # print cls.collection,type(cls.collection)
-        id = yield (cls.collection.save(cls.doc, w=w))
-        cls.doc['_id'] = id
-        defer.returnValue(id)
+    def save(self, *args, **kwargs):
+        kwargs['manipulate'] = True
+        return cls.collection.save(self.doc, *args, **kwargs)
 
     @classmethod
-    @defer.inlineCallbacks
     def ensure_indexes(cls):
         for idi, unique, drop_dups in cls.indexes:
-            _ = yield cls.collection.create_index(list(idi), unique=unique, dropDups=drop_dups)
-        defer.returnValue(None)
+            cls.collection.create_index(list(idi), unique=unique, dropDups=drop_dups)
 
     def filter_fields(self):
         msg = self.doc.copy()
@@ -188,22 +129,21 @@ class Message(MongoObject):
         print "+MESSAGE:", self.doc
         return super(Message, self).save()
 
-    @defer.inlineCallbacks
     def deliver(self, target, recommender=None, recocomment=None, sfrom=None):
         feedel_val = dict(user=target['name'], message=self['id'])
-        feedel = yield FeedElement.find_one(feedel_val)
+        feedel = FeedElement.find_one(feedel_val)
         if not feedel:
             feedel_val.update(dict(recommender=recommender,
                                    recocomment=recocomment,
                                    date=time.time()))
             feedel = FeedElement(feedel_val)
-            _ = yield feedel.save()
+            feedel.save()
             res = 0
             for notifier in notifiers:
-                res += yield notifier.notify(target, 'message', (self, recommender, recocomment, sfrom))
-            defer.returnValue(res)
+                res += notifier.notify(target, 'message', (self, recommender, recocomment, sfrom))
+            return res
         else:
-            defer.returnValue(0)
+            return 0
 
 
 class FeedElement(MongoObject):
@@ -229,12 +169,11 @@ class Comment(MongoObject):
         print "+COMMENT:", self.doc
         return super(Comment, self).save()
 
-    @defer.inlineCallbacks
     def deliver(self, target, recommender=None, recocomment=None, sfrom=None):
         res = 0
         for notifier in notifiers:
-            res += yield notifier.notify(target, 'comment', (self, sfrom))
-        defer.returnValue(res)
+            res += notifier.notify(target, 'comment', (self, sfrom))
+        return res
 
 
 class User(MongoObject):

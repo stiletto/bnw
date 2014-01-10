@@ -1,8 +1,8 @@
 # coding: utf-8
 
-from tornado.concurrent import Future
-from twisted.internet import defer
-import motor
+#from tornado.concurrent import Future
+#from twisted.internet import defer
+#import motor
 
 from bnw_mongo import get_db
 from bnw_objects import fudef
