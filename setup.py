@@ -12,8 +12,8 @@ setup(name='BnW',
     install_requires=['tornado>=2.0', 'twisted', 'Pillow', 'PyRSS2Gen', 'misaka'],
     entry_points = {
         'console_scripts': [
-            'bnw = bnw.scripts.instance:runintwistd',
-            'bnw-search = bnw.scripts.search:runintwistd',
+            'bnw = bnw.scripts.entry:instance',
+            'bnw-search = bnw.scripts.entry:search',
         ],
     }
 )
