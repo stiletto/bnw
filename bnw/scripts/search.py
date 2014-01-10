@@ -1,9 +1,5 @@
 import os
 import sys
-dirname = os.path.dirname(__file__)
-root = os.path.abspath(dirname)
-sys.path.insert(0, root)
-os.chdir(os.path.join(root, 'bnw.search'))
 from twisted.application import internet, service
 from twisted.web import server
 import bnw.core.base
