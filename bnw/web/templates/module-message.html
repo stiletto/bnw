@@ -3,7 +3,7 @@
         <img class='avatar avatar_ps' alt='avatar' src='/u/{{ msg['user'] }}/avatar/thumb' />
         {{ w.tags(msg['tags'], msg['clubs'], username) }}
         {% if msg.get('loltroll') %}
-            <div class='pw entry-title entry-content'{% if msg.get('format')=='moinmoin' %} style='white-space: pre-wrap;'{% end %}>{{ msg.get('loltroll') }}</div>
+            <div class='pw entry-title entry-content'>{{ msg.get('loltroll') }}</div>
         {% else %}
             {% set linkified, thumbs = thumbify(msg['text'], msg.get('format')) %}
             {% if thumbs %}<div class="imgpreviews">
@@ -12,7 +12,7 @@
                 </a>{% end %}
                 </div>{% end %}
             <div class='pw entry-title entry-content{{ ' hasthumbs' if thumbs else ''
-            }}'>{{ linkified }}</div>
+            }}'{% if msg.get('format')=='moinmoin' %} style='white-space: pre-wrap;'{% end %}>{{ linkified }}</div>
         {% end %}
         {% if msg['recommendations'] and full %}
             <div class='recos'>
