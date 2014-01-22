@@ -63,7 +63,7 @@
     <hr/>
     <div id='messages'>
     {% for msg in messages %}
-        {{ modules.Message(msg,username=username) }}
+        {{ modules.Message(msg, username=username, secure=secure) }}
     {% end %}
     </div>
 {% end %}

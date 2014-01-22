@@ -62,8 +62,7 @@ def get_thumbs(raw, secure=False):
     thumbs = []
     for match in _URL_RE.finditer(text):
         url = match.group(1)
-        for regexp, handler, _ in 
-        linkhostings:
+        for regexp, handler, _ in linkhostings:
             m = regexp.match(url)
             if m:
                 thumb = handler(m.group, 's' if secure else '')
