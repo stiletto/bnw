@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}BnW - {% if ok %}@{{ user }} info{% else %}Ошибка{% end %}{% end %}
+{% block body_extraclass %}vcard{% end %}
+{% block body %}
+{% if not ok %}
+    <div id="err_outer">
+        <div id="err_middle">
+            <div id="err_inner">
+                <div id="err_inner2">
+                    Ошибка<br/>
+                    Пользователь с таким id не найден
+                    <!-- {{ escape(desc) }} -->
+                </div>
+              </div>
+        </div>
+    </div>
+{% else %}
+    <div class='outerborder info'>
+        <div class='msg'>
+            <div style='display: table-cell;'>
+                <img src='/u/{{ user }}/avatar' alt='avatar' class='avatar_big photo' />
+            </div>
+            <div style='display: table-cell; vertical-align: top; padding-left: 1em;'>
+                Пользователь <a href="/u/{{ user }}" class="usrid">@<span class="nickname">{{ user }}</span></a> — няшка.
+                Он зарегистрировался здесь {{ w.time(regdate) }} и написал с тех пор
+                <a href="/u/{{ user }}/">{{ messages_count }}
+                {{ w.messages(messages_count) }}</a>
+                и {{ comments_count }} {{ w.comments(comments_count) }}.
+            </div>
+        </div>
+    </div>
+    <hr/>
+    <div class='outerborder'>
+    <div class='msg' id="none">
+    {% if loltroll %}{{ loltroll }}{% end %}
+    <table class='friendstable'>
+        {% if 'fullname' in vcard %}
+        <tr><td>Полное имя:</td>
+            <td class="fn">{{ escape(vcard['fullname']) }}</td>
+        </tr>
+        {% else %}
+            <tr style='display: none;'><td>Никнейм здесь:</td><td class="fn">{{ user }}</td></tr>
+        {% end %}
+        {% if 'url' in vcard %}
+        <tr><td>Домашняя страница:</td>
+            <td><a href="{{ escape(vcard['url']) }}" class="url">{{ escape(vcard['url']) }}</a></td>
+        </tr>
+        {% end %}
+        {% if about %}
+        <tr>
+          <td>О себе:</td>
+          <td class='pw note'>{{ linkify(about) }}</td>
+        </tr>
+        {% end %}
+        <tr><td>Подписки:</td>
+            <td>{% for sub in subscriptions %}{{ w.userl(sub) }} {% end %}</td>
+        </tr>
+        <tr><td>Взаимные подписки:</td>
+            <td> {% for sub in friends %}{{ w.userl(sub) }} {% end %} </td>
+        </tr>
+        <tr><td>Читатели:</td>
+            <td>{% for sub in subscribers %}{{ w.userl(sub) }} {% end %}</td>
+        </tr>
+    </table>
+    </div>
+    </div>
+{% end %}
+{% end %}

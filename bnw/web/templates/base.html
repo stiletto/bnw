@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>{% block title %}BnW — Somewhere in Nevada{% end %}</title>
+    <link rel="stylesheet" href="{{ static_url("basestyle.css") }}" type="text/css" />
+    <link rel="stylesheet" href="{{ static_url("highlight_github.css") }}" type="text/css" />
+    <link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="{{ static_url("mobile.css") }}" type="text/css" />
+    <style type="text/css">
+    {% block basestyles %}/* dark: CD, light: FF, gray E5 */{% end %}
+    {% block extrastyle %}{% end %}
+    </style>
+    <style type="text/css">
+    {% if auth_user %}{{ auth_user.get('settings',{}).get('usercss','') }}{% end %}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script type="text/javascript" src="{{ static_url("jquery.min.js") }}"></script>
+    <script type="text/javascript" src="{{ static_url("jquery.cookie.js") }}"></script>
+    <script type="text/javascript" src="{{ static_url("highlight.min.js") }}"></script>
+    <script type="text/javascript" src="{{ static_url("dialogs.js") }}"></script>
+    <script type="text/javascript" src="{{ static_url("dynamic.js") }}"></script>
+    <script type="text/javascript">
+        var page_type = "base";
+        var auth_user = "{% if auth_user %}{{ auth_user['name'] }}{% end %}";
+        $(function() {
+            $(".avatar_ps").removeClass("avatar_ps");
+            $(".imgpreview_ps").removeClass("imgpreview_ps");
+            $('code').each(function(i, e) {hljs.highlightBlock(e)});
+            
+            //titles for youtube's previews
+            var regexp = /^https?:\/\/img\.youtube\.com\/vi\/([A-z0-9_\-]+)\/default\.jpg$/;
+            $('.imgpreview').each(function (index, elem)
+            {
+                var matches, that = this;
+                if((matches = regexp.exec($(this).attr('src'))) !== null)
+                {
+                    $.get('//gdata.youtube.com/feeds/api/videos/'+matches[1], function (data)
+                    {
+                        $(that).attr('title', $($(data).find('title')[0]).text());
+                    });
+                }
+            });
+        });
+        function meow() {
+            window.location = "http://meow.bnw.im"+window.location.pathname;
+        }
+    </script>
+    {% block extrahead %}
+    {% end %}
+</head>
+<body>
+<div class='bodyshit {% block body_extraclass %}{% end %}'>
+    <div class='header' style='text-align: left; overflow: hidden; width: 100%;'>
+        <a href='/' class='tagline'>{{ w.ranq() }}</a>
+        <span style='float: right; padding-right: 1em;'>
+            {% if auth_user %}
+            <a href='/post' class='headlink' id='new_post'>Написать</a>
+            <a href='/feed' class='headlink'>@{{ auth_user['name'] }}</a>
+            {% else %}
+            <a href='/' class='headlink' id='login_button'>Войти</a>
+            {% end %}
+            <a href='/c/bnw' class='headlink'>!bnw</a>
+            <a href='/today' class='headlink'>Сегодня</a>
+            <a href='/clubs' class='headlink'>Клубы</a>
+            {% if auth_user %}
+            <a href='/logout' class='headlink'>Выход</a>
+            {% end %}
+        </span>
+    </div>
+{% block body %}
+{% end %}
+    <div style='overflow: hidden; width: 100%;'>
+        {% block footerrow %}
+        {% end %}
+        <div style='float:right;'>
+            <a href="http://ipv6-test.com/validate.php?url=referer"><img src="{{
+            static_url("button-ipv6-80x15.png") }}" alt="ipv6 ready"
+            title="ipv6 ready" style="border: none; vertical-align: middle;" /></a>
+
+            <a href="https://bitbucket.org/stiletto/bnw-android/downloads"
+            class='pagelink'>BnW для ведрофона</a>
+
+            <a href="http://bnw.reformal.ru/" class='pagelink'>BnW на Реформале</a>
+
+            <a href="http://hive.blasux.ru/u/Stiletto/BnW" class="pagelink">Викивач</a>
+            <a style="background-color: #c5c; color: #fff;" href="#" onclick="meow()" class="pagelink">Котятки</a>
+        </div>
+    </div>
+    <br />
+    <div style='text-align: center;'>
+        Цоперайт &copy; 2010-2014 <a href='/u/stiletto'>@stiletto</a>.
+    </div>
+</div>
+</body>
+</html>

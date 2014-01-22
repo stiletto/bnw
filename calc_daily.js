@@ -13,5 +13,5 @@ redfun = function (k, vals) {
     return sum;
 }
 
-db.messages.mapReduce(mapfun,redfun,{'out':'stat_messages'})
-db.comments.mapReduce(mapfun,redfun,{'out':'stat_comments'})
+db.messages.mapReduce(mapfun,redfun,{'out':{replace: 'stat_messages'}})
+db.comments.mapReduce(mapfun,redfun,{'out':{replace: 'stat_comments'}})

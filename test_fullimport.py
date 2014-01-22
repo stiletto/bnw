@@ -4,18 +4,18 @@ import unittest
 
 class TestImport(unittest.TestCase):
     def test_core(self):
-        import bnw_core.base
-        import bnw_core.bnw_objects
-        import bnw_core.ensure_indexes
-        import bnw_core.post
+        import bnw.core.base
+        import bnw.core.bnw_objects
+        import bnw.core.ensure_indexes
+        import bnw.core.post
 
     def test_global(self):
-        import bnw_xmpp.bnw_component
+        import bnw.xmpp.bnw_component
 
     def test_xmpp(self):
-        import bnw_xmpp.base
-        import bnw_xmpp.handlers
-        import bnw_xmpp.iq_handlers
+        import bnw.xmpp.base
+        import bnw.xmpp.handlers
+        import bnw.xmpp.iq_handlers
 
     def test_web(self):
-        import bnw_web.site
+        import bnw.web.site

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}BnW — лента пользователя @{{auth_user['name']}}{% end %}
+{% block body %}
+{% if not result['ok'] %}
+    <div id="err_outer">
+        <div id="err_middle">
+            <div id="err_inner">
+                <div id="err_inner2">
+                    Ошибка<br/>
+                    Кто бы еще знал, что случилось.
+                </div>
+              </div>
+        </div>
+    </div>
+{% else %}
+    <div class='outerborder info'>
+        <div class='msg'>
+            Лента пользователя
+            <a href="/u/{{ auth_user['name'] }}">@{{ auth_user['name'] }}</a>.<br />
+            Последние 20 сообщений, пришедших в Jabber (или не пришедших,
+            потому что вы были OFF).
+        </div>
+    </div>
+    <hr/>
+    <div id='messages'>
+    <!-- {{ result['messages'].reverse() }} да, я ем говно -->
+    {% for msg in result['messages'] %}
+        {{ modules.Message(msg, secure=secure) }}
+    {% end %}
+    </div>
+{% end %}
+{% end %}
+{% block footerrow %}{% include "pagination.html" %}{% end %}
