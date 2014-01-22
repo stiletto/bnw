@@ -1,7 +1,7 @@
 <div class='outerborder hentry comment_entry' id="{{ comment['id'].split('/')[1] }}">
 <div class='comment'>
     <img class='avatar avatar_ps' alt='avatar' src='/u/{{ comment['user'] }}/avatar/thumb' />
-    {% set linkified, thumbs = thumbify(comment['text'], comment.get('format')) %}
+    {% set linkified, thumbs = thumbify(comment['text'], comment.get('format'), secure) %}
     {% if thumbs %}<div class="imgpreviews">
         {% for thumb in thumbs %}<a class="imglink" href="{{ escape(thumb[0]) }}">
             <img class="imgpreview imgpreview_ps" src="{{ escape(thumb[1]) }}"/>

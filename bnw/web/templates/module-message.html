@@ -5,7 +5,7 @@
         {% if msg.get('loltroll') %}
             <div class='pw entry-title entry-content'>{{ msg.get('loltroll') }}</div>
         {% else %}
-            {% set linkified, thumbs = thumbify(msg['text'], msg.get('format')) %}
+            {% set linkified, thumbs = thumbify(msg['text'], msg.get('format'), secure) %}
             {% if thumbs %}<div class="imgpreviews">
                 {% for thumb in thumbs %}<a class="imglink" href="{{ escape(thumb[0]) }}">
                     <img class="imgpreview imgpreview_ps" src="{{ escape(thumb[1]) }}"/>

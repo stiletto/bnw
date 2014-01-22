@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*18^- coding: utf-8 -*-
 
 import traceback
 from time import time
@@ -66,6 +66,7 @@ class BnwWebHandler(tornado.web.RequestHandler):
     def render(self, templatename, **kwargs):
         args = get_defargs()
         args['auth_user'] = getattr(self, 'user', None)
+        args['secure'] = self.request.protocol=="https"
         args.update(kwargs)
         return super(BnwWebHandler, self).render(templatename, **args)
 
