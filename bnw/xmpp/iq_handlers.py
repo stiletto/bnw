@@ -2,11 +2,12 @@ import base64
 from cStringIO import StringIO
 
 from twisted.words.xish import domish
-from twisted.internet import defer
+from twisted.internet import defer, reactor
 from twisted.internet.threads import deferToThread
 from twisted.web.client import Agent
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IBodyProducer
+from zope.interface import implements
 
 #from txmongo import gridfs
 import Image
