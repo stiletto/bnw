@@ -4,6 +4,10 @@ from cStringIO import StringIO
 from twisted.words.xish import domish
 from twisted.internet import defer
 from twisted.internet.threads import deferToThread
+from twisted.web.client import Agent
+from twisted.web.http_headers import Headers
+from twisted.web.iweb import IBodyProducer
+
 #from txmongo import gridfs
 import Image
 
@@ -11,7 +15,26 @@ from base import send_raw
 import bnw.core.base
 import bnw.core.bnw_mongo
 from bnw.core import bnw_objects as objs
+from bnw.core import config
 
+class StringProducer(object):
+    implements(IBodyProducer)
+
+    def __init__(self, body):
+        self.body = body
+        self.length = len(body)
+
+    def startProducing(self, consumer):
+        consumer.write(self.body)
+        return succeed(None)
+
+    def pauseProducing(self):
+        pass
+
+    def stopProducing(self):
+        pass
+
+agent = Agent(reactor)
 
 def get_and_resize_avatar(iq):
     mimetype = str(iq.vCard.PHOTO.TYPE)
@@ -49,37 +72,23 @@ def vcard(iq, iq_user):
     v = iq.vCard
     # Update avatar info.
     av_info = iq_user.get('avatar')
-    if v.PHOTO:
+    av_key = 'avatars/' + iq_user['name']
+    if v.PHOTO and config.blob_storage:
         res = yield deferToThread(get_and_resize_avatar, iq)
         if res:
             avatar, mimetype, thumb = res
-            fs = yield bnw.core.bnw_mongo.get_fs('avatars')
-            update_needed = True
-            if av_info and False:
-                # TODO: Fix fs.get/GridOut.__init__ in txmongo
-                doc = yield fs._GridFS__files.find_one({'_id': av_info[0]})
-                f = yield fs.get(doc)
-                old_avatar = yield f.read()
-                if old_avatar == avatar:
-                    update_needed = False
-                else:
-                    fs.delete(av_info[0])
-                    fs.delete(av_info[2])
-            if update_needed and False:
-                extension = mimetype.split('/')[1]
-                avid = fs.put(
-                    avatar, filename=iq_user['name'] + '.' + extension,
-                    contentType=mimetype)
-                thumbid = fs.put(
-                    thumb, filename=iq_user['name'] + '_thumb.png',
-                    contentType='image/png')
-                yield objs.User.mupdate(
-                    {'name': iq_user['name']},
-                    {'$set': {'avatar': [avid, mimetype, thumbid]}})
-    elif av_info and False:
-        fs = yield bnw.core.bnw_mongo.get_fs('avatars')
-        fs.delete(av_info[0])
-        fs.delete(av_info[2])
+            yield agent.request('PUT',config.blob_storage+'put/'+av_key,
+                Headers({'Content-Type': mimetype
+                         'Content-Length': str(len(avatar))}, StringProducer(avatar))
+            yield agent.request('PUT',config.blob_storage+'put/'+av_key+'/thumb',
+                Headers({'Content-Type': 'image/png'
+                         'Content-Length': str(len(thumb))}, StringProducer(thumb))
+            yield objs.User.mupdate(
+                {'name': iq_user['name']},
+                    {'$set': {'avatar': 'blobstorage'}})
+    elif av_info and config.blob_storage:
+        yield agent.request('DELETE',config.blob_storage+'delete/'+av_key)
+        yield agent.request('PUT',config.blob_storage+'put/'+av_key+'/thumb')
         yield objs.User.mupdate(
             {'name': iq_user['name']},
             {'$unset': {'avatar': 1}})

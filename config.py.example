@@ -86,6 +86,9 @@ search_port = 7850
 rpc_enabled = False
 rpc_port = 8081
 
+## Blob storage for avatars
+blob_storage = 'http://127.0.0.1:6421/'
+
 ## Set twisted manhole password (disabled if empty)
 manhole = ''
 
