@@ -15,7 +15,7 @@ from base import send_raw
 import bnw.core.base
 import bnw.core.bnw_mongo
 from bnw.core import bnw_objects as objs
-from bnw.core import config
+from bnw.core.base import config
 
 class StringProducer(object):
     implements(IBodyProducer)
