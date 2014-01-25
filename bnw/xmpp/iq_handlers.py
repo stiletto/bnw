@@ -78,17 +78,17 @@ def vcard(iq, iq_user):
         if res:
             avatar, mimetype, thumb = res
             yield agent.request('PUT',config.blob_storage+'put/'+av_key,
-                Headers({'Content-Type': mimetype
+                Headers({'Content-Type': mimetype,
                          'Content-Length': str(len(avatar))}, StringProducer(avatar))
             yield agent.request('PUT',config.blob_storage+'put/'+av_key+'/thumb',
-                Headers({'Content-Type': 'image/png'
+                Headers({'Content-Type': 'image/png',
                          'Content-Length': str(len(thumb))}, StringProducer(thumb))
             yield objs.User.mupdate(
                 {'name': iq_user['name']},
                     {'$set': {'avatar': 'blobstorage'}})
     elif av_info and config.blob_storage:
         yield agent.request('DELETE',config.blob_storage+'delete/'+av_key)
-        yield agent.request('PUT',config.blob_storage+'put/'+av_key+'/thumb')
+        yield agent.request('DELETE',config.blob_storage+'delete/'+av_key+'/thumb')
         yield objs.User.mupdate(
             {'name': iq_user['name']},
             {'$unset': {'avatar': 1}})
