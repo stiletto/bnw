@@ -8,6 +8,7 @@ from twisted.web.client import Agent
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IBodyProducer
 from zope.interface import implements
+from tornado.escape import utf8
 
 #from txmongo import gridfs
 import Image
@@ -27,7 +28,7 @@ class StringProducer(object):
 
     def startProducing(self, consumer):
         consumer.write(self.body)
-        return succeed(None)
+        return defer.succeed(None)
 
     def pauseProducing(self):
         pass
@@ -78,18 +79,18 @@ def vcard(iq, iq_user):
         res = yield deferToThread(get_and_resize_avatar, iq)
         if res:
             avatar, mimetype, thumb = res
-            yield agent.request('PUT',config.blob_storage+'put/'+av_key,
-                Headers({'Content-Type': mimetype,
-                         'Content-Length': str(len(avatar))}), StringProducer(avatar))
-            yield agent.request('PUT',config.blob_storage+'put/'+av_key+'/thumb',
-                Headers({'Content-Type': 'image/png',
-                         'Content-Length': str(len(thumb))}), StringProducer(thumb))
+            yield agent.request('PUT',utf8(config.blob_storage+'put/'+av_key),
+                Headers({'Content-Type': [mimetype],
+                         'Content-Length': [str(len(avatar))]}), StringProducer(avatar))
+            yield agent.request('PUT',utf8(config.blob_storage+'put/'+av_key+'/thumb'),
+                Headers({'Content-Type': ['image/png'],
+                         'Content-Length': [str(len(thumb))]}), StringProducer(thumb))
             yield objs.User.mupdate(
                 {'name': iq_user['name']},
                     {'$set': {'avatar': 'blobstorage'}})
     elif av_info and config.blob_storage:
-        yield agent.request('DELETE',config.blob_storage+'delete/'+av_key)
-        yield agent.request('DELETE',config.blob_storage+'delete/'+av_key+'/thumb')
+        yield agent.request('DELETE',utf8(config.blob_storage+'delete/'+av_key))
+        yield agent.request('DELETE',utf8(config.blob_storage+'delete/'+av_key+'/thumb'))
         yield objs.User.mupdate(
             {'name': iq_user['name']},
             {'$unset': {'avatar': 1}})
