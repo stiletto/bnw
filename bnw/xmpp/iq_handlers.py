@@ -46,11 +46,14 @@ def get_and_resize_avatar(iq):
     if not filedata:
         return
     filedata = str(filedata)
-    if len(filedata) > 32768:
+    if len(filedata) > 102400:
         # XEP-0153 says what image SHOULD be 8KB max,
-        # let's approve up to 32KB.
+        # let's approve up to 100KB.
         return
     try:
+        missing_padding = 4 - len(filedata) % 4
+        if missing_padding:
+            filedata += '=' * missing_padding
         avatar = base64.b64decode(filedata)
     except TypeError:
         return
