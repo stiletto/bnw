@@ -59,6 +59,11 @@ def get_and_resize_avatar(iq):
         return
     try:
         im = Image.open(StringIO(avatar))
+        if im.size[0]*im.size[1] > 1024**2:
+            # we won't generate thumbnails for avatars larger than 1024x1024
+            # because uhm...well... fuck you
+            print 'Avatar from %s is too large.' % (iq['from'],), im.size
+            return
         im.thumbnail((48, 48), Image.ANTIALIAS)
         thumb_f = StringIO()
         im.save(thumb_f, 'png')
