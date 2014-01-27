@@ -14,7 +14,7 @@
         <span class='cmtb' id='cmtb-{{ comment['id'] }}'></span>
         / {{ w.userl(comment['user']) }}
         {% if comment['replyto'] %} --&gt;
-        <a href="/p/{{ comment['replyto'].replace('/', '#') }}"
+        <a href="#{{ comment['replyto'].split('/')[1] }}"
         class="msgid">#{{ comment['replyto']}}</a>{% end %}
         / {{ w.time(comment['date']) }}
     </div>
