@@ -431,12 +431,13 @@ function add_message_page_actions(comment_id, comment_user) {
         var short_id = comment_id.split("/")[1];
         var comment = $("#"+short_id);
         comment.find(".msgid").first().click(function() {
-            if (!depth) {
-                depth = 1;
+            var d = depth;
+            if (!d) {
+                d = 1;
             } else {
-                depth += 1;
+                d += 1;
             }
-            form.css("margin-left", depth+"em");
+            form.css("margin-left", d+"em");
             form.find("[name=comment]").val(short_id);
             comment.after(form);
             $("#comment_textarea").focus();
