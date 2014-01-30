@@ -1,5 +1,6 @@
 *.py[co]
 .eric4project
+.idea
 .ropeproject
 .venv
 nbproject
