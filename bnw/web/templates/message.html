@@ -2,6 +2,8 @@
 {% block title %}BnW — {{ msg.get('user','None') if msg else 'None' }}: {{ escape(w.shorttext(msg['text'])) if msg else 'None' }}{% end %}
 {% block extrahead %}
     <link rel="canonical" href="http://{{ config.webui_base }}/p/{{ msgid }}" />
+{% end %}
+{% block extrascript %}
     <script type="text/javascript">
         var page_type = "message";
         var message_id = "{{ msgid }}";
@@ -26,7 +28,7 @@
             {% end %}
         };
     </script>
-    <script type="text/javascript" src="{{ static_url("tree-comments.js") }}"></script>
+    <script type="text/javascript" src="{{ static_url("tree-comments.js") }}" defer></script>
     {% include "ws_headers.html" %}
 {% end %}
 {% block body_extraclass %}hfeed{% end %}

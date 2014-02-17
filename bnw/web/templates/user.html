@@ -3,6 +3,8 @@
 {% block extrahead %}
     <link rel="alternate" type="application/rss+xml" title="Поток сознания @{{ username }}"
     href="/u/{{ username }}/?format=rss" />
+{% end %}
+{% block extrascript %}
     <script type="text/javascript">
         var page_type = "user";
         var auth_user = "{% if auth_user %}{{ auth_user['name'] }}{% end %}";
