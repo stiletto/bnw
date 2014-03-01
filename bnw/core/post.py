@@ -248,11 +248,12 @@ def recommendMessage(user, message, comment="", sfrom=None):
 
     if user['name'] != message['user']:
         tuser = yield objs.User.find_one({'name': message['user']})
-        yield tuser.send_plain(
-            '@%s recommended your message #%s, '
-            'so %d more users received it. %s/p/%s' % (
-                user['name'], message['id'], recipients,
-                get_webui_base(tuser), message['id']))
+        if not tuser.get('off'):
+            yield tuser.send_plain(
+                '@%s recommended your message #%s, '
+                'so %d more users received it. %s/p/%s' % (
+                    user['name'], message['id'], recipients,
+                    get_webui_base(tuser), message['id']))
         recos_count = len(message['recommendations'])
         if (recos_count < 1024 and
                 user['name'] not in message['recommendations']):
