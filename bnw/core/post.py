@@ -219,7 +219,9 @@ def postComment(message_id, comment_id, text, user, anon=False, sfrom=None):
     _ = (yield objs.Message.mupdate({'id': message_id}, {'$inc': {'replycount': 1}}))
 
     qn, recipients = yield send_to_subscribers([{'target': message_id, 'type': 'sub_message'}], comment)
-    publish('new_comment_in_' + message_id, comment.filter_fields())  # ALARM
+    filtered_comment = comment.filter_fields()  # ALARM
+    publish('new_comment', filtered_comment)
+    publish('new_comment_in_' + message_id, filtered_comment)
     publish('upd_comments_count', message_id, comment['num'])
     publish('upd_comments_count_in_'+message_id, message_id, comment['num'])
     defer.returnValue((True, (comment['id'], comment['num'], qn, recipients)))

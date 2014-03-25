@@ -124,6 +124,16 @@ class UserWsHandler(MainWsHandler):
             ('upd_recommendations_count', self.upd_recommendations_count),
         )
 
+class CommentsWsHandler(WsHandler):
+    """Deliver new comments via websockets."""
+
+    def get_handlers(self, user):
+        return (
+            ('new_comment', self.new_comment),
+        )
+
+    def new_comment(self, comment)
+        self.write_message(json.dumps(comment))
 
 class MessageWsHandler(MainWsHandler):
     """Deliver new events on message page via websockets."""
