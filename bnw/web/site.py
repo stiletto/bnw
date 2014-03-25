@@ -553,6 +553,7 @@ def get_site():
         (r"/u/([0-9a-z_-]+)(?:/(recommendations|all))?/t/(.*)/?", UserHandler),
         (r"/", MainHandler),
         (r"/ws/?", MainWsHandler),
+        (r"/comments/ws/?", CommentsWsHandler),
         (r"/t/()(.*)/?", MainHandler),
         (r"/c/(.*)()/?", MainHandler),
         (r"/login", LoginHandler),
