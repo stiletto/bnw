@@ -127,12 +127,12 @@ class UserWsHandler(MainWsHandler):
 class CommentsWsHandler(WsHandler):
     """Deliver new comments via websockets."""
 
-    def get_handlers(self, user):
+    def get_handlers(self):
         return (
             ('new_comment', self.new_comment),
         )
 
-    def new_comment(self, comment)
+    def new_comment(self, comment):
         self.write_message(json.dumps(comment))
 
 class MessageWsHandler(MainWsHandler):
