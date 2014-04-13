@@ -241,7 +241,7 @@ class User(MongoObject):
     """ Няшка-пользователь."""
     collection = CollectionWrapper("users")
     dangerous_fields = ('_id', 'login_key', 'avatar', 'jid', 'jids',
-                        'pending_jids', 'id', 'settings')
+                        'pending_jids', 'id', 'settings', 'blacklist')
     indexes = (
         ((("name", 1)), True, False),
     )
