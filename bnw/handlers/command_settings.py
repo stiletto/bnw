@@ -12,13 +12,12 @@ class SimpleSetting(object):
         setts = request.user.get('settings', {})
         return setts.get(name, self.default)
 
-    @defer.inlineCallbacks
     def write(self, request, name, value):
         if len(value) > 2048:
-            defer.returnValue((False, ('%s value is too long.' % (name,))))
-        _ = yield objs.User.mupdate({'name': request.user['name']},
-                                    {'$set': {'settings.' + name: value}})
-        defer.returnValue((True,))
+            return False, ('%s value is too long.' % (name,))
+        objs.User.mupdate({'name': request.user['name']},
+                          {'$set': {'settings.' + name: value}})
+        return (True,)
 
 
 class ServiceJidSetting(SimpleSetting):
@@ -39,15 +38,13 @@ optionnames = {
 
 
 @require_auth
-@defer.inlineCallbacks
 def cmd_set(request, **kwargs):
     if not kwargs:
         # Show current settings.
         current = {}
         for n, v in optionnames.iteritems():
             current[n] = v.get(request, n)
-        defer.returnValue(
-            dict(ok=True, format='settings', settings=current))
+        return dict(ok=True, format='settings', settings=current)
     else:
         if 'name' in kwargs:
             # Simplified interface.
@@ -58,13 +55,9 @@ def cmd_set(request, **kwargs):
             # Redeye interface.
             name, value = kwargs.items()[0]
         if not name in optionnames:
-            defer.returnValue(
-                dict(ok=False, desc='Unknown setting: %s' % kwargs['name']))
+            return dict(ok=False, desc='Unknown setting: %s' % kwargs['name'])
         else:
-            res = yield optionnames[name].write(request, name, value)
+            res = optionnames[name].write(request, name, value)
             if not res[0]:
-                defer.returnValue(
-                    dict(ok=False, desc=res[1])
-                )
-        defer.returnValue(
-            dict(ok=True, desc='Settings updated.'))
+                return dict(ok=False, desc=res[1])
+        return dict(ok=True, desc='Settings updated.')

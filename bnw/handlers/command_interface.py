@@ -7,8 +7,7 @@ import bnw.core.bnw_objects as objs
 
 
 @require_auth
-@defer.inlineCallbacks
-def cmd_interface(request, iface=None):  # TODO: asynchronize
+def cmd_interface(request, iface=None):
         """ Переключение интерфейса
 
         Переключение парсера команд xmpp-интерфейса.
@@ -17,17 +16,10 @@ def cmd_interface(request, iface=None):  # TODO: asynchronize
         simple: INTERFACE redeye"""
         parsers = ('simplified', 'redeye')
         if not iface:
-            defer.returnValue(
-                dict(ok=True,
-                     desc='Possible interfaces: ' + ', '.join(parsers))
-            )
+            return dict(ok=True, desc='Possible interfaces: ' + ', '.join(parsers))
         if iface in parsers:
             request.user['interface'] = iface
-            _ = yield objs.User.save(request.user)
-            defer.returnValue(
-                dict(ok=True, desc='Interface changed.')
-            )
+            objs.User.save(request.user)
+            return dict(ok=True, desc='Interface changed.')
         else:
-            defer.returnValue(
-                dict(ok=False, desc='No such interface.')
-            )
+            return dict(ok=False, desc='No such interface.')

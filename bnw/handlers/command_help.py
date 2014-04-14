@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # from twisted.words.xish import domish
-from twisted.web.client import getPage
+import urllib2
 
 from base import *
 import random
@@ -92,22 +92,20 @@ HELP_BASE = 'http://hive.blasux.ru/u/Stiletto/BnW/help_'
 
 
 def formatCommand(command):
-        defer.returnValue(command + ':\n' + '\n'.join((("-" + arg[0]).rjust(4) + (' ARG' if arg[2] else '    ') +
+    return (command + ':\n' + '\n'.join((("-" + arg[0]).rjust(4) + (' ARG' if arg[2] else '    ') +
                          ("--" + arg[1]).rjust(10) + ('=ARG' if arg[2] else '    ') +
             ' ' + arg[3]) for arg in elf.parser.commands[command]))
 
 
-@defer.inlineCallbacks
 def cmd_help_simple(request):
     """ Справка """
-    page = yield getPage(HELP_BASE + 'simplified' + '?action=raw')
+    page = unicode(urllib2.urlopen(HELP_BASE + 'simplified' + '?action=raw').read(),'utf-8','replace')
     if page.startswith('{{{\r\n'):
         page = page[3:]
     if page.endswith('}}}\r\n'):
         page = page[:-5]
-    defer.returnValue(
-        dict(ok=True, desc='Help:' + (page if random.random() < 0.9 else de_yo(page)) +
-            ('\n\nАлсо, @vrusha - няша' if random.random() > 0.65 else ''), cache=3600, cache_public=True))
+    return dict(ok=True, desc='Help:' + (page if random.random() < 0.9 else de_yo(page)) +
+            ('\n\nАлсо, @vrusha - няша' if random.random() > 0.65 else ''), cache=3600, cache_public=True)
 
 
 def cmd_help_redeye(request):

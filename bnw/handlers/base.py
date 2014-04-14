@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import re
-from twisted.internet import defer, reactor
 import bnw.core.base
 
 USER_RE = ur'[0-9A-Za-z_-]+'
@@ -42,14 +41,11 @@ def _(s, user):
 
 
 def require_auth(fun):
-    @defer.inlineCallbacks
     def newfun(request, *args, **kwargs):
         if request.user is None or not request.user.get('name'):
-            defer.returnValue(
-                dict(ok=False, desc='Only for registered users')
-            )
+            return dict(ok=False, desc='Only for registered users')
         else:
-            defer.returnValue((yield fun(request, *args, **kwargs)))
+            return fun(request, *args, **kwargs)
     newfun.__doc__ = fun.__doc__
     return newfun
 
@@ -62,19 +58,16 @@ def check_arg(**kwargs):  # fun,name,rex):
         rexs[name] = (value, rexc)
 
     def damndeco(fun):
-        @defer.inlineCallbacks
         def new_fun(request, *args, **kwargs):
             for name, value in kwargs.iteritems():
                 if value is None:
                     value = ''
                 if (name in rexs) and not rexs[name][1].match(value):
-                    defer.returnValue(
-                        dict(ok=False,
-                             desc='Option "%s" doesn''t meet the constraint "%s"' % (
-                                 name, rexs[name][0]),
-                             constraint=True)
-                    )
-            defer.returnValue((yield fun(request, *args, **kwargs)))
+                    return dict(ok=False,
+                                desc='Option "%s" doesn''t meet the constraint "%s"' % (
+                                  name, rexs[name][0]),
+                                constraint=True)
+            return fun(request, *args, **kwargs)
         new_fun.__doc__ = fun.__doc__
         return new_fun
     return damndeco

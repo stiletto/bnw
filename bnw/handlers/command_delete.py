@@ -4,7 +4,6 @@
 from base import *
 import bnw.core.bnw_objects as objs
 from bnw.core.post import publish
-from twisted.internet import defer
 
 
 def _(s, user):
@@ -13,7 +12,6 @@ def _(s, user):
 
 @require_auth
 @check_arg(message=MESSAGE_COMMENT_RE)
-@defer.inlineCallbacks
 def cmd_delete(request, message="", last=False):
     """ Удаление
 
@@ -23,8 +21,8 @@ def cmd_delete(request, message="", last=False):
     simple: D #123456, D #ABDEF/123, D L"""
     message = canonic_message_comment(message).upper()
     if last:
-        lastcomment = list((yield objs.Comment.find_sort({'user': request.user['name']}, [('date', -1)], limit=1)))
-        lastmessage = list((yield objs.Message.find_sort({'user': request.user['name']}, [('date', -1)], limit=1)))
+        lastcomment = list(objs.Comment.find_sort({'user': request.user['name']}, [('date', -1)], limit=1))
+        lastmessage = list(objs.Message.find_sort({'user': request.user['name']}, [('date', -1)], limit=1))
         if lastcomment:
             if lastmessage:
                 message = lastmessage[0]['id'] if lastmessage[0][
@@ -35,50 +33,34 @@ def cmd_delete(request, message="", last=False):
             if lastmessage:
                 message = lastmessage[0]['id']
             else:
-                defer.returnValue(
-                    dict(ok=False, desc='Nothing to delete.')
-                )
+                return dict(ok=False, desc='Nothing to delete.')
     if not message:
-        defer.returnValue(
-            dict(ok=False, desc='Usage: delete -m POST[/COMMENT]')
-        )
+        return dict(ok=False, desc='Usage: delete -m POST[/COMMENT]')
     splitpost = message.split('/')
     message_id = splitpost[0].upper()
     comment_id = message if len(splitpost) > 1 else None
     if comment_id:
-        comment = yield objs.Comment.find_one({'id': comment_id, 'message': message_id})
-    post = yield objs.Message.find_one({'id': message_id})
+        comment = objs.Comment.find_one({'id': comment_id, 'message': message_id})
+    post = objs.Message.find_one({'id': message_id})
     if comment_id:
         if not comment:
-            defer.returnValue(
-                dict(ok=False, desc='No such comment')
-            )
+            return dict(ok=False, desc='No such comment')
         if request.user['name'] not in (comment['user'], post['user'], comment.get('real_user'), post.get('real_user')):
-            defer.returnValue(
-                dict(ok=False, desc='Not your comment and not your message.')
-            )
-        _ = (yield objs.Message.mupdate({'id': message_id}, {'$inc': {'replycount': -1}}))
-        _ = yield objs.Comment.remove({'id': comment['id'], 'message': comment['message'], 'user': comment['user']})
+            return dict(ok=False, desc='Not your comment and not your message.')
+        objs.Message.mupdate({'id': message_id}, {'$inc': {'replycount': -1}})
+        objs.Comment.remove({'id': comment['id'], 'message': comment['message'], 'user': comment['user']})
         publish('del_comment_in_' + message_id, comment_id)
         publish('upd_comments_count', message_id, post['replycount'] - 1)
         publish('upd_comments_count_in_' + message_id,
                 message_id, post['replycount'] - 1)
-        defer.returnValue(
-            dict(ok=True, desc='Comment %s removed.' % (comment_id,))
-        )
+        return dict(ok=True, desc='Comment %s removed.' % (comment_id,))
     else:
         if not post:
-            defer.returnValue(
-                dict(ok=False, desc='No such message.')
-            )
+            return dict(ok=False, desc='No such message.')
         if request.user['name'] not in (post['user'], post.get('real_user')):
-            defer.returnValue(
-                dict(ok=False, desc='Not your message.')
-            )
-        _ = yield objs.Message.remove({'id': post['id'], 'user': post['user']})
-        _ = yield objs.Comment.remove({'message': post['id']})
+            return dict(ok=False, desc='Not your message.')
+        objs.Message.remove({'id': post['id'], 'user': post['user']})
+        objs.Comment.remove({'message': post['id']})
         publish('del_message', message_id)
         publish('del_message_on_user_' + post['user'], message_id)
-        defer.returnValue(
-            dict(ok=True, desc='Message %s removed.' % (message,))
-        )
+        return dict(ok=True, desc='Message %s removed.' % (message,))

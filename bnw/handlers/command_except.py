@@ -3,7 +3,6 @@
 
 from base import *
 import random
-from twisted.internet import defer
 
 
 def _(s, user):

@@ -28,21 +28,16 @@ srtypes = dict((d[1], d[0]) for d in stypes.items())
 
 
 @require_auth
-@defer.inlineCallbacks
 def cmd_subscriptions(request):
     """ Список подписок """
-    defer.returnValue(
-        dict(ok=True, format="subscriptions",
-             subscriptions=[x.filter_fields() for x in
-                     (yield objs.Subscription.find({'user': request.user['name'],
-                                                    'type':{'$ne': 'sub_message'}}))
-             ])
-    )
+    return dict(ok=True, format="subscriptions",
+        subscriptions=[x.filter_fields() for x in objs.Subscription.find(
+            {'user': request.user['name'],'type':{'$ne': 'sub_message'}})
+    ])
 
 
 @require_auth
 @check_arg(user=USER_RE)
-@defer.inlineCallbacks
 def cmd_subscribe(request, message="", user="", tag="", club="", newtab=None):
         """ Подписка """
         user = user.lower()
@@ -52,21 +47,18 @@ def cmd_subscribe(request, message="", user="", tag="", club="", newtab=None):
         starget, stype = parseSubscription(
             message=message, user=user, tag=tag, club=club)
         if not starget:
-            defer.returnValue(
-                dict(ok=False, desc=usageHelp('subscribe'))
-            )
+            return dict(ok=False, desc=usageHelp('subscribe'))
         if newtab:
             subc = ''.join(c for c in starget[:10] if (c >= 'a' and c <= 'z'))
             sfrom = stype[4] + '-' + subc
         else:
             sfrom = request.to.userhost() if request.to else None
-        ok, desc = (yield bnw.core.post.subscribe(request.user, stype, starget, sfrom=sfrom))
-        defer.returnValue(dict(ok=ok, desc=desc))
+        ok, desc = bnw.core.post.subscribe(request.user, stype, starget, sfrom=sfrom)
+        return dict(ok=ok, desc=desc)
 
 
 @require_auth
 @check_arg(user=USER_RE)
-@defer.inlineCallbacks
 def cmd_unsubscribe(request, message="", user="", tag="", club="", newtab=None):
         """ Отписывание """
         # В этой функции DRY всосало по полной
@@ -77,8 +69,6 @@ def cmd_unsubscribe(request, message="", user="", tag="", club="", newtab=None):
         starget, stype = parseSubscription(
             message=message, user=user, tag=tag, club=club)
         if not starget:
-            defer.returnValue(
-                dict(ok=False, desc=usageHelp('unsubscribe'))
-            )
-        ok, desc = yield bnw.core.post.unsubscribe(request.user, stype, starget)
-        defer.returnValue(dict(ok=ok, desc=desc))
+            return dict(ok=False, desc=usageHelp('unsubscribe'))
+        ok, desc = bnw.core.post.unsubscribe(request.user, stype, starget)
+        return dict(ok=ok, desc=desc)

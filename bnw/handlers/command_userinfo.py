@@ -1,25 +1,23 @@
-from twisted.internet import defer
 
 import bnw.core.bnw_objects as objs
 
 
-@defer.inlineCallbacks
 def cmd_userinfo(request, user=''):
     # DB interactions
     if not user:
-        defer.returnValue(dict(ok=False, desc='Username required.'))
-    user_obj = yield objs.User.find_one({'name': user})
+        return dict(ok=False, desc='Username required.')
+    user_obj = objs.User.find_one({'name': user})
     if not user_obj:
-        defer.returnValue(dict(ok=False, desc='User not found.'))
-    subscribers = yield objs.Subscription.find(dict(
+        return dict(ok=False, desc='User not found.')
+    subscribers = objs.Subscription.find(dict(
         target=user, type='sub_user'))
     subscribers = set([x['user'] for x in subscribers])
-    subscriptions = yield objs.Subscription.find(dict(
+    subscriptions = objs.Subscription.find(dict(
         user=user, type='sub_user'))
     subscriptions = set([x['target'] for x in subscriptions])
-    messages_count = int((yield objs.Message.count({'user': user})))
-    comments_count = int((yield objs.Comment.count({'user': user})))
-    characters_stat = yield objs.StatCharacters.find_one({'_id': user})
+    messages_count = int(objs.Message.count({'user': user}))
+    comments_count = int(objs.Comment.count({'user': user}))
+    characters_stat = objs.StatCharacters.find_one({'_id': user})
     characters_count = int(characters_stat['value']) if characters_stat else 0
 
     # Data processing
@@ -39,7 +37,7 @@ def cmd_userinfo(request, user=''):
         about = vcard.get('desc', '')
 
     # Result
-    defer.returnValue({
+    return {
         'ok': True,
         'user': user,
         'regdate': user_obj.get('regdate', 0),
@@ -54,4 +52,4 @@ def cmd_userinfo(request, user=''):
         'vcard': vcard,
         'about': about,
         'loltroll': user_obj.get('loltroll', None),
-    })
+    }

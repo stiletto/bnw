@@ -3,7 +3,6 @@
 
 from base import *
 import random
-from twisted.internet import defer
 
 answers = ('Pong, чо.',
            'Pong, хуле.',
