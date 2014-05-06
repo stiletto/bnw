@@ -320,10 +320,10 @@ class MainHandler(BnwWebHandler, AuthMixin):
         page = get_page(self)
         qdict = {}
         if tag:
-            tag = tornado.escape.url_unescape(tag)
+            tag = tornado.escape.url_unescape(tag, plus=False)
             qdict['tags'] = tag
         if club:
-            club = tornado.escape.url_unescape(club)
+            club = tornado.escape.url_unescape(club, plus=False)
             qdict['clubs'] = club
         if user:
             bl = []
