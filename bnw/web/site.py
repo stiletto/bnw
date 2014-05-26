@@ -393,7 +393,7 @@ class TodayHandler(BnwWebHandler, AuthMixin):
     @defer.inlineCallbacks
     def respond(self):
         req = BnwWebRequest((yield self.get_auth_user()))
-        result = yield cmd_today(req)
+        result = yield cmd_today(req, use_bl=True)
         self.set_header("Cache-Control", "max-age=300")
         defer.returnValue({
             'result': result,
