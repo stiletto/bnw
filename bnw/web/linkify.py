@@ -71,6 +71,27 @@ def get_thumbs(raw, secure=False):
                 break
     return thumbs
 
+bnwlinks_types = (
+    ('msg', _MSG_RE, lambda m: (m.group(1),)),
+    ('user', _USER_RE, lambda m: (m.group(1),)),
+)
+
+bnwlinks_parser = LinkParser(types=bnwlinks_types)
+
+def bnwlinks(text):
+    texta = []
+    for m in bnwlinks_parser.parse(text):
+        if isinstance(m, tuple):
+            if m[0] == 'msg':
+                texta.append('<a href="/p/%s">%s</a>' % (m[2].replace('/', '#'), m[1]))
+            elif m[0] == 'user':
+                texta.append('<a href="/u/%s">%s</a>' % (m[2], m[1]))
+            else:
+                texta.append('%s<!-- %s -->' % (m[1], m[0]))
+        else:
+            texta.append(m)
+    return ''.join(texta)
+
 blockquote_crap = re.compile(ur'(^|\n)\s*>.+(?=\n[^>\n])')
 
 class BnwRenderer(HtmlRenderer):
@@ -78,8 +99,8 @@ class BnwRenderer(HtmlRenderer):
 
     def preprocess(self, text):
         """Apply some additional BnW's rules."""
-        text = _USER_RE.sub('[\g<0>](/u/\g<1>)', text)
-        text = _MSG_RE.sub(msg_url, text)
+        #text = _USER_RE.sub('[\g<0>](/u/\g<1>)', text)
+        #text = _MSG_RE.sub(msg_url, text)
         text = blockquote_crap.sub('\g<0>\n', text) # fuck you, kagami
         return text
 
@@ -90,6 +111,7 @@ class BnwRenderer(HtmlRenderer):
         """
         # TODO: Should we be more wakabic?
         text = ignore_trailing_newlines(text)
+        text = bnwlinks(text)
         return '<blockquote>{0}</blockquote>\n'.format(text)
 
     def header(self, text, level):
@@ -100,6 +122,7 @@ class BnwRenderer(HtmlRenderer):
         """Use just newlines instead of paragraphs
         (becase we already in the <pre> tag).
         """
+        text = bnwlinks(text)
         return '<p>'+ text.replace('\n','<br/>') + '</p>'
 
     def image(self, link, title, alt_text):
