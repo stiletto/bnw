@@ -69,7 +69,7 @@
         var page_type = "base";
         var auth_user = "{% if auth_user %}{{ auth_user['name'] }}{% end %}";
         document.addEventListener( "DOMContentLoaded", function () {
-        $(document).load(function () {
+        $(window).load(function () {
             $(".avatar_ps").removeClass("avatar_ps");
             $(".imgpreview_ps").removeClass("imgpreview_ps");
         });
