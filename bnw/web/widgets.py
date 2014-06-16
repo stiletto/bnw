@@ -24,7 +24,7 @@ class Widgets(object):
 
     def tag(self, tag, user=None):
         pars = {
-            'tu': tornado.escape.url_escape(tag),
+            'tu': tornado.escape.url_escape(tag, plus=False),
             't': tornado.escape.xhtml_escape(tag[:32]),
             'u': user,
         }
@@ -35,7 +35,7 @@ class Widgets(object):
 
     def club(self, club, user=None):
         pars = {
-            'tu': tornado.escape.url_escape(club),
+            'tu': tornado.escape.url_escape(club, plus=False),
             't': tornado.escape.xhtml_escape(club[:32]),
             'u': user
         }
