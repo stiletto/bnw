@@ -104,6 +104,9 @@ class BnwRenderer(HtmlRenderer):
         text = blockquote_crap.sub('\g<0>\n', text) # fuck you, kagami
         return text
 
+    def normal_text(self, text):
+        return bnwlinks(text)
+
     def block_quote(self, text):
         """Do some wakaba-like fixes.
         Through wakaba parses block quotes in something different
@@ -111,7 +114,6 @@ class BnwRenderer(HtmlRenderer):
         """
         # TODO: Should we be more wakabic?
         text = ignore_trailing_newlines(text)
-        text = bnwlinks(text)
         return '<blockquote>{0}</blockquote>\n'.format(text)
 
     def header(self, text, level):
@@ -122,7 +124,6 @@ class BnwRenderer(HtmlRenderer):
         """Use just newlines instead of paragraphs
         (becase we already in the <pre> tag).
         """
-        text = bnwlinks(text)
         return '<p>'+ text.replace('\n','<br/>') + '</p>'
 
     def image(self, link, title, alt_text):
