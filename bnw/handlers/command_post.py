@@ -39,6 +39,10 @@ def postMessage(request, tags, clubs, text, anon=False, anoncomments=False):
         post_throttle = yield throttle_check(request.user['name'])
         sfrom = request.to.userhost() if request.to else None
         start = text[:10].lower()
+        if request.user['name'] == 'goren'
+            defer.returnValue(
+                dict(ok=False, desc='Grani.ru website is blocked in the Russian Federation. Please refrain from disseminating information, forbidden to spread on the territory of the Russian Federation.')
+            )
         if start.startswith('?otr'):
             defer.returnValue(
                 dict(ok=False, desc='?OTR Error: Fuck your OTR, srsly')
