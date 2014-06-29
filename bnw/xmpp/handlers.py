@@ -199,7 +199,7 @@ simple_handlers = (
         (ur'(?i)login',command_login.cmd_login),
         (ur'(?i)on',command_onoff.cmd_on),
         (ur'(?i)off',command_onoff.cmd_off),
-        (ur'(?i)pm +@(?P<user>\S+) +(?P<text>.+)',command_pm.cmd_pm),
+        (ur'(?i)pm +@(?P<user>\S+)\s+(?P<text>.+)',command_pm.cmd_pm),
 
         (ur'(?i)bl',command_bl.cmd_blacklist),
         (ur'(?i)bl \+?@(?P<user>\S+)',command_bl.cmd_blacklist),
