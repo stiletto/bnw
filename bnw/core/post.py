@@ -210,7 +210,9 @@ def postComment(message_id, comment_id, text, user, anon=False, sfrom=None):
     objs.Message.mupdate({'id': message_id}, {'$inc': {'replycount': 1}})
 
     qn, recipients = send_to_subscribers([{'target': message_id, 'type': 'sub_message'}], comment)
-    publish('new_comment_in_' + message_id, comment.filter_fields())  # ALARM
+    filtered_comment = comment.filter_fields()  # ALARM
+    publish('new_comment', filtered_comment)
+    publish('new_comment_in_' + message_id, filtered_comment)
     publish('upd_comments_count', message_id, comment['num'])
     publish('upd_comments_count_in_'+message_id, message_id, comment['num'])
     return True, (comment['id'], comment['num'], qn, recipients)
@@ -235,11 +237,12 @@ def recommendMessage(user, message, comment="", sfrom=None):
 
     if user['name'] != message['user']:
         tuser = objs.User.find_one({'name': message['user']})
-        tuser.send_plain(
-            '@%s recommended your message #%s, '
-            'so %d more users received it. %s/p/%s' % (
-                user['name'], message['id'], recipients,
-                get_webui_base(tuser), message['id']))
+        if not tuser.get('off'):
+            tuser.send_plain(
+                '@%s recommended your message #%s, '
+                'so %d more users received it. %s/p/%s' % (
+                    user['name'], message['id'], recipients,
+                    get_webui_base(tuser), message['id']))
         recos_count = len(message['recommendations'])
         if (recos_count < 1024 and
                 user['name'] not in message['recommendations']):

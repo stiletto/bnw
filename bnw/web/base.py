@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*18^- coding: utf-8 -*-
 
 import traceback
 from time import time
@@ -21,14 +21,17 @@ class BnwWebRequest(object):
         self.user = user
 
 
-def get_defargs():
-    return {
+def get_defargs(handler=None):
+    args = {
         'linkify': linkify.linkify,
         'thumbify': linkify.thumbify,
         'config': config,
         'w': widgets,
-    }.copy()
-
+    }
+    if handler:
+        args['auth_user'] = getattr(handler, 'user', None)
+        args['secure'] = handler.request.protocol=="https"
+    return args
 
 class BnwWebHandler(tornado.web.RequestHandler):
     errortemplate = '500.html'
@@ -64,8 +67,7 @@ class BnwWebHandler(tornado.web.RequestHandler):
         return 'No POST handler'
 
     def render(self, templatename, **kwargs):
-        args = get_defargs()
-        args['auth_user'] = getattr(self, 'user', None)
+        args = get_defargs(self)
         args.update(kwargs)
         return super(BnwWebHandler, self).render(templatename, **args)
 

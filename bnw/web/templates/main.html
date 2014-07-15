@@ -9,6 +9,8 @@
 {% block extrahead %}
     <link rel="alternate" type="application/rss+xml" title="Последние сообщения BnW"
     href="/?format=rss" />
+{% end %}
+{% block extrascript %}
     <script type="text/javascript">
         var page_type = "main";
         {% if auth_user %}
@@ -42,7 +44,7 @@
     <hr/>
     <div id='messages'>
     {% for msg in messages %}
-        {{ modules.Message(msg) }}
+        {{ modules.Message(msg, secure=secure) }}
     {% end %}
     </div>
 {% end %}

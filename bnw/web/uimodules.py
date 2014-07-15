@@ -4,8 +4,8 @@ from bnw.web.widgets import widgets
 
 
 class Message(tornado.web.UIModule):
-    def render(self, msg, full=False, username=None):
-        args = get_defargs()
+    def render(self, msg, full=False, username=None, secure=False):
+        args = get_defargs(self.handler)
         args['msg'] = msg
         args['full'] = full
         args['username'] = username
@@ -13,7 +13,7 @@ class Message(tornado.web.UIModule):
 
 
 class Comment(tornado.web.UIModule):
-    def render(self, comment):
-        args = get_defargs()
+    def render(self, comment, secure=False):
+        args = get_defargs(self.handler)
         args['comment'] = comment
         return self.render_string('module-comment.html', **args)

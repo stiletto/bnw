@@ -1,5 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>{% block title %}BnW — Somewhere in Nevada{% end %}</title>
@@ -14,37 +14,6 @@
     {% if auth_user %}{{ auth_user.get('settings',{}).get('usercss','') }}{% end %}
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script type="text/javascript" src="{{ static_url("jquery.min.js") }}"></script>
-    <script type="text/javascript" src="{{ static_url("jquery.cookie.js") }}"></script>
-    <script type="text/javascript" src="{{ static_url("highlight.min.js") }}"></script>
-    <script type="text/javascript" src="{{ static_url("dialogs.js") }}"></script>
-    <script type="text/javascript" src="{{ static_url("dynamic.js") }}"></script>
-    <script type="text/javascript">
-        var page_type = "base";
-        var auth_user = "{% if auth_user %}{{ auth_user['name'] }}{% end %}";
-        $(function() {
-            $(".avatar_ps").removeClass("avatar_ps");
-            $(".imgpreview_ps").removeClass("imgpreview_ps");
-            $('code').each(function(i, e) {hljs.highlightBlock(e)});
-            
-            //titles for youtube's previews
-            var regexp = /^https?:\/\/img\.youtube\.com\/vi\/([A-z0-9_\-]+)\/default\.jpg$/;
-            $('.imgpreview').each(function (index, elem)
-            {
-                var matches, that = this;
-                if((matches = regexp.exec($(this).attr('src'))) !== null)
-                {
-                    $.get('//gdata.youtube.com/feeds/api/videos/'+matches[1], function (data)
-                    {
-                        $(that).attr('title', $($(data).find('title')[0]).text());
-                    });
-                }
-            });
-        });
-        function meow() {
-            window.location = "http://meow.bnw.im"+window.location.pathname;
-        }
-    </script>
     {% block extrahead %}
     {% end %}
 </head>
@@ -91,5 +60,41 @@
         Цоперайт &copy; 2010-2014 <a href='/u/stiletto'>@stiletto</a>.
     </div>
 </div>
+    <script type="text/javascript" src="{{ static_url("jquery.min.js") }}"></script>
+    <script type="text/javascript" src="{{ static_url("jquery.cookie.js") }}" defer></script>
+    <script type="text/javascript" src="{{ static_url("highlight.min.js") }}" defer></script>
+    <script type="text/javascript" src="{{ static_url("dialogs.js") }}" defer></script>
+    <script type="text/javascript" src="{{ static_url("dynamic.js") }}" defer></script>
+    <script type="text/javascript">
+        var page_type = "base";
+        var auth_user = "{% if auth_user %}{{ auth_user['name'] }}{% end %}";
+        document.addEventListener( "DOMContentLoaded", function () {
+        $(window).load(function () {
+            $(".avatar_ps").removeClass("avatar_ps");
+            $(".imgpreview_ps").removeClass("imgpreview_ps");
+        });
+        $(function() {
+            $('code').each(function(i, e) {hljs.highlightBlock(e)});
+            
+            //titles for youtube's previews
+            var regexp = /^https?:\/\/img\.youtube\.com\/vi\/([A-z0-9_\-]+)\/default\.jpg$/;
+            $('.imgpreview').each(function (index, elem)
+            {
+                var matches, that = this;
+                if((matches = regexp.exec($(this).attr('src'))) !== null)
+                {
+                    $.get('//gdata.youtube.com/feeds/api/videos/'+matches[1], function (data)
+                    {
+                        $(that).attr('title', $($(data).find('title')[0]).text());
+                    });
+                }
+            });
+        }) }, false);
+        function meow() {
+            window.location = "http://meow.bnw.im"+window.location.pathname;
+        }
+    </script>
+    {% block extrascript %}
+    {% end %}
 </body>
 </html>

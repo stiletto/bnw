@@ -8,6 +8,7 @@ CLUBS_MAP = 'function() { this.clubs.forEach(function(z) { emit(z, 1);}); }'
 CLUBS_REDUCE = 'function(k,vals) { var sum=0; for(var i in vals) sum += vals[i]; return sum; }'
 
 LAST_REBUILD = 0  # TODO: Сделать умнее. Ибо в случае нескольких инстансов соснёт
+CLUBS_LAST_REBUILD = 0
 REBUILD_PERIOD = 3600 * 6  # Период ребилда
 
 # TODO: Херни понаписал. Чини блджад.
@@ -20,10 +21,10 @@ def cmd_clubs(request):
 
     redeye: clubs
     """
-    global LAST_REBUILD
-    rebuild = time.time() > LAST_REBUILD + REBUILD_PERIOD
+    global CLUBS_LAST_REBUILD
+    rebuild = time.time() > CLUBS_LAST_REBUILD + REBUILD_PERIOD
     if rebuild:
-        LAST_REBUILD = time.time()
+        CLUBS_LAST_REBUILD = time.time()
         result = objs.Message.map_reduce(CLUBS_MAP, CLUBS_REDUCE, out='clubs')
     if (not rebuild) or result:
         clubs = list(x.doc for x in objs.Club.find_sort({'$nor': [{'_id': '@'}, {'_id': ''}]}, [('value', -1)], limit=20))

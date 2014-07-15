@@ -23,7 +23,6 @@ from bnw.handlers import command_whoami
 
 # TODO: Auto-import all avialable handlers?
 handlers = {
-    "register":             command_register.cmd_register,
     "search":               command_search.cmd_search,
     "interface":            command_interface.cmd_interface,
     "subscriptions/add":    command_subscription.cmd_subscribe,

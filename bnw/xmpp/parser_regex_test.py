@@ -21,7 +21,7 @@ if __name__ == "__main__":
         (ur'LOGIN', 'login'),
         (ur'ON', 'on'),
         (ur'OFF', 'off'),
-        (ur'PM +@(?P<user>\S+) +(?P<text>.+)', 'pm'),
+        (ur'PM +@(?P<user>\S+)\s+(?P<text>.+)', 'pm'),
         (ur'BL', 'not_implemented'),
         (ur'BL .+', 'not_implemented'),
         (ur'\? .+', 'not_implemented'),

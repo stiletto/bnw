@@ -124,6 +124,16 @@ class UserWsHandler(MainWsHandler):
             ('upd_recommendations_count', self.upd_recommendations_count),
         )
 
+class CommentsWsHandler(WsHandler):
+    """Deliver new comments via websockets."""
+
+    def get_handlers(self):
+        return (
+            ('new_comment', self.new_comment),
+        )
+
+    def new_comment(self, comment):
+        self.write_message(json.dumps(comment))
 
 class MessageWsHandler(MainWsHandler):
     """Deliver new events on message page via websockets."""
@@ -310,10 +320,10 @@ class MainHandler(BnwWebHandler, AuthMixin):
         page = get_page(self)
         qdict = {}
         if tag:
-            tag = tornado.escape.url_unescape(tag)
+            tag = tornado.escape.url_unescape(tag, plus=False)
             qdict['tags'] = tag
         if club:
-            club = tornado.escape.url_unescape(club)
+            club = tornado.escape.url_unescape(club, plus=False)
             qdict['clubs'] = club
         if user:
             bl = []
@@ -383,7 +393,7 @@ class TodayHandler(BnwWebHandler, AuthMixin):
     @defer.inlineCallbacks
     def respond(self):
         req = BnwWebRequest((yield self.get_auth_user()))
-        result = yield cmd_today(req)
+        result = yield cmd_today(req, use_bl=True)
         self.set_header("Cache-Control", "max-age=300")
         defer.returnValue({
             'result': result,
@@ -543,6 +553,7 @@ def get_site():
         (r"/u/([0-9a-z_-]+)(?:/(recommendations|all))?/t/(.*)/?", UserHandler),
         (r"/", MainHandler),
         (r"/ws/?", MainWsHandler),
+        (r"/comments/ws/?", CommentsWsHandler),
         (r"/t/()(.*)/?", MainHandler),
         (r"/c/(.*)()/?", MainHandler),
         (r"/login", LoginHandler),

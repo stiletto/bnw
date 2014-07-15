@@ -23,7 +23,7 @@
     <div id='messages'>
         {% set result['messages'].reverse() %}
         {% for msg in result['messages'] %}
-            {{ modules.Message(msg) }}
+            {{ modules.Message(msg, secure=secure) }}
         {% end %}
     </div>
 {% end %}

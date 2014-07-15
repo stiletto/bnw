@@ -11,17 +11,17 @@ from bnw.web.linkshit import _URL_RE, _USER_RE, _MSG_RE
 
 #: Displaying thumbs allowed for the following hostings:
 linkhostings = [
-    (ur'(?i)http://rghost.ru/([0-9]+)', lambda m: 'http://rghost.ru/%s/thumb.png' % (m(1),)),
-    (ur'(?i)http://imgur.com/([A-Za-z0-9]+)', lambda m: 'http://i.imgur.com/%ss.png' % (m(1),)),
-    (ur'http://ompldr.org/v([A-Za-z0-9]+)(/.+)?', lambda m: 'http://ompldr.org/t%s' % (m(1),)),
-    (ur'http://2-ch.ru/([a-z]+)/src/([0-9]+).(png|gif|jpg)', lambda m: 'http://2-ch.ru/%s/thumb/%ss.%s' % (m(1),m(2),m(3))),
-    (ur'https?://(?:www\.)?youtube.com/watch\?(?:.+&)?v\=([A-Z0-9a-z_-]+)(?:&.+)?', lambda m: 'http://img.youtube.com/vi/%s/default.jpg' % (m(1),)),
-    (ur'(?i)http://(.+.(?:png|gif|jpg|jpeg))', lambda m: 'http://fuck.blasux.ru/thumb?img=%s' % (url_escape(m(0)),)),
+    (ur'(?i)http://rghost.(net|ru)/([0-9]+)', lambda m,s: 'http%s://rghost.%s/%s/thumb.png' % (s,m(1),m(2))),
+    (ur'(?i)https?://imgur.com/([A-Za-z0-9]+)', lambda m,s: 'http%s://i.imgur.com/%ss.png' % (s,m(1),)),
+    (ur'http://(2ch.hk|2ch.pm|2ch.re|2ch.tf|2ch.wf|2ch.yt|2-ch.so)/([a-z]+)/src/([0-9]+).(png|gif|jpg)', lambda m,s: 'http%s://%s/%s/thumb/%ss.gif' % (s,m(1),m(2),m(3))),
+    (ur'https?://(?:www\.)?youtube.com/watch\?(?:.+&)?v\=([A-Z0-9a-z_-]+)(?:&.+)?', lambda m,s: 'http%s://img.youtube.com/vi/%s/default.jpg' % (s,m(1))),
+    (ur'(?i)https?://upload.wikimedia.org/wikipedia/commons/([0-9]{1}\/[A-Za-z0-9]+)/([A-Za-z0-9_.]+)', lambda m,s: 'http%s://upload.wikimedia.org/wikipedia/commons/thumb/%s/%s/256px-%s' % (s,m(1),m(2),m(2))),
+    (ur'(?i)https?://(.+.(?:png|gif|jpg|jpeg))', lambda m,s: 'http%s://bnw-thumb.r.worldssl.net/thumb?img=%s' % (s,url_escape(m(0)),)),
 ]
 linkhostings = [(re.compile('^' + k + '$'), v, k) for (k, v) in linkhostings]
 
 
-def thumbify(text, format='markdown'):
+def thumbify(text, format='markdown', secure=False):
     """Format text and generate thumbs using available formatters.
 
     :param format: default: 'markdown'. Specify text formatter.
@@ -32,9 +32,9 @@ def thumbify(text, format='markdown'):
     Thumbs: list of (original_file_url, thumb_url)
     """
     if format == 'moinmoin':
-        return moinmoin(text)
+        return moinmoin(text, secure)
     else:
-        return markdown(text)
+        return markdown(text, secure)
 
 
 def linkify(text, format='markdown'):
@@ -57,7 +57,7 @@ def msg_url(match):
     return '[{0}](/p/{1})'.format(text, url_part)
 
 
-def get_thumbs(raw):
+def get_thumbs(raw, secure=False):
     # Don't forget about escaping
     text = xhtml_escape(raw)
     thumbs = []
@@ -66,10 +66,31 @@ def get_thumbs(raw):
         for regexp, handler, _ in linkhostings:
             m = regexp.match(url)
             if m:
-                thumb = handler(m.group)
+                thumb = handler(m.group, 's' if secure else '')
                 thumbs.append((url, thumb))
                 break
     return thumbs
+
+bnwlinks_types = (
+    ('msg', _MSG_RE, lambda m: (m.group(1),)),
+    ('user', _USER_RE, lambda m: (m.group(1),)),
+)
+
+bnwlinks_parser = LinkParser(types=bnwlinks_types)
+
+def bnwlinks(text):
+    texta = []
+    for m in bnwlinks_parser.parse(text):
+        if isinstance(m, tuple):
+            if m[0] == 'msg':
+                texta.append('<a href="/p/%s">%s</a>' % (m[2].replace('/', '#'), m[1]))
+            elif m[0] == 'user':
+                texta.append('<a href="/u/%s">%s</a>' % (m[2], m[1]))
+            else:
+                texta.append('%s<!-- %s -->' % (m[1], m[0]))
+        else:
+            texta.append(m)
+    return ''.join(texta)
 
 blockquote_crap = re.compile(ur'(^|\n)\s*>.+(?=\n[^>\n])')
 
@@ -78,10 +99,13 @@ class BnwRenderer(HtmlRenderer):
 
     def preprocess(self, text):
         """Apply some additional BnW's rules."""
-        text = _USER_RE.sub('[\g<0>](/u/\g<1>)', text)
-        text = _MSG_RE.sub(msg_url, text)
+        #text = _USER_RE.sub('[\g<0>](/u/\g<1>)', text)
+        #text = _MSG_RE.sub(msg_url, text)
         text = blockquote_crap.sub('\g<0>\n', text) # fuck you, kagami
         return text
+
+    def normal_text(self, text):
+        return bnwlinks(text)
 
     def block_quote(self, text):
         """Do some wakaba-like fixes.
@@ -127,10 +151,10 @@ markdown_parser = Markdown(
     m.EXT_NO_INTRA_EMPHASIS | m.EXT_AUTOLINK | m.EXT_FENCED_CODE)
 
 
-def markdown(raw):
+def markdown(raw, secure=False):
     raw = _unicode(raw)
     formatted_text = ignore_trailing_newlines(markdown_parser.render(raw))
-    thumbs = get_thumbs(raw)
+    thumbs = get_thumbs(raw, secure)
     return formatted_text, thumbs
 
 
@@ -156,7 +180,7 @@ formatting_tags = {
 parser = LinkParser(types=bnwtypes + shittypes)
 
 
-def moinmoin(text):
+def moinmoin(text, secure=False):
     text = _unicode(xhtml_escape(text))
     permitted_protocols = ["http", "https", "ftp", "git",
                            "gopher", "magnet", "mailto", "xmpp"]
@@ -186,7 +210,7 @@ def moinmoin(text):
                     for lh in linkhostings:
                         mn = lh[0].match(url)
                         if mn:
-                            thumb = lh[1](mn.group)
+                            thumb = lh[1](mn.group, 's' if secure else '')
                             thumbs.append((url, thumb))
                             break
                     texta.append('<a href="%s">%s</a>' % (url, m[3]))
