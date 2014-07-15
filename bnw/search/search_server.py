@@ -1,59 +1,56 @@
+#!/usr/bin/python
+import logging
+import time
 import xapian
-from twisted.internet import defer, reactor, threads
-from twisted.python import log
-from twisted.web import xmlrpc
+
 from bnw.core import bnw_objects
 from bnw.search.indexer import Indexer
 
 
-class RPCSearch(xmlrpc.XMLRPC):
+class RPCSearch(object):
     def __init__(self, dbpath, language):
-        xmlrpc.XMLRPC.__init__(self, allowNone=True)
         self.indexer = Indexer(dbpath, language)
         self.db = xapian.Database(dbpath)
         self.stemmer = xapian.Stem(language)
         self.query_parser = xapian.QueryParser()
         self.query_parser.set_stemmer(self.stemmer)
         self.query_parser.set_stemming_strategy(xapian.QueryParser.STEM_ALL)
-        self.query_parser.add_boolean_prefix('author', 'A')
-        self.query_parser.add_boolean_prefix('user', 'A')
+        self.query_parser.add_boolean_prefix('author', '@')
+        self.query_parser.add_boolean_prefix('user', '@')
         self.query_parser.add_boolean_prefix('type', 'XTYPE')
         self.query_parser.add_prefix('clubs', 'XCLUBS')
         self.query_parser.add_prefix('tags', 'XTAGS')
         date_proc = xapian.DateValueRangeProcessor(Indexer.DATE)
         self.query_parser.add_valuerangeprocessor(date_proc)
-        self.run_incremental_indexing()
 
-    @defer.inlineCallbacks
     def run_incremental_indexing(self):
         self.indexed = 0
-        c1 = yield bnw_objects.Message.count({'indexed': {'$exists': False}})
-        c2 = yield bnw_objects.Comment.count({'indexed': {'$exists': False}})
+        c1 = bnw_objects.Message.count({'indexed': {'$exists': False}})
+        c2 = bnw_objects.Comment.count({'indexed': {'$exists': False}})
         self.total = c1 + c2
         self._run_incremental_indexing()
 
-    @defer.inlineCallbacks
     def _run_incremental_indexing(self):
-        bnw_o = bnw_objects.Message
-        objs = yield bnw_o.find({'indexed': {'$exists': False}}, limit=500)
-        objs = list(objs)
-        if not objs:
-            bnw_o = bnw_objects.Comment
-            objs = yield bnw_o.find({'indexed': {'$exists': False}}, limit=500)
+        while True:
+            bnw_o = bnw_objects.Message
+            objs = bnw_o.find({'indexed': {'$exists': False}}, limit=500)
             objs = list(objs)
             if not objs:
-                log.msg('=== Indexing is over. Will repeat an hour later. ===')
-                reactor.callLater(3600, self.run_incremental_indexing)
-                return
+                bnw_o = bnw_objects.Comment
+                objs = bnw_o.find({'indexed': {'$exists': False}}, limit=500)
+                objs = list(objs)
+                if not objs:
+                    logging.info('=== Indexing is over. Will repeat an hour later. ===')
+                    return
 
-        yield threads.deferToThread(self.indexer.create_index, objs)
-        ids = [obj['_id'] for obj in objs]
-        yield bnw_o.mupdate(
-            {'_id': {'$in': ids}}, {'$set': {'indexed': True}},
-            multi=True)
-        self.indexed += len(objs)
-        log.msg('Indexed %d/%d...' % (self.indexed, self.total))
-        reactor.callLater(0.01, self._run_incremental_indexing)
+            self.indexer.create_index(objs)
+            ids = [obj['_id'] for obj in objs]
+            bnw_o.mupdate(
+                {'_id': {'$in': ids}}, {'$set': {'indexed': True}},
+                multi=True)
+            self.indexed += len(objs)
+            logging.info('Indexed %d/%d...' % (self.indexed, self.total))
+            #time.sleep(0.01)
 
     PAGE_SIZE = 20
 
@@ -84,3 +81,4 @@ class RPCSearch(xmlrpc.XMLRPC):
         estimated = matches.get_matches_estimated()
         results = map(process_match, matches)
         return dict(estimated=estimated, results=results)
+

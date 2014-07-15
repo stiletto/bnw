@@ -41,9 +41,9 @@ class Indexer(object):
         # Go word by word, stem it and add to the document.
         for index, match in enumerate(self.WORD_REC.finditer(text)):
             doc.add_posting(self.make_stem_term(match.group()), index)
-        id_term = 'Q' + obj['id']
+        id_term = '#' + obj['id']
         doc.add_term(id_term)
-        doc.add_term('A' + obj['user'])
+        doc.add_term('@' + obj['user'])
         tags_info = []
         if 'replycount' in obj:
             # Message object.

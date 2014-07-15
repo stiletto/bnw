@@ -43,8 +43,8 @@ admin_jid = 'admin@localhost'
 database = 'bnw'
 database_fs = 'bnw_fs'
 ## MongoDB database URI
-database_uri = 'mongodb://10.254.100.2/bnw'
-database_rs = 'bnw'
+database_uri = 'mongodb://127.0.0.1/bnw'
+database_rs = '' # 'bnw'
 
 ## Is BnW's web interface should be enabled. In case of default
 ## settings it can be reached at http://localhost:7808/
@@ -97,3 +97,5 @@ manhole = ''
 
 ## Enable printing stack trace before shutdown
 trace_shutdown = False
+
+loglevel = logging.INFO

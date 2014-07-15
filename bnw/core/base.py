@@ -1,6 +1,5 @@
 import random
 
-from delayed_global import DelayedGlobal
 from bnw.core.config import config
 
 idchars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'

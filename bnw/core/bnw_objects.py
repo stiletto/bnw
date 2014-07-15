@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from bnw_mongo import get_db #, mongo_errors
-from bnw.xmpp.base import send_plain
+import bnw_mongo
+#from bnw.xmpp.base import send_plain
 from base import notifiers
 from config import config
 # from bnw.xmpp import deliver_formatters
@@ -42,6 +42,14 @@ class WrappedDict(object):
     def __unicode__(self):
         return self.doc.__unicode__()
 
+class CollectionWrapper(object):
+    def __init__(self, collection_name):
+        self.collection_name = collection_name
+        self.collection = None
+
+    def __getattr__(self, db_method):
+        return getattr(bnw_mongo.db[self.collection_name], db_method)
+
 INDEX_TTL = 946080000  # one year. i don't think you will ever need to change this
 
 class MongoObjectCollectionProxy(type):
@@ -80,17 +88,13 @@ class MongoObject(WrappedDict):
     @classmethod
     def find(cls, *args, **kwargs):
         cursor = cls.collection.find(*args, **kwargs)
-        limit = kwargs.get('limit',1000) # TODO: Document this
-        res = cursor.to_list(limit)
-        return (cls(doc) for doc in res)  # wrap all documents in our class
+        return (cls(doc) for doc in cursor)  # wrap all documents in our class
 
     @classmethod
     def find_sort(cls, spec, sort, **kwargs):
         cursor = cls.collection.find(spec, **kwargs)
         cursor.sort(sort)
-        limit = kwargs.get('limit',1000) # TODO: Document this
-        res = cursor.to_list(limit)
-        return (cls(doc) for doc in res)  # wrap all documents in our class
+        return (cls(doc) for doc in cursor)  # wrap all documents in our class
 
     @classmethod
     def mupdate(cls, spec, document, *args, **kwargs):
@@ -194,7 +198,7 @@ class User(MongoObject):
 
 def massert(condition,code="assert"):
     if not condition:
-        defer.returnValue((False, code))
+        return (False, code)
 
 class Subscription(MongoObject):
     """ Сраная подписка. """
@@ -208,7 +212,6 @@ class Subscription(MongoObject):
         return '@' in self['target']
 
     @classmethod
-    @defer.inlineCallbacks
     def subscribe(cls, user, target_type, target, safe=True, sfrom=None):
         massert(target_type in ('sub_club', 'sub_tag', 'sub_user', 'sub_message'))
 
@@ -221,31 +224,30 @@ class Subscription(MongoObject):
         if not safe:
             pass
         elif target_type == 'sub_user':
-            subject = yield User.find_one({ 'name':target })
+            subject = User.find_one({ 'name':target })
             if not subject:
-                defer.returnValue((False, "sub_nouser"))
+                return (False, "sub_nouser")
         elif target_type == 'sub_message':
-            subject = yield Message.find_one({ 'id':target })
+            subject = Message.find_one({ 'id':target })
             if not subject:
-                defer.returnValue((False, "sub_nomessage"))
+                return (False, "sub_nomessage")
         try:
-            yield cls.insert(sub_rec, safe=safe)
+            cls.insert(sub_rec, safe=safe)
         except mongo_errors.DuplicateKeyError:
-            defer.returnValue((False, "sub_exists"))
-        defer.returnValue((True, subject))
+            return (False, "sub_exists")
+        return (True, subject)
 
     @classmethod
-    @defer.inlineCallbacks
     def unsubscribe(self, user, target_type, target, safe=True):
         massert(target_type in ('sub_club', 'sub_tag', 'sub_user', 'sub_message'))
         sub_rec = { 'user': user['name'], 'target': target, 'type': target_type }
         if safe:
-            result = yield cls.find_and_modify(sub_rec, remove=True)
+            result = cls.find_and_modify(sub_rec, remove=True)
             if result:
-                defer.returnValue((True, result))
-            defer.returnValue((False, "sub_nosub"))
-        yield cls.remove(sub_rec)
-        defer.returnValue((True, None))
+                return (True, result)
+            return (False, "sub_nosub")
+        cls.remove(sub_rec)
+        return (True, None)
 
 
 class GlobalState(MongoObject):
