@@ -10,7 +10,7 @@ mongo-async-python-driver
 *.log
 *.pid
 *.e4p
-config.py
+/config.py
 passwords.py
 flashshit.py
 bnwach.log*
