@@ -17,7 +17,7 @@ setup(name='BnW',
     entry_points = {
         'console_scripts': [
             'bnw = bnw.scripts.entry:instance',
-            'bnw-search = bnw.scripts.entry:search',
+            'bnw-search = bnw.scripts.search:entry',
         ],
     }
 )
