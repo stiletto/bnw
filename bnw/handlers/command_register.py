@@ -50,5 +50,5 @@ def cmd_register(request, name=""):
                 )
             else:
                 defer.returnValue(
-                    dict(ok=True, desc='This username is already taken')
+                    dict(ok=False, desc='This username is already taken')
                 )
