@@ -50,3 +50,4 @@ def get_https_webui_base():
 
 def get_http_webui_base():
     return "http://" + config.webui_base
+

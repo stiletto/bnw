@@ -37,8 +37,16 @@ def entry():
     config.register_handler(search_reconfig)
     parser = argparse.ArgumentParser('BnW search service')
     parser.add_argument('config', metavar='CONFIG', help='Configuration file name', default='config.py')
+    parser.add_argument('--pidfile', metavar='PIDFILE', help='Write pid to this file', default='')
     args = parser.parse_args()
     new_config = Config()
+    if args.pidfile:
+        try:
+            f = open(args.pidfile, 'w')
+            f.write(str(os.getpid()))
+            f.close()
+        except:
+            logging.error("Failed to write PID to '%s': %s", args.pidfile, traceback.format_exc())
     execfile(args.config, {'logging':logging}, new_config)
     try:
         result = config.update_config(new_config)
