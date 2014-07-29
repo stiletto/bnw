@@ -25,6 +25,7 @@ import bnw.core.ensure_indexes
 import bnw.xmpp.base
 from bnw.core.bnw_mongo import open_db
 from bnw.xmpp import bnw_component, xmpp_notifier
+from bnw.handlers import throttle
 
 bnw.core.base.config.register(config)
 application = service.Application("BnW")
@@ -90,6 +91,8 @@ def checkload(lasttime):
         bnw.core.base.timertime = currenttime - lasttime
     reactor.callLater(1, checkload, currenttime)
 checkload(None)
+
+throttle.setup_throttle()
 
 def runintwistd():
     sys.argv.insert(1,__file__)

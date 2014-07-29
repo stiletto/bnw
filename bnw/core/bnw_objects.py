@@ -363,4 +363,5 @@ class Throttle(MongoObject):
     collection = CollectionWrapper("post_throttle")
     indexes = (
         ((("user", 1)), True, False),
+        ((("bucket", 1)), False, False),
     )

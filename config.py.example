@@ -94,3 +94,6 @@ manhole = ''
 
 ## Enable printing stack trace before shutdown
 trace_shutdown = False
+
+throttle_leak_speed = 5 # seconds
+throttle_bucket_size = 5 # number of actions

@@ -9,34 +9,15 @@ from bnw.core.post import publish
 
 from twisted.python import log
 import bnw.core.post
-
+from throttle import throttle_check
 
 def _(s, user):
     return s
 
 
 @defer.inlineCallbacks
-def throttle_check(user):
-    post_throttle = yield objs.Throttle.find_one({'user': user})
-    if post_throttle and post_throttle['time'] >= (time.time() - 5):
-        raise BnwResponse('You are sending messages too fast!')
-    defer.returnValue(post_throttle)
-
-
-@defer.inlineCallbacks
-def throttle_update(user, post_throttle):
-        throttledoc = {'user': user, 'time': time.time()}
-        if post_throttle:  # TODO: заменить на upsert
-            _ = yield objs.Throttle.mupdate({'user': user}, throttledoc)
-        else:
-            throttle = objs.Throttle(throttledoc)
-            _ = yield throttle.save()
-        defer.returnValue(None)
-
-
-@defer.inlineCallbacks
 def postMessage(request, tags, clubs, text, anon=False, anoncomments=False):
-        post_throttle = yield throttle_check(request.user['name'])
+        yield throttle_check(request.user['name'])
         sfrom = request.to.userhost() if request.to else None
         start = text[:10].lower()
         if start.startswith('?otr'):
@@ -45,7 +26,6 @@ def postMessage(request, tags, clubs, text, anon=False, anoncomments=False):
             )
         ok, rest = yield bnw.core.post.postMessage(
             request.user, tags, clubs, text, anon, anoncomments, sfrom=sfrom)
-        _ = yield throttle_update(request.user['name'], post_throttle)
         if ok:
             msgid, qn, recepients = rest
             defer.returnValue(
@@ -94,11 +74,10 @@ def cmd_comment(request, message="", anonymous="", text=""):
         message = canonic_message_comment(message).upper()
         message_id = message.split('/')[0]
         comment_id = message if '/' in message else None
-        post_throttle = yield throttle_check(request.user['name'])
+        yield throttle_check(request.user['name'])
         sfrom = request.to.userhost() if request.to else None
         ok, rest = yield bnw.core.post.postComment(
             message_id, comment_id, text, request.user, anonymous, sfrom=sfrom)
-        _ = yield throttle_update(request.user['name'], post_throttle)
         if ok:
             msgid, num, qn, recepients = rest
             defer.returnValue(
@@ -148,10 +127,9 @@ def cmd_recommend(request, message="", comment="", unrecommend=""):
                     ok=False,
                     desc='You haven\'t recommended this message.'))
 
-        post_throttle = yield throttle_check(request.user['name'])
+        yield throttle_check(request.user['name'])
         ok, rest = yield bnw.core.post.recommendMessage(
             request.user, message_obj, comment)
-        yield throttle_update(request.user['name'], post_throttle)
         if ok:
             qn, recepients, replies = rest
             defer.returnValue(dict(
