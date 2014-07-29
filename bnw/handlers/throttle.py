@@ -10,7 +10,7 @@ import bnw.core.bnw_objects as objs
 def throttle_check(user):
     throttle = yield objs.Throttle.find_and_modify({'user': user},{'$inc':{'bucket':1}},upsert=True)
     if throttle and throttle.get('bucket',0) >= config.throttle_bucket_size:
-        raise BnwResponse('You are sending messages too fast!')
+        raise BnwResponse('You are sending messages too fast! Please wait %d seconds before trying again.' % (throttle['bucket']*config.throttle_leak,))
     defer.returnValue(throttle)
 
 @defer.inlineCallbacks
