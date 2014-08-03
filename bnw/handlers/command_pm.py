@@ -3,6 +3,7 @@
 from base import *
 from twisted.internet import defer
 import bnw.core.bnw_objects as objs
+from throttle import throttle_check
 
 
 @require_auth
@@ -10,6 +11,7 @@ import bnw.core.bnw_objects as objs
 @defer.inlineCallbacks
 def cmd_pm(request, text, user=""):
     """ Отправка приватного сообщения """
+    yield throttle_check(request.user['name'])
     user = user.lower()
     if len(text) > 2048:
         defer.returnValue(dict(ok=False, desc='Too long.'))
