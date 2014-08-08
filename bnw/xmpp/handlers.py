@@ -138,6 +138,7 @@ redeye_handlers = (
                 ("s", "servicejid", False, u"Set service's jid."),
                 ("b", "baseurl", True, u"Set base url for links."),
                 ("a", "about", True, u'Set "about me".'),
+                ("", "notify_on_recommendation", True, u'Set "notify_on_recommendation".'),
             ),
             command_settings.cmd_set,
         ),
