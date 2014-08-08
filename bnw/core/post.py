@@ -250,7 +250,7 @@ def recommendMessage(user, message, comment="", sfrom=None):
 
     if user['name'] != message['user']:
         tuser = yield objs.User.find_one({'name': message['user']})
-        if not tuser.get('off'):
+        if not tuser.get('off') and tuser.get('settings',{}).get('notify_on_recommendation',True):
             yield tuser.send_plain(
                 '@%s recommended your message #%s, '
                 'so %d more users received it. %s/p/%s' % (

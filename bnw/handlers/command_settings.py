@@ -20,6 +20,27 @@ class SimpleSetting(object):
                                     {'$set': {'settings.' + name: value}})
         defer.returnValue((True,))
 
+class BooleanSetting(object):
+    def __init__(self, default=False):
+        self.default = default
+
+    def get(self, request, name):
+        setts = request.user.get('settings', {})
+        return setts.get(name, self.default)
+
+    @defer.inlineCallbacks
+    def write(self, request, name, value):
+        value_lowercase = value.lower()
+        if value_lowercase in ('on', 'yes', 'true', 't', 'y', '1'):
+            new_value = True
+        elif value_lowercase in ('off', 'no', 'false', 'f', 'n', '0'):
+            new_value = False
+        else:
+            defer.returnValue((False, ('Unable to parse %s value. Try to use "yes"/"no" (or "on"/"off").' % (name,))))
+        _ = yield objs.User.mupdate({'name': request.user['name']},
+                                    {'$set': {'settings.' + name: new_value}})
+        defer.returnValue((True,))
+
 
 class ServiceJidSetting(SimpleSetting):
     def get(self, request, name):
@@ -31,6 +52,7 @@ class ServiceJidSetting(SimpleSetting):
 
 optionnames = {
     'usercss': SimpleSetting(),
+    'notify_on_recommendation': BooleanSetting(True),
     'password': SimpleSetting(),
     'servicejid': ServiceJidSetting(),
     'baseurl': SimpleSetting(),
