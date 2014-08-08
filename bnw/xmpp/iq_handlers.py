@@ -11,7 +11,7 @@ from zope.interface import implements
 from tornado.escape import utf8
 
 #from txmongo import gridfs
-import Image
+from PIL import Image
 
 from base import send_raw
 import bnw.core.base
