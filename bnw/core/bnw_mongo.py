@@ -17,7 +17,10 @@ fs_avatars = None
 
 def open_db():
     global db, fs
-    client = motor.MotorReplicaSetClient(config.database_uri,read_preference=ReadPreference.NEAREST, replicaSet='shiplica')
+    if config.database_rs:
+        client = motor.MotorReplicaSetClient(config.database_uri,read_preference=ReadPreference.NEAREST, replicaSet=config.database_rs)
+    else:
+        client = motor.MotorClient(config.database_uri,read_preference=ReadPreference.NEAREST)
     IOLoop.current().run_sync(client.open)
     db = client[config.database]
     fs = client[config.database_fs]
