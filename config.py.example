@@ -40,6 +40,9 @@ admin_jid = 'admin@localhost'
 ##     component_secret = "surelythisissecureenough"
 
 ## MongoDB's databases names which will be created and used by BnW.
+
+database_uri = 'mongodb://127.0.0.1/bnw'
+database_rs = ''
 database = 'bnw'
 database_fs = 'bnw_fs'
 
