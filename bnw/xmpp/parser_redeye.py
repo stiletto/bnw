@@ -90,11 +90,11 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
                     cmda.append('')
                 msg.body = alias_subst.arg_substitution(alias, cmda[1].strip())
                 return self.resolve(msg)
-        return None, None, None, None
+        return None, None, None, None, None
 
     @defer.inlineCallbacks
     def handle(self, msg):
-        handler, restname, options, rest = self.resolve(
+        cmdname, handler, restname, options, rest = self.resolve(
             msg)  # unicode(msg.body).encode('utf-8','ignore'))
         if not handler:
             handler, restname2, options, rest = self.alias_resolve(msg)
@@ -125,6 +125,7 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
         waitcommand = True
         options = {}
         wordbuf = []
+        cmdname = u''
             # i know it's ugly and slow. is there any better way to implement
             # quotes?
         for i, c in enumerate(text):
@@ -133,13 +134,13 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
                 if len(wordbuf) > 0:  # 1: \todo check why there was 1
                     if waitcommand:
                         waitcommand = False
-                        command = ''.join(wordbuf).lower()  # text[wordbegin:i]
-                        handler_tuple = self.commandfuns.get(command, None)
+                        cmdname = ''.join(wordbuf).lower()  # text[wordbegin:i]
+                        handler_tuple = self.commandfuns.get(cmdname, None)
                         if not handler_tuple:
                             # raise CommandParserException('No such command:
-                            # "%s"' % command)
-                            return None, command, None, None
-                        argi = self.getHashed(command)
+                            # "%s"' % cmdname)
+                            return None, None, cmdname, None, None
+                        argi = self.getHashed(cmdname)
                     else:
                         prevopt, newopts = self.parseArgument(
                             argi, prevopt, ''.join(wordbuf))
@@ -170,11 +171,11 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
                 raise CommandParserException(
                     "Ouch! You forgot to close quotes <%s> " % inquotes)
             if waitcommand:
-                command = ''.join(wordbuf).lower()
-                handler_tuple = self.commandfuns.get(command, None)
+                cmdname = ''.join(wordbuf).lower()
+                handler_tuple = self.commandfuns.get(cmdname, None)
                 if not handler_tuple:
                     raise CommandParserException(
-                        'No such command: %s' % command)
+                        'No such command: %s' % cmdname)
             else:
                 prevopt, newopts = self.parseArgument(
                     argi, prevopt, ''.join(wordbuf))
@@ -184,4 +185,4 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
                 for name, value in newopts:
                     options[name] = value
         handler, restname = handler_tuple
-        return (handler, restname, options, rest)
+        return (cmdname, handler, restname, options, rest)
