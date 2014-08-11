@@ -27,6 +27,8 @@ from bnw.handlers import command_update
 import formatters_redeye
 import formatters_simple
 
+# -h / --help is defined and handled in redeye parser itself. Put nice, short
+# option descriptions into fourth element of a tuple and you'll be fine.
 bl_args = (
                 ("u", "user", True, u"Blacklist user."),
                 ("t", "tag", True, u"Blacklist tag."),

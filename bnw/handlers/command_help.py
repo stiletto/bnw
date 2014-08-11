@@ -103,5 +103,5 @@ def cmd_help_simple(request):
 
 def cmd_help_redeye(request):
     """ Справка """
-    return dict(ok=True, desc='Help:' + helptext, cache=3600, cache_public=True)
+    return dict(ok=True, desc=helptext, cache=3600, cache_public=True)
         #+'\n'.join(self.formatCommand(command) for command in self.parser.commands)
