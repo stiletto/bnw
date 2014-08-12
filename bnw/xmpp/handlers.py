@@ -49,7 +49,9 @@ show_args =  (
                 ("c", "club", True, u"Show club posts."),
                 ("p", "page", True, u"Results page (from 0)."),
                 ("r", "replies", False, u"Include replies in output (only with -m)."),
-                ("a", "after", True, u"Show only replies after this."),
+                ("b", "before", True, u"Show only replies before this one."),
+                ("a", "after", True, u"Show only replies after this one."),
+                ("", "use_bl", False, u"Use BL."),
             )
 post_args = (
                 ("s", "notop", False, u"Post cannot be bumped to top."), # no-op
@@ -80,6 +82,9 @@ update_args = (
                 ('', 'tags', True, 'Set comma-separated list of tags.'),
                 ('', 'api', False, 'Set clubs and tags using api.'),
             )
+feed_args = (
+                ("p", "page", True, "Results page (from 0)"),
+            )
 
 redeye_handlers = (
         ("ping",
@@ -91,7 +96,11 @@ redeye_handlers = (
 
 #        ("except", (), command_except.cmd_except, ),
         ("register", (), command_register.cmd_register, "name", ),
-        ("search", (), command_search.cmd_search, "query", ),
+        ("search",
+            (
+                ("p", "page", True, "Results page (from 0)"),
+            ),
+            command_search.cmd_search, "query", ),
         ("interface", (), command_interface.cmd_interface, "iface", ),
         ("subscribe", subscribe_args, command_subscription.cmd_subscribe, ),
         ("sub", subscribe_args, command_subscription.cmd_subscribe, ),
@@ -100,9 +109,13 @@ redeye_handlers = (
         ("subscriptions", (), command_subscription.cmd_subscriptions, ),
         ("lsub", (), command_subscription.cmd_subscriptions, ),
         ("help", (), command_help.cmd_help_redeye, ),
-        ("feed", (), command_show.cmd_feed, ),
-        ("today", (), command_show.cmd_today, ),
-        ("f", (), command_show.cmd_feed, ),
+        ("feed", feed_args, command_show.cmd_feed, ),
+        ("f", feed_args, command_show.cmd_feed, ),
+        ("today",
+            (
+                ("", "use_bl", False, u"Use BL."),
+            ),
+            command_show.cmd_today, ),
         ("show", show_args, command_show.cmd_show, ),
         ("s", show_args, command_show.cmd_show, ),
         ("post", post_args, command_post.cmd_post, "text", ),
@@ -127,7 +140,7 @@ redeye_handlers = (
         ),
         ("userlist",
             (
-                ("p", "page", True, u"Page number."),
+                ("p", "page", True, u"Page number (from 0)."),
             ),
             command_userlist.cmd_userlist,
         ),
