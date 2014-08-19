@@ -119,7 +119,10 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
         shortopts = self.pad_to_colwidth(shortopts, shortopts_colwidth)
         longopts = self.pad_to_colwidth(longopts, longopts_colwidth)
 
-        result = u'Справка для команды %s:' % cmd
+        # self.commandfuns contains the name of the positional argument that
+        # the command accepts. Let's look it up!
+        _, restname = self.commandfuns[cmd]
+        result = u"Usage: %s" % cmd + (" " + restname if restname else "")
         # join columns linewise
         line_tuples = zip(shortopts, longopts, descriptions)
         join = lambda acc, x: acc + '\n' + "    ".join(x)
