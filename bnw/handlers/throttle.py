@@ -3,6 +3,7 @@
 from base import *
 import random
 import time
+import pymongo.errors
 from bnw.core.base import BnwResponse, config
 import bnw.core.bnw_objects as objs
 
@@ -16,7 +17,10 @@ def throttle_check(user):
 
 @defer.inlineCallbacks
 def throttle_leak():
-    yield objs.Throttle.mupdate({'bucket':{'$gt':0}}, {'$inc':{'bucket':-1}}, multi=True)
+    try:
+        yield objs.Throttle.mupdate({'bucket':{'$gt':0}}, {'$inc':{'bucket':-1}}, multi=True)
+    except pymongo.errors.AutoReconnect:
+        pass
     reactor.callLater(config.throttle_leak_speed, throttle_leak)
     defer.returnValue(None)
 
