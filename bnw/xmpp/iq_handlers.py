@@ -115,15 +115,29 @@ def vcard(iq, iq_user):
         {'$set': {'vcard': vcard}})
     defer.returnValue(True)
 
+
+def construct_iq_reply(req):
+    reply = domish.Element((None, 'iq'))
+    reply['type'] = 'result'
+    if req.getAttribute('id'):
+            reply['id'] = req['id']
+    return reply
+
+
+PING_XMLNS = 'urn:xmpp:ping'
+
+def ping(iq, iq_user):
+    if iq.ping and iq.ping.uri == PING_XMLNS:
+        reply = construct_iq_reply(iq)
+        send_raw(iq['from'], iq['to'], reply)
+        return True
+
 VERSION_XMLNS = 'jabber:iq:version'
 
 
 def version(iq, iq_user):
     if iq.query and iq.query.uri == VERSION_XMLNS:
-        reply = domish.Element((None, 'iq'))
-        reply['type'] = 'result'
-        if iq.getAttribute('id'):
-            reply['id'] = iq['id']
+        reply = construct_iq_reply(iq)
         reply.addElement('query', VERSION_XMLNS)
         reply.query.addElement('name', content='BnW')
         reply.query.addElement('version', content='0.1')
@@ -136,10 +150,7 @@ DISCO_ITEMS_XMLNS = 'http://jabber.org/protocol/disco#items'
 
 def disco_items(iq, iq_user):
     if iq.query and iq.query.uri == DISCO_ITEMS_XMLNS:
-        reply = domish.Element((None, 'iq'))
-        reply['type'] = 'result'
-        if iq.getAttribute('id'):
-            reply['id'] = iq['id']
+        reply = construct_iq_reply(iq)
         reply.addElement('query', DISCO_ITEMS_XMLNS)
         send_raw(iq['from'], iq['to'], reply)
         return True
@@ -150,15 +161,13 @@ FEATURES = ('jabber:iq:version',
             'http://jabber.org/protocol/disco#info',
             'http://jabber.org/protocol/disco#items',
             'urn:xmpp:receipts',
+            'urn:xmpp:ping',
             )
 
 
 def disco_info(iq, iq_user):
     if iq.query and iq.query.uri == DISCO_INFO_XMLNS:
-        reply = domish.Element((None, 'iq'))
-        reply['type'] = 'result'
-        if iq.getAttribute('id'):
-            reply['id'] = iq['id']
+        reply = construct_iq_reply(iq)
         reply.addElement('query', DISCO_INFO_XMLNS)
         reply.query.addElement('identity')
         reply.query.identity['category'] = 'client'  # not pretty sure
@@ -174,6 +183,7 @@ def disco_info(iq, iq_user):
 
 handlers = [
     vcard,
+    ping,
     version,
     disco_items,
     disco_info,
