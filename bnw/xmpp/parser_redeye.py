@@ -97,11 +97,17 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
             if cmd is "update" and longname is "api":
                 continue
 
-            shortopt = "-" + shortname
-            longopt = "--" + longname
-            if arg_required:
-                shortopt += " ARG"
-                longopt += "=ARG"
+            shortopt = ""
+            if shortname:
+                shortopt = "-" + shortname
+                if arg_required:
+                    shortopt += " ARG"
+
+            longopt = ""
+            if longname:
+                longopt = "--" + longname
+                if arg_required:
+                    longopt += "=ARG"
 
             shortopts.append(shortopt)
             longopts.append(longopt)
