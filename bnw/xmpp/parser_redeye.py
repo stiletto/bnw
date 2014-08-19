@@ -14,6 +14,7 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
         self.commands = {}
         self._commands = {}
         self.commandfuns = {}
+        self.helpmsgs = {}
         self.formatters = formatters
 
         for cmd in commands:
@@ -26,6 +27,7 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
             args+=(('h','help',False,u'Show list of possible arguments'),)
             self.commands[name] = args
             self.commandfuns[name] = handler, restname
+            self.helpmsgs[name] = self.generate_help_message(name)
 
     def hashCommand(self, cmd):
         self._commands[cmd] = {"short": {}, "long": {}}
@@ -73,7 +75,7 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
                     prevopt = argi['short'][c][1]
             return prevopt, shorts
 
-    def formatCommandHelp(self, cmd):
+    def generate_help_message(self, cmd):
         # Example entry of self.commands:
         # ("u", "user", True, u"Blacklist user."),
 
@@ -114,6 +116,9 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
         lines = reduce(join, line_tuples, result);
 
         return lines
+
+    def formatCommandHelp(self, cmd):
+        return self.helpmsgs[cmd]
 
     """
     Pads each string in a list to match required width
