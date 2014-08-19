@@ -110,7 +110,6 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
         result = u'Справка для команды %s:' % cmd
         # join columns linewise
         line_tuples = zip(shortopts, longopts, descriptions)
-        print line_tuples
         join = lambda acc, x: acc + '\n' + "    ".join(x)
         lines = reduce(join, line_tuples, result);
 
