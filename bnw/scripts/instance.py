@@ -1,3 +1,65 @@
+import argparse
+import logging
+import os
+import sys
+import threading
+import time
+import traceback
+import tornado
+
+import bnw.core
+from bnw.core.config import config, Config
+import bnw.web.site
+
+def log_reconfig(old, new):
+    if not old.compare(new, 'loglevel'):
+        logging.basicConfig(level=new.loglevel)
+
+def config_handler(old, new):
+    if not old.compare(new, 'webui_port'):
+        site = bnw.web.get_site()
+        
+
+def entry():
+    config.register_handler(log_reconfig)
+    logging.basicConfig(level=logging.INFO)
+    parser = argparse.ArgumentParser('BnW xmpp and web service')
+    parser.add_argument('config', metavar='CONFIG', help='Configuration file name', default='config.py')
+    parser.add_argument('--pidfile', metavar='PIDFILE', help='Write pid to this file', default='')
+    args = parser.parse_args()
+    new_config = Config()
+    if args.pidfile:
+        try:
+            f = open(args.pidfile, 'w')
+            f.write(str(os.getpid()))
+            f.close()
+        except:
+            logging.error("Failed to write PID to '%s': %s", args.pidfile, traceback.format_exc())
+    execfile(args.config, {'logging':logging}, new_config)
+    try:
+        result = config.update_config(new_config)
+    except:
+        result = traceback.format_exc()
+    if result:
+        logging.error('Unable apply config file: %s', result)
+        return
+
+    def index_func():
+        while True:
+            lss = search
+            lss.run_incremental_indexing()
+            time.sleep(3600)
+
+    indexer = threading.Thread(target=index_func, name='indexer')
+    indexer.daemon = True
+    indexer.start()
+    while True:
+        logging.info('Starting search server')
+        search_server.serve_forever()
+
+if __name__=="__main__":
+    entry()
+
 #!/bin/echo tac is a python source file, but should be started via twistd
 
 import sys

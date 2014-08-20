@@ -9,9 +9,10 @@ setup(name='BnW',
     author_email='blasux@blasux.ru',
     url='http://github.com/stiletto/bnw',
     packages=['bnw', 'bnw.core', 'bnw.handlers', 'bnw.scripts', 'bnw.search', 'bnw.web', 'bnw.xmpp'],
-    dependency_links=['http://github.com/mongodb/mongo-python-driver/tarball/master#egg=pymongo-2.6',],
+    dependency_links=['http://github.com/mongodb/mongo-python-driver/tarball/master#egg=pymongo-2.6',
+                      'https://github.com/stiletto/axsrf/tarball/master#egg=axsrf-0.1'],
 
-    install_requires=['tornado>=2.0', 'gevent', 'Pillow', 'PyRSS2Gen', 'misaka', 'pymongo>=2.6'],
+    install_requires=['tornado>=2.0', 'gevent', 'Pillow', 'PyRSS2Gen', 'misaka', 'pymongo>=2.6', 'gevent-websocket', 'falcon', 'axsrf'],
     package_data={'bnw.web': ['templates/*.html','static/*.*', 'static/flot/*', 'static/web-socket-js/*']},
     entry_points = {
         'console_scripts': [

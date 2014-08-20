@@ -2,72 +2,68 @@
 
 import traceback
 from time import time
-from twisted.internet import defer
-from twisted.words.protocols.jabber.jid import JID
-import tornado.web
+import falcon
+import os.path
+from tornado import template, escape
+from Cookie import SimpleCookie
 #import txmongo
 import bnw.core.base
 import bnw.core.bnw_objects as objs
 import linkify
 from widgets import widgets
 from bnw.core.base import config
+import cookie
 
+settings = {
+    "template_path": os.path.join(os.path.dirname(__file__), "templates"),
+    "static_path": os.path.join(os.path.dirname(__file__), "static"),
+}
 
 class BnwWebRequest(object):
     def __init__(self, user=None):
         self.body = None
         self.to = None
-        self.jid = JID(user['jid']) if user else None
+        self.jid = user['jid'] if user else None
         self.user = user
 
+def get_defargs(req=None, res=None):
+    def set_xsrf_cookie(value):
+        c = cookie.set_cookie(req.env, '_xsrf', value)
+        if req.protocol == 'https':
+            c['secure'] = True
+        c['expires'] = datetime.utcnow() + timedelta(days=30)
 
-def get_defargs(handler=None):
+    def get_xsrf_token():
+        if 'bnw.xsrf_token' not in req.env:
+            try:
+                token_cookie = req.env['cookies']['_xsrf'].value
+            except KeyError:
+                req.env['bnw.xsrf_token'] = axsrf.Token()
+            else:
+                req.env['bnw.xsrf_token'] = axsrf.Token(token_cookie)
+        return req.env['bnw.xsrf_token'].encoded
+
+    def xsrf_form_html():
+        return '<input type="hidden" name="_xsrf" value="' + \
+            escape.xhtml_escape(get_xsrf_token()) + '"/>'
+
     args = {
         'linkify': linkify.linkify,
         'thumbify': linkify.thumbify,
         'config': config,
         'w': widgets,
+        'xsrf_form_html': xsrf_form_html,
+            static_url=self.static_url,
     }
-    if handler:
-        args['auth_user'] = getattr(handler, 'user', None)
-        args['secure'] = handler.request.protocol=="https"
+    if req:
+        args['auth_user'] = req.env.get('bnw.user')
+        args['secure'] = req.protocol=="https"
+        args['request'] = req
     return args
 
-class BnwWebHandler(tornado.web.RequestHandler):
-    errortemplate = '500.html'
-
-    # Fucked twisted. How to run chain without passing result?
-    def passargs(self, f, *args, **kwargs):
-        return f(*args, **kwargs)
-
-    @tornado.web.asynchronous
-    def get(self, *args, **kwargs):
-        d = defer.Deferred()
-        d.addCallback(self.passargs, *args, **kwargs)
-        d.addCallbacks(self.writeandfinish, self.errorfinish)
-        self.start_time = self.render_time = time()
-        d.callback(self.respond)
-
-    @tornado.web.asynchronous
-    def post(self, *args, **kwargs):
-        d = defer.Deferred()
-        d.addCallback(self.passargs, *args, **kwargs)
-        d.addCallbacks(self.writeandfinish, self.errorfinish)
-        self.start_time = self.render_time = time()
-        d.callback(self.respond_post)
-
-    def respond(self, *args, **kwargs):
-        """Default GET response."""
-        self.set_status(500)
-        return 'No GET handler'
-
-    def respond_post(self, *args, **kwargs):
-        """Default POST response."""
-        self.set_status(500)
-        return 'No POST handler'
-
-    def render(self, templatename, **kwargs):
-        args = get_defargs(self)
+class BnwWebHandler:
+    def render(self, req, templatename, **kwargs):
+        args = get_defargs(req)
         args.update(kwargs)
         return super(BnwWebHandler, self).render(templatename, **args)
 
