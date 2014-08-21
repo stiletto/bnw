@@ -341,7 +341,7 @@ class StatCharacters(MongoObject):
 
 
 class Tag(MongoObject):
-    """ Клуб в выхлопе мап-редьюса."""
+    """ Тег в выхлопе мап-редьюса."""
     collection = CollectionWrapper("tags")
     indexes = ()
 
@@ -364,4 +364,11 @@ class Throttle(MongoObject):
     indexes = (
         ((("user", 1)), True, False),
         ((("bucket", 1)), False, False),
+    )
+
+class UserTag(Tag):
+    """ Тег в выхлопе мап-редьюса."""
+    collection = CollectionWrapper("usertags")
+    indexes = (
+        ((("user", 1), ("count", -1)), False, False),
     )

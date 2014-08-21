@@ -168,46 +168,28 @@ def cmd_feed(request, page="0"):
     )
 
 
-TODAY_REBUILD_PERIOD = 300
-TODAY_MAP = 'function() { emit(this.message, 1); }'
-TODAY_REDUCE = 'function(k,vals) { var sum=0; for(var i in vals) sum += vals[i]; return sum; }'
-
-
 @defer.inlineCallbacks
 def cmd_today(request, use_bl=False):
     """ Показать обсуждаемое за последние 24 часа """
     bl = get_user_bl(request, use_bl)
-    last_rebuild = yield objs.GlobalState.find_one({'name': 'today_rebuild'})
-    if not last_rebuild:
-        last_rebuild = {'name': 'today_rebuild', 'value': 0}
-    rebuild = time.time() > TODAY_REBUILD_PERIOD + last_rebuild['value']
-    if rebuild:
-        _ = yield objs.GlobalState.mupdate({'name': 'today_rebuild'}, {'name': 'today_rebuild', 'value': time.time()}, True)
 
-        start = time.time() - 86400
-        _ = yield objs.Today.remove({})
-        result = yield objs.Comment.map_reduce(TODAY_MAP, TODAY_REDUCE, out='today', query={'date': {'$gte': start}})
-        print 'map_reduce result', result
-    if (not rebuild) or result:
-        for x in range(10):
-            postids = [x['_id'] for x in (yield objs.Today.find_sort({}, [('value', -1)], limit=20))]
-            if len(postids)>0: break
-        qdict = {'id': {'$in': postids}}
-        if bl: qdict['user'] = {'$nin': bl}
-        dbposts = dict(
-            (x['id'], x.filter_fields())
-            for x in (yield objs.Message.find(qdict)))
-        messages = [dbposts[x] for x in postids if (x in dbposts)]
-        messages = yield set_subscriptions_info(request, messages)
-        messages.reverse()
-        defer.returnValue(
-            dict(ok=True, format="messages",
-                 messages=messages,
-                 desc='Today''s most discussed',
-                 cache=300)
-        )
-    else:
-        defer.returnValue(dict(ok=False, desc='Map/Reduce failed'))
+    for x in range(10):
+        postids = [x['_id'] for x in (yield objs.Today.find_sort({}, [('value', -1)], limit=20))]
+        if len(postids)>0: break
+    qdict = {'id': {'$in': postids}}
+    if bl: qdict['user'] = {'$nin': bl}
+    dbposts = dict(
+        (x['id'], x.filter_fields())
+        for x in (yield objs.Message.find(qdict)))
+    messages = [dbposts[x] for x in postids if (x in dbposts)]
+    messages = yield set_subscriptions_info(request, messages)
+    messages.reverse()
+    defer.returnValue(
+        dict(ok=True, format="messages",
+             messages=messages,
+             desc='Today''s most discussed',
+             cache=300)
+    )
 
 
 @defer.inlineCallbacks

@@ -25,7 +25,7 @@ import bnw.core.ensure_indexes
 import bnw.xmpp.base
 from bnw.core.bnw_mongo import open_db
 from bnw.xmpp import bnw_component, xmpp_notifier
-from bnw.handlers import throttle
+from bnw.handlers import throttle, mapreduce
 
 bnw.core.base.config.register(config)
 application = service.Application("BnW")
@@ -93,6 +93,7 @@ def checkload(lasttime):
 checkload(None)
 
 throttle.setup_throttle()
+mapreduce.setup_mapreduce()
 
 def runintwistd():
     sys.argv.insert(1,__file__)

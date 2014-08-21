@@ -100,3 +100,5 @@ trace_shutdown = False
 
 throttle_leak_speed = 5 # seconds
 throttle_bucket_size = 5 # number of actions
+
+config.mapreduce_enabled = True
