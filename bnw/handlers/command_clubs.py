@@ -17,7 +17,7 @@ def cmd_clubs(request):
 
     clubs = list(x.doc for x in (yield objs.Club.find_sort({'$nor': [{'_id': '@'}, {'_id': ''}]}, [('value', -1)], limit=20)))
     defer.returnValue(dict(ok=True, format='clubs', clubs=clubs,
-                      rebuilt=rebuild, cache=3600, cache_public=True))
+                      cache=3600, cache_public=True))
 
 
 @defer.inlineCallbacks
@@ -30,4 +30,4 @@ def cmd_tags(request):
     """
     tags = list(x.doc for x in (yield objs.Tag.find_sort({'_id': {'$ne': ''}}, [('value', -1)], limit=20)))
     defer.returnValue(dict(ok=True, format='tags', tags=tags,
-                      rebuilt=rebuild, cache=3600, cache_public=True))
+                      cache=3600, cache_public=True))
