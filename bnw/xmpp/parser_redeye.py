@@ -93,10 +93,6 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
 
         # put options and descriptions into appropriate columns
         for shortname, longname, arg_required, helpmsg in self.commands[cmd]:
-            # `update --api` is used by meow and shouldn't be shown to the user
-            if cmd is "update" and longname is "api":
-                continue
-
             shortopt = ""
             if shortname:
                 shortopt = "-" + shortname

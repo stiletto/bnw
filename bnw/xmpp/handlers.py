@@ -79,7 +79,7 @@ update_args = (
                 ('d', 'delete',False,'Delete, not add'),
                 ('', 'clubs', True, 'Set comma-separated list of clubs'),
                 ('', 'tags', True, 'Set comma-separated list of tags'),
-                ('', 'api', False, 'Set clubs and tags using api'),
+                # ('', 'api', False, 'Set clubs and tags using api'),
             )
 feed_args = (
                 ("p", "page", True, u"Show nth results page (counting from 0)"),
