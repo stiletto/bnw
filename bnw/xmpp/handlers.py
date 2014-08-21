@@ -27,11 +27,13 @@ from bnw.handlers import command_update
 import formatters_redeye
 import formatters_simple
 
+# -h / --help is defined and handled in redeye parser itself. Put nice, short
+# option descriptions into fourth element of a tuple and you'll be fine.
 bl_args = (
-                ("u", "user", True, u"Blacklist user."),
-                ("t", "tag", True, u"Blacklist tag."),
-                ("c", "club", True, u"Blacklist club."),
-                ("d", "delete", False, u"Delete blacklist item."),
+                ("u", "user", True, u"Blacklist user"),
+                ("t", "tag", True, u"Blacklist tag"),
+                ("c", "club", True, u"Blacklist club"),
+                ("d", "delete", False, u"Delete existing item"),
             )
 subscribe_args = (
                 ("m", "message", True, u"Subscribe to message."),
@@ -41,42 +43,46 @@ subscribe_args = (
                 ("n", "newtab", False, u"Receive messages for this subscription from into tab"),
             )
 show_args =  (
-                ("m", "message", True, u"Show specified message."),
-                ("u", "user", True, u"Show user's posts."),
-                ("t", "tag", True, u"Show posts with tag."),
-                ("c", "club", True, u"Show club posts."),
-                ("p", "page", True, u"Results page (from 0)."),
-                ("r", "replies", False, u"Include replies in output (only with -m)."),
-                ("a", "after", True, u"Show only replies after this."),
+                ("m", "message", True, u"Show specified message"),
+                ("u", "user", True, u"Show user's posts"),
+                ("t", "tag", True, u"Show posts with tag"),
+                ("c", "club", True, u"Show club posts"),
+                ("p", "page", True, u"Show nth results page (counting from 0)"),
+                ("r", "replies", False, u"Show replies as well (only with -m)"),
+                ("b", "before", True, u"Show replies older than this one"),
+                ("a", "after", True, u"Show replies newer than this one"),
+                ("", "use_bl", False, u"Don't show messages from BL'ed users"),
             )
 post_args = (
-                ("s", "notop", False, u"Post cannot be bumped to top."), # no-op
-                ("t", "tags", True, u"Mark post with this tag(s) (comma-separated)."),
-                ("c", "clubs", True, u"Post to this club(s) (comma-separated)."),
-                ("a", "anonymous", False, u"Anonymous post."),
-                ("q", "anoncomments", False, u"Make all comments to this post anonymous."),
+                ("s", "notop", False, u"Post cannot be bumped to top"), # no-op
+                ("t", "tags", True, u"Mark post with this tag(s) (comma-separated)"),
+                ("c", "clubs", True, u"Post to this club(s) (comma-separated)"),
+                ("a", "anonymous", False, u"Anonymous post"),
+                ("q", "anoncomments", False, u"Make all comments to this post anonymous"),
             )
 comment_args = (
-                ("m", "message", True, u"Message to comment."),
-                ("a", "anonymous", False, u"Anonymous comment."),
+                ("m", "message", True, u"Message to comment"),
+                ("a", "anonymous", False, u"Anonymous comment"),
             )
 recommend_args = (
-                ("m", "message", True, u"Message to recommend."),
-                ("u", "unrecommend", False,
-                 u"Delete message from your recommendations list."),
+                ("m", "message", True, u"Message to recommend"),
+                ("u", "unrecommend", False, u"Delete message from your recommendations list"),
             )
 delete_args = (
-                ('m', 'message',True,'Message or comment to delete.'),
-                ('l', 'last',False,'Delete last message or comment.'),
+                ('m', 'message',True,'Message or comment to delete'),
+                ('l', 'last',False,'Delete your last message or comment'),
             )
 update_args = (
-                ('m', 'message',True,'Message or comment to update.'),
-                ('c', 'club',False,'Add/delete club.'),
-                ('t', 'tag',False,'Add/delete tag.'),
-                ('d', 'delete',False,'Delete, not add.'),
-                ('', 'clubs', True, 'Set comma-separated list of clubs.'),
-                ('', 'tags', True, 'Set comma-separated list of tags.'),
-                ('', 'api', False, 'Set clubs and tags using api.'),
+                ('m', 'message',True,'Message or comment to update'),
+                ('c', 'club',False,'Post to/delete from the club'),
+                ('t', 'tag',False,'Add/delete tag'),
+                ('d', 'delete',False,'Delete, not add'),
+                ('', 'clubs', True, 'Set comma-separated list of clubs'),
+                ('', 'tags', True, 'Set comma-separated list of tags'),
+                ('', 'api', False, 'Set clubs and tags using api'),
+            )
+feed_args = (
+                ("p", "page", True, u"Show nth results page (counting from 0)"),
             )
 
 redeye_handlers = (
@@ -89,7 +95,11 @@ redeye_handlers = (
 
 #        ("except", (), command_except.cmd_except, ),
         ("register", (), command_register.cmd_register, "name", ),
-        ("search", (), command_search.cmd_search, "query", ),
+        ("search",
+            (
+                ("p", "page", True, u"Show nth results page (counting from 0)"),
+            ),
+            command_search.cmd_search, "query", ),
         ("interface", (), command_interface.cmd_interface, "iface", ),
         ("subscribe", subscribe_args, command_subscription.cmd_subscribe, ),
         ("sub", subscribe_args, command_subscription.cmd_subscribe, ),
@@ -98,9 +108,13 @@ redeye_handlers = (
         ("subscriptions", (), command_subscription.cmd_subscriptions, ),
         ("lsub", (), command_subscription.cmd_subscriptions, ),
         ("help", (), command_help.cmd_help_redeye, ),
-        ("feed", (), command_show.cmd_feed, ),
-        ("today", (), command_show.cmd_today, ),
-        ("f", (), command_show.cmd_feed, ),
+        ("feed", feed_args, command_show.cmd_feed, ),
+        ("f", feed_args, command_show.cmd_feed, ),
+        ("today",
+            (
+                ("", "use_bl", False, u"Don't show messages from BL'ed users"),
+            ),
+            command_show.cmd_today, ),
         ("show", show_args, command_show.cmd_show, ),
         ("s", show_args, command_show.cmd_show, ),
         ("post", post_args, command_post.cmd_post, "text", ),
@@ -118,14 +132,14 @@ redeye_handlers = (
         ("vcard", (), command_vcard.cmd_vcard, ),
         ("pm",
             (
-                ("u", "user", True, u"Target user."),
+                ("u", "user", True, u"Target user"),
             ),
             command_pm.cmd_pm,
             "text",
         ),
         ("userlist",
             (
-                ("p", "page", True, u"Page number."),
+                ("p", "page", True, u"Show nth results page (counting from 0)"),
             ),
             command_userlist.cmd_userlist,
         ),
@@ -133,29 +147,29 @@ redeye_handlers = (
         ("u", update_args, command_update.cmd_update, "text", ),
         ("set",
             (
-                ("c", "usercss", True, u"User CSS."),
-                ("p", "password", True, u"Password."),
-                ("s", "servicejid", False, u"Set service's jid."),
-                ("b", "baseurl", True, u"Set base url for links."),
-                ("a", "about", True, u'Set "about me".'),
-                ("", "notify_on_recommendation", True, u'Set "notify_on_recommendation".'),
+                ("c", "usercss", True, u"User CSS"),
+                ("p", "password", True, u"Password"),
+                ("s", "servicejid", False, u"Set service's jid"),
+                ("b", "baseurl", True, u"Set base url for links"),
+                ("a", "about", True, u'Set "about me"'),
+                ("", "notify_on_recommendation", True, u'Set "notify_on_recommendation"'),
             ),
             command_settings.cmd_set,
         ),
         ("clubs", (), command_clubs.cmd_clubs, ),
         ("jids",
             (
-                ("a", "add", True, u"JID to add."),
-                ("d", "delete", True, u"JID to delete."),
-                ("s", "select", True, u"JID to select."),
+                ("a", "add", True, u"JID to add"),
+                ("d", "delete", True, u"JID to delete"),
+                ("s", "select", True, u"JID to select"),
             ),
             command_jids.cmd_jids,
         ),
         ("confirm", (), command_jids.cmd_confirm, "code", ),
         ("alias",
             (
-                ("d", "delete", True, u"Delete an alias."),
-                ("s", "set", True, u"Update an alias."),
+                ("d", "delete", True, u"Delete an alias"),
+                ("s", "set", True, u"Update an alias"),
             ),
             command_alias.cmd_alias,
             'value',
