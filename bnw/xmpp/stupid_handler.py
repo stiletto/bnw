@@ -64,7 +64,7 @@ def idiotic(msg):
             # defer.returnValue((yield "BACKEND (CATCHED) ERROR! IMMEDIATELY
             # REPORT THIS SHIT TO MY STUPID
             # AUTHOR!!!\n\n"+traceback.format_exc()))
-            defer.returnValue("BACKEND (CATCHED) ERROR! IMMEDIATELY REPORT THIS SHIT TO MY STUPID AUTHOR!!!\n\n" +
+            defer.returnValue("BACKEND (CAUGHT) ERROR! IMMEDIATELY REPORT THIS SHIT TO MY STUPID AUTHOR!!!\n\n" +
                               traceback.format_exc() + "\n" +
                               "Command which caused this exception: " + message_body)
         defer.returnValue(result)
