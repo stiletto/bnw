@@ -152,7 +152,7 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
         cmdname, handler, restname, options, rest = self.resolve(
             msg)  # unicode(msg.body).encode('utf-8','ignore'))
         if not handler:
-            handler, restname2, options, rest = self.alias_resolve(msg)
+            cmdname, handler, restname2, options, rest = self.alias_resolve(msg)
             if not handler:
                 defer.returnValue('ERROR. Command not found: %s' % (restname,))
             else:
