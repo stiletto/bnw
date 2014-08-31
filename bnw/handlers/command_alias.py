@@ -30,7 +30,7 @@ def cmd_alias(request, set="", delete="", value=""):
         )
     elif delete:
         assert len(delete) <= 32
-        _ = yield objs.User.mupdate({'name': request.user['name']}, {'$unset': {'aliases.%s' % (set,): 1}})
+        _ = yield objs.User.mupdate({'name': request.user['name']}, {'$unset': {'aliases.%s' % (delete,): 1}})
         defer.returnValue(
             dict(ok=True,
                          desc='Alias %s deleted.' % (delete,)
