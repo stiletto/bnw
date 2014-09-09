@@ -14,9 +14,21 @@ from throttle import throttle_check
 def _(s, user):
     return s
 
+acceptable_formats = ["markdown", "md", "moinmoin", "mm", "plaintext"]
+acceptable_formats_str = u", ".join(acceptable_formats)
+
+def normalize_format(format):
+    """Turns common shortenings into full format names."""
+    if format is "md":
+        format = "markdown"
+    elif format is "mm":
+        format = "moinmoin"
+
+    return format
 
 @defer.inlineCallbacks
-def postMessage(request, tags, clubs, text, anon=False, anoncomments=False):
+def postMessage(request, tags, clubs, text, anon=False, anoncomments=False,
+                format=None):
         yield throttle_check(request.user['name'])
         sfrom = request.to.userhost() if request.to else None
         start = text[:10].lower()
@@ -25,7 +37,7 @@ def postMessage(request, tags, clubs, text, anon=False, anoncomments=False):
                 dict(ok=False, desc='?OTR Error: Fuck your OTR, srsly')
             )
         ok, rest = yield bnw.core.post.postMessage(
-            request.user, tags, clubs, text, anon, anoncomments, sfrom=sfrom)
+            request.user, tags, clubs, text, anon, anoncomments, format, sfrom=sfrom)
         if ok:
             msgid, qn, recepients = rest
             defer.returnValue(
@@ -45,6 +57,10 @@ def postMessage(request, tags, clubs, text, anon=False, anoncomments=False):
 @defer.inlineCallbacks
 def cmd_post(request, tags="", clubs="", anonymous="", anoncomments="", format="", text=""):
         """ Отправка псто """
+        if not format in acceptable_formats:
+            defer.returnValue(dict(ok=False, desc=u"'%s' is not a valid format! Choose one of: %s" % (format, acceptable_formats_str)))
+        else:
+            format = normalize_format(format)
         tags = tags.split(',')[:5]
         clubs = clubs.split(',')[:5]
         tags = filter(None, set(
@@ -52,7 +68,7 @@ def cmd_post(request, tags="", clubs="", anonymous="", anoncomments="", format="
         clubs = filter(None, set(
             [x.lower().strip().replace('\n', ' ')[:256] for x in clubs]))
         defer.returnValue(
-            (yield postMessage(request, tags, clubs, text, anonymous, anoncomments)))
+            (yield postMessage(request, tags, clubs, text, anonymous, anoncomments, format)))
 
 
 @defer.inlineCallbacks
@@ -71,13 +87,17 @@ def cmd_post_simple(request, text, tag1=None, tag2=None, tag3=None, tag4=None, t
 @defer.inlineCallbacks
 def cmd_comment(request, message="", anonymous="", format="", text=""):
         """ Отправка комментария """
+        if not format in acceptable_formats:
+            defer.returnValue(dict(ok=False, desc=u"'%s' is not a valid format! Choose one of: %s" % (format, acceptable_formats_str)))
+        else:
+            format = normalize_format(format)
         message = canonic_message_comment(message).upper()
         message_id = message.split('/')[0]
         comment_id = message if '/' in message else None
         yield throttle_check(request.user['name'])
         sfrom = request.to.userhost() if request.to else None
         ok, rest = yield bnw.core.post.postComment(
-            message_id, comment_id, text, request.user, anonymous, sfrom=sfrom)
+            message_id, comment_id, text, request.user, anonymous, format, sfrom=sfrom)
         if ok:
             msgid, num, qn, recepients = rest
             defer.returnValue(

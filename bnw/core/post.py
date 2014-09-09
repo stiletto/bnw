@@ -116,7 +116,8 @@ def send_to_subscribers(queries, message, recommender=None, recocomment=None):
 
 
 @defer.inlineCallbacks
-def postMessage(user, tags, clubs, text, anon=False, anoncomments=False, sfrom=None):
+def postMessage(user, tags, clubs, text, anon=False, anoncomments=False,
+                format=None, sfrom=None):
     """!Это дерьмо создает новое сообщение и рассылает его.
     @param user Объект-пользователь.
     @param tags Список тегов.
@@ -124,6 +125,7 @@ def postMessage(user, tags, clubs, text, anon=False, anoncomments=False, sfrom=N
     @param text Текст сообщения.
     @param anon Отправить от анона.
     @param anoncom Все комментарии принудительно анонимны.
+    @param format Используемое в сообщении форматирование (Markdown, MoinMoin, plaintext).
     """
     if len(text) == 0:
         defer.returnValue((False, 'So where is your post?'))
@@ -140,6 +142,7 @@ def postMessage(user, tags, clubs, text, anon=False, anoncomments=False, sfrom=N
                'anonymous': bool(anon),
                'anoncomments': bool(anoncomments),
                'recommendations': [],
+               'format': format,
                }
     if anon:
         message['real_user'] = message['user']
@@ -162,13 +165,14 @@ def postMessage(user, tags, clubs, text, anon=False, anoncomments=False, sfrom=N
 
 
 @defer.inlineCallbacks
-def postComment(message_id, comment_id, text, user, anon=False, sfrom=None):
+def postComment(message_id, comment_id, text, user, anon=False, format=None, sfrom=None):
     """!Это дерьмо постит комментарий.
     @param message_id Id сообщения к которому комментарий.
     @param comment_id Если ответ - id комментария, на который отвечаем.
     @param text Текст комментария.
     @param user Объект-пользователь.
     @param anon Анонимный ответ.
+    @param format Используемое в сообщении форматирование (Markdown, MoinMoin, plaintext).
     """
 
     if len(text) == 0:
@@ -196,6 +200,7 @@ def postComment(message_id, comment_id, text, user, anon=False, sfrom=None):
                'replytotext': cropstring(old_comment['text'] if comment_id else message['text'], 128),
                'text': ('@' + old_comment['user'] + ' 'if comment_id else '') + text,
                'anonymous': bool(anon),
+               'format': format,
                }
 #              'depth': old_comment.get('depth',0)+1 if old_comment else 0,
     if anon:

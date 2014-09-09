@@ -59,10 +59,12 @@ post_args = (
                 ("c", "clubs", True, u"Post to this club(s) (comma-separated)"),
                 ("a", "anonymous", False, u"Anonymous post"),
                 ("q", "anoncomments", False, u"Make all comments to this post anonymous"),
+                ("f", "format", True, u"Specify the formatting used (one of: %s)" % command_post.acceptable_formats_str)
             )
 comment_args = (
                 ("m", "message", True, u"Message to comment"),
                 ("a", "anonymous", False, u"Anonymous comment"),
+                ("f", "format", True, u"Specify the formatting used (one of: %s)" % command_post.acceptable_formats_str)
             )
 recommend_args = (
                 ("m", "message", True, u"Message to recommend"),
@@ -80,6 +82,7 @@ update_args = (
                 ('', 'clubs', True, 'Set comma-separated list of clubs'),
                 ('', 'tags', True, 'Set comma-separated list of tags'),
                 # ('', 'api', False, 'Set clubs and tags using api'),
+                ("f", "format", True, u"Set the formatting used (one of: %s)" % command_post.acceptable_formats_str)
             )
 feed_args = (
                 ("p", "page", True, u"Show nth results page (counting from 0)"),
