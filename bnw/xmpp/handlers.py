@@ -85,6 +85,19 @@ feed_args = (
                 ("p", "page", True, u"Show nth results page (counting from 0)"),
             )
 
+redeye_standard_aliases = {
+    "subscribe":     "sub"
+,   "unsubscribe":   "usub"
+,   "subscriptions": "lsub"
+,   "feed":          "f"
+,   "show":          "s"
+,   "post":          "p"
+,   "comment":       "c"
+,   "recommend":     "r"
+,   "delete":        "d"
+,   "update":        "u"
+}
+
 redeye_handlers = (
         ("ping",
             (
@@ -102,31 +115,22 @@ redeye_handlers = (
             command_search.cmd_search, "query", ),
         ("interface", (), command_interface.cmd_interface, "iface", ),
         ("subscribe", subscribe_args, command_subscription.cmd_subscribe, ),
-        ("sub", subscribe_args, command_subscription.cmd_subscribe, ),
         ("unsubscribe", subscribe_args, command_subscription.cmd_unsubscribe, ),
-        ("usub", subscribe_args, command_subscription.cmd_unsubscribe, ),
         ("subscriptions", (), command_subscription.cmd_subscriptions, ),
-        ("lsub", (), command_subscription.cmd_subscriptions, ),
         ("help", (), command_help.cmd_help_redeye, ),
         ("feed", feed_args, command_show.cmd_feed, ),
-        ("f", feed_args, command_show.cmd_feed, ),
         ("today",
             (
                 ("", "use_bl", False, u"Don't show messages from BL'ed users"),
             ),
             command_show.cmd_today, ),
         ("show", show_args, command_show.cmd_show, ),
-        ("s", show_args, command_show.cmd_show, ),
         ("post", post_args, command_post.cmd_post, "text", ),
-        ("p", post_args, command_post.cmd_post, "text", ),
         ("comment", comment_args, command_post.cmd_comment, "text", ),
-        ("c",  comment_args, command_post.cmd_comment, "text", ),
         ("recommend", recommend_args, command_post.cmd_recommend, "comment", ),
-        ("r", recommend_args, command_post.cmd_recommend, "comment", ),
         ("on", (), command_onoff.cmd_on, ),
         ("off", (), command_onoff.cmd_off, ),
         ("delete", delete_args, command_delete.cmd_delete, ),
-        ("d", delete_args, command_delete.cmd_delete, ),
         ("login", (), command_login.cmd_login, ),
         ("bl", bl_args, command_bl.cmd_blacklist, ),
         ("vcard", (), command_vcard.cmd_vcard, ),
@@ -144,7 +148,6 @@ redeye_handlers = (
             command_userlist.cmd_userlist,
         ),
         ("update", update_args, command_update.cmd_update, "text", ),
-        ("u", update_args, command_update.cmd_update, "text", ),
         ("set",
             (
                 ("c", "usercss", True, u"User CSS"),
@@ -271,7 +274,7 @@ simple_formatters = {
 }
 
 parsers={}
-parsers['redeye']=RedEyeParser(redeye_handlers,redeye_formatters)
+parsers['redeye']=RedEyeParser(redeye_handlers, redeye_standard_aliases, redeye_formatters)
 parsers['simplified']=RegexParser(simple_handlers,simple_formatters)
 
 s2s_handlers = {}

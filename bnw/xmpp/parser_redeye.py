@@ -9,7 +9,7 @@ import alias_subst
 
 
 class RedEyeParser(parser_basexmpp.BaseXmppParser):
-    def __init__(self, commands, formatters):
+    def __init__(self, commands, aliases, formatters):
 
         self.commands = {}
         self._commands = {}
@@ -25,9 +25,18 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
                 name, args, handler = cmd
                 restname = None
             args+=(('h','help',False,u'Show list of possible arguments'),)
+
+            alias = aliases.get(name)
+
             self.commands[name] = args
+            self.commands[alias] = args
+
             self.commandfuns[name] = handler, restname
-            self.helpmsgs[name] = self.generate_help_message(name)
+            self.commandfuns[alias] = handler, restname
+
+            helpmsg = self.generate_help_message(name, alias)
+            self.helpmsgs[name] = helpmsg
+            self.helpmsgs[alias] = helpmsg
 
     def hashCommand(self, cmd):
         self._commands[cmd] = {"short": {}, "long": {}}
@@ -75,7 +84,7 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
                     prevopt = argi['short'][c][1]
             return prevopt, shorts
 
-    def generate_help_message(self, cmd):
+    def generate_help_message(self, cmd, alias):
         # Example entry of self.commands:
         # ("u", "user", True, u"Blacklist user."),
 
@@ -118,7 +127,11 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
         # self.commandfuns contains the name of the positional argument that
         # the command accepts. Let's look it up!
         _, restname = self.commandfuns[cmd]
-        result = u"Usage: %s" % cmd + (" " + restname if restname else "")
+        options_usage = (" " + restname if restname else "")
+        result = u"Usage: %s" % cmd + options_usage
+        if alias:
+            result += u"\n       %s" % alias + options_usage
+
         # join columns linewise
         line_tuples = zip(shortopts, longopts, descriptions)
         join = lambda acc, x: acc + '\n' + "    ".join(x)
