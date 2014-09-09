@@ -2,6 +2,7 @@ import random
 from base import *
 from bnw.core.base import config
 import bnw.core.bnw_objects as objs
+from bnw.handlers import command_post
 
 
 class SimpleSetting(object):
