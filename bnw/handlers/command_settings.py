@@ -51,6 +51,17 @@ class ServiceJidSetting(SimpleSetting):
     def write(self, request, name, value):
         return SimpleSetting.write(self, request, name, request.to.userhost())
 
+class DefaultFormatSetting(SimpleSetting):
+    @defer.inlineCallbacks
+    def write(self, request, name, value):
+        if not value in command_post.acceptable_formats:
+            defer.returnValue(dict(ok=False, desc=u"'%s' is not a valid format! Choose one of: %s" % (value, command_post.acceptable_formats_str)))
+        else:
+            value = command_post.normalize_format(value)
+        _ = yield objs.User.mupdate({'name': request.user['name']},
+                                    {'$set': {'settings.' + name: value}})
+        defer.returnValue((True,))
+
 optionnames = {
     'usercss': SimpleSetting(),
     'notify_on_recommendation': BooleanSetting(True),
@@ -58,7 +69,7 @@ optionnames = {
     'servicejid': ServiceJidSetting(),
     'baseurl': SimpleSetting(),
     'about': SimpleSetting(),
-    'default_format': SimpleSetting(),
+    'default_format': DefaultFormatSetting(default="plaintext"),
 }
 
 
@@ -85,11 +96,6 @@ def cmd_set(request, **kwargs):
             defer.returnValue(
                 dict(ok=False, desc='Unknown setting: %s' % kwargs['name']))
         else:
-            if name is 'default_format':
-                if not value in command_post.acceptable_formats:
-                    defer.returnValue(dict(ok=False, desc=u"'%s' is not a valid format! Choose one of: %s" % (value, command_post.acceptable_formats_str)))
-                else:
-                    value = command_post.normalize_format(value)
             res = yield optionnames[name].write(request, name, value)
             if not res[0]:
                 defer.returnValue(
