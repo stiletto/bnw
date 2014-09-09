@@ -159,6 +159,7 @@ redeye_handlers = (
                 ("b", "baseurl", True, u"Set base url for links"),
                 ("a", "about", True, u'Set "about me"'),
                 ("", "notify_on_recommendation", True, u'Set "notify_on_recommendation"'),
+                ("f", "default_format", True, u"Default formatting for posts and comments (one of: %s)" % command_post.acceptable_formats_str),
             ),
             command_settings.cmd_set,
         ),

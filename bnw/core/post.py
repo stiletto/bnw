@@ -142,7 +142,7 @@ def postMessage(user, tags, clubs, text, anon=False, anoncomments=False,
                'anonymous': bool(anon),
                'anoncomments': bool(anoncomments),
                'recommendations': [],
-               'format': format,
+               'format': format if format else user.get('settings',{}).get('default_format'),
                }
     if anon:
         message['real_user'] = message['user']
@@ -200,7 +200,7 @@ def postComment(message_id, comment_id, text, user, anon=False, format=None, sfr
                'replytotext': cropstring(old_comment['text'] if comment_id else message['text'], 128),
                'text': ('@' + old_comment['user'] + ' 'if comment_id else '') + text,
                'anonymous': bool(anon),
-               'format': format,
+               'format': format if format else user.get('settings',{}).get('default_format'),
                }
 #              'depth': old_comment.get('depth',0)+1 if old_comment else 0,
     if anon:
