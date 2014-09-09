@@ -2,6 +2,7 @@ import random
 from base import *
 from bnw.core.base import config
 import bnw.core.bnw_objects as objs
+from bnw.handlers import command_post
 
 
 class SimpleSetting(object):
@@ -50,6 +51,17 @@ class ServiceJidSetting(SimpleSetting):
     def write(self, request, name, value):
         return SimpleSetting.write(self, request, name, request.to.userhost())
 
+class DefaultFormatSetting(SimpleSetting):
+    @defer.inlineCallbacks
+    def write(self, request, name, value):
+        if not value in command_post.acceptable_formats:
+            defer.returnValue(dict(ok=False, desc=u"'%s' is not a valid format! Choose one of: %s" % (value, command_post.acceptable_formats_str)))
+        else:
+            value = command_post.normalize_format(value)
+        _ = yield objs.User.mupdate({'name': request.user['name']},
+                                    {'$set': {'settings.' + name: value}})
+        defer.returnValue((True,))
+
 optionnames = {
     'usercss': SimpleSetting(),
     'notify_on_recommendation': BooleanSetting(True),
@@ -57,6 +69,7 @@ optionnames = {
     'servicejid': ServiceJidSetting(),
     'baseurl': SimpleSetting(),
     'about': SimpleSetting(),
+    'default_format': DefaultFormatSetting(default="plaintext"),
 }
 
 
