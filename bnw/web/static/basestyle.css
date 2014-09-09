@@ -226,10 +226,10 @@
 
         .pwls {
             white-space: pre-wrap;
-            word-wrap: break-word;
         }
 
         .pw {
+            word-wrap: break-word;
             padding-bottom: 0.5em;
             margin: 0;
         }
