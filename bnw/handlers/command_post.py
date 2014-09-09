@@ -43,7 +43,7 @@ def postMessage(request, tags, clubs, text, anon=False, anoncomments=False):
 
 @require_auth
 @defer.inlineCallbacks
-def cmd_post(request, tags="", clubs="", anonymous="", anoncomments="", text=""):
+def cmd_post(request, tags="", clubs="", anonymous="", anoncomments="", format="", text=""):
         """ Отправка псто """
         tags = tags.split(',')[:5]
         clubs = clubs.split(',')[:5]
@@ -69,7 +69,7 @@ def cmd_post_simple(request, text, tag1=None, tag2=None, tag3=None, tag4=None, t
 @require_auth
 @check_arg(message=MESSAGE_COMMENT_RE)
 @defer.inlineCallbacks
-def cmd_comment(request, message="", anonymous="", text=""):
+def cmd_comment(request, message="", anonymous="", format="", text=""):
         """ Отправка комментария """
         message = canonic_message_comment(message).upper()
         message_id = message.split('/')[0]
