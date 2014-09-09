@@ -6,7 +6,7 @@ import time
 from widgets import widgets
 import PyRSS2Gen
 from datetime import datetime
-from linkify import linkify
+from bnw.formatting import linkify
 
 from xml.sax import saxutils
 

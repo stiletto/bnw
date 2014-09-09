@@ -102,7 +102,7 @@ class MongoObject(WrappedDict):
     #
     dangerous_fields = ('_id',)
     indexes = (
-        ((("id",1)), True, False),
+        ((("id",1),), True, False),
     )
 
     def __init__(self, src=None):
@@ -221,8 +221,8 @@ class Comment(MongoObject):
     collection = CollectionWrapper("comments")
     dangerous_fields = ('_id', 'real_user')
     indexes = MongoObject.indexes + (
-        ((("message", 1)), False, False),
-        ((("user", 1)), False, False),
+        ((("message", 1),), False, False),
+        ((("user", 1),), False, False),
     )
 
     def save(self, safe=True):
@@ -313,7 +313,7 @@ class GlobalState(MongoObject):
     """ Всякие глобальные переменные."""
     collection = CollectionWrapper("globalstate")
     indexes = (
-        ((("name", 1)), True, False),
+        ((("name", 1),), True, False),
     )
 
 

@@ -8,11 +8,12 @@ setup(name='BnW',
     author='Stiletto',
     author_email='blasux@blasux.ru',
     url='http://github.com/stiletto/bnw',
-    packages=['bnw', 'bnw.core', 'bnw.handlers', 'bnw.scripts', 'bnw.search', 'bnw.web', 'bnw.xmpp'],
+    packages=['bnw', 'bnw.core', 'bnw.formatting', 'bnw.handlers', 'bnw.scripts', 'bnw.search', 'bnw.web', 'bnw.xmpp'],
     dependency_links=['http://github.com/mongodb/motor/tarball/master#egg=motor-0.1.2',
-                      'http://github.com/mongodb/mongo-python-driver/tarball/master#egg=pymongo-2.6',],
+                      'http://github.com/mongodb/mongo-python-driver/tarball/master#egg=pymongo-2.6',
+                      'http://github.com/stiletto/linkshit/tarball/master#egg=linkshit-0.2'],
 
-    install_requires=['tornado>=2.0', 'twisted', 'Pillow', 'PyRSS2Gen', 'misaka', 'pymongo>=2.6', 'motor'],
+    install_requires=['tornado>=2.0', 'twisted', 'Pillow', 'PyRSS2Gen', 'misaka', 'motor', 'linkshit'],
     package_data={'bnw.web': ['templates/*.html','static/*.*', 'static/flot/*', 'static/web-socket-js/*']},
     entry_points = {
         'console_scripts': [

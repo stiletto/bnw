@@ -8,7 +8,7 @@ import tornado.web
 #import txmongo
 import bnw.core.base
 import bnw.core.bnw_objects as objs
-import linkify
+from bnw.formatting import linkify, thumbify
 from widgets import widgets
 from bnw.core.base import config
 
@@ -23,8 +23,8 @@ class BnwWebRequest(object):
 
 def get_defargs(handler=None):
     args = {
-        'linkify': linkify.linkify,
-        'thumbify': linkify.thumbify,
+        'linkify': linkify,
+        'thumbify': thumbify,
         'config': config,
         'w': widgets,
     }
