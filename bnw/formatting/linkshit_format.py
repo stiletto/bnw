@@ -78,7 +78,7 @@ class LinkShitFormat(object):
                 out.append(m)
         for i in stack:
             out.append(self.formatting_tags[i][1])
-        return ''.join(out), thumbs
+        return '<div class="pwls">'+''.join(out)+'</div>', thumbs
 
     def format_url(self, m, secure):
         # TODO: Move checking for permitted protocols

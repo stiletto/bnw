@@ -53,6 +53,7 @@
             padding: 0;
         }
 
+
         .bodyshit {
             padding: 1em;
         }
@@ -223,9 +224,12 @@
             text-align: center;
         }
 
+        .pwls {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
         .pw {
-            /*white-space: pre-wrap;
-            word-wrap: break-word; */
             padding-bottom: 0.5em;
             margin: 0;
         }
