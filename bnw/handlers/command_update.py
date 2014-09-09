@@ -34,7 +34,7 @@ def cmd_update(request, message='', text='', club=False, tag=False,
                  '[--tags=tag1,tag2] '
                  '[--format=<markdown|md|moinmoin|mm|plaintext>]'))
 
-    if not format in command_post.acceptable_formats:
+    if format and not format in command_post.acceptable_formats:
         defer.returnValue(dict(ok=False, desc=u"'%s' is not a valid format! Choose one of: %s" % (format, command_post.acceptable_formats_str)))
     else:
         format = command_post.normalize_format(format)

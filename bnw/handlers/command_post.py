@@ -57,7 +57,7 @@ def postMessage(request, tags, clubs, text, anon=False, anoncomments=False,
 @defer.inlineCallbacks
 def cmd_post(request, tags="", clubs="", anonymous="", anoncomments="", format="", text=""):
         """ Отправка псто """
-        if not format in acceptable_formats:
+        if format and not format in acceptable_formats:
             defer.returnValue(dict(ok=False, desc=u"'%s' is not a valid format! Choose one of: %s" % (format, acceptable_formats_str)))
         else:
             format = normalize_format(format)
@@ -87,7 +87,7 @@ def cmd_post_simple(request, text, tag1=None, tag2=None, tag3=None, tag4=None, t
 @defer.inlineCallbacks
 def cmd_comment(request, message="", anonymous="", format="", text=""):
         """ Отправка комментария """
-        if not format in acceptable_formats:
+        if format and not format in acceptable_formats:
             defer.returnValue(dict(ok=False, desc=u"'%s' is not a valid format! Choose one of: %s" % (format, acceptable_formats_str)))
         else:
             format = normalize_format(format)
