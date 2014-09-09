@@ -65,7 +65,7 @@ def do_mapreduce():
                     }
                 }
                 return {count:sum, tag:tag, user:user};
-            ''',
+            }''',
             out={'replace': objs.UserTag.collection.collection_name})
         yield objs.UserTag.ensure_indexes()
 
