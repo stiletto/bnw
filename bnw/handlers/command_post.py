@@ -17,14 +17,14 @@ def _(s, user):
 acceptable_formats = ["markdown", "md", "moinmoin", "mm", "plaintext"]
 acceptable_formats_str = u", ".join(acceptable_formats)
 
-def normalize_format(format):
+def normalize_format(fmt):
     """Turns common shortenings into full format names."""
-    if format is "md":
-        format = "markdown"
-    elif format is "mm":
-        format = "moinmoin"
+    if fmt == u"md":
+        fmt = "markdown"
+    elif fmt == u"mm":
+        fmt = "moinmoin"
 
-    return format
+    return fmt
 
 @defer.inlineCallbacks
 def postMessage(request, tags, clubs, text, anon=False, anoncomments=False,
