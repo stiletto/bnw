@@ -102,3 +102,6 @@ throttle_leak_speed = 5 # seconds
 throttle_bucket_size = 5 # number of actions
 
 mapreduce_enabled = True
+thumbor = '%(proto)s://example.com'
+thumbor_key = 'ABCDEF'
+thumbor_pars = { 'width': 256, 'height': 256, 'fit_in': True }
