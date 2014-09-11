@@ -116,8 +116,8 @@ def send_to_subscribers(queries, message, recommender=None, recocomment=None):
     defer.returnValue((qn, reccount))
 
 def renderPostOrComment(text, format):
-    return { 'insecure' = formatting.thumbify(text, format, False),
-             'secure' = formatting.thumbify(text, format, True) }
+    return { 'insecure': formatting.thumbify(text, format, False),
+             'secure': formatting.thumbify(text, format, True) }
 
 @defer.inlineCallbacks
 def postMessage(user, tags, clubs, text, anon=False, anoncomments=False,
