@@ -19,6 +19,7 @@ setup(name='BnW',
         'console_scripts': [
             'bnw = bnw.scripts.entry:instance',
             'bnw-search = bnw.scripts.entry:search',
+            'bnw-admin = bnw.scripts.admin:main',
         ],
     }
 )

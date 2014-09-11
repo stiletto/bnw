@@ -79,7 +79,7 @@ class CollectionWrapper(object):
             self.collection = get_db(self.collection_name)
         method = getattr(self.collection, db_method)
         def fn(*args, **kwargs):
-            print 'method',db_method,args,kwargs
+            #print 'method',db_method,args,kwargs
             f = method(*args, **kwargs)
             if isinstance(f, Future):
                 return fudef(f)
@@ -142,7 +142,7 @@ class MongoObject(WrappedDict):
         cursor.sort(sort)
         limit = kwargs.get('limit',1000) # TODO: Document this
         res = yield fudef(cursor.to_list(limit))
-        print 'findsort res ', len(res)
+        #print 'findsort res ', len(res)
         defer.returnValue(
             cls(doc) for doc in res)  # wrap all documents in our class
 

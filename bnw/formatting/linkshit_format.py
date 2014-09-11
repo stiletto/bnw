@@ -118,7 +118,7 @@ class LinkShitFormat(object):
         return result, None
 
     def format_namedlink(self, m, secure):
-        return self.format_url(self, m, secure)
+        return self.format_url(m, secure)
 
     def format_msg(self, m, secure):
         return ('<a href="/p/%s">%s</a>' % (m[2].replace('/', '#'), m[1])), None
