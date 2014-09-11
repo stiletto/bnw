@@ -1,5 +1,11 @@
-import os
 import sys
+try:
+    sys.setappdefaultencoding('utf-8')
+except:
+    sys = reload(sys)
+    sys.setdefaultencoding('utf-8')
+import os
+
 import argparse
 import time
 from twisted.internet import defer

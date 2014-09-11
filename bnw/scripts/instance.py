@@ -6,9 +6,6 @@ try:
 except:
     sys = reload(sys)
     sys.setdefaultencoding('utf-8')
-import os.path
-root = os.path.abspath(os.path.dirname(__file__))
-sys.path.insert(0, root)
 
 import tornado.platform.twisted
 tornado.platform.twisted.install()
