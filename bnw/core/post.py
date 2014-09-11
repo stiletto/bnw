@@ -7,6 +7,7 @@ from base import genid, cropstring, get_webui_base
 from twisted.internet import defer, reactor
 import time
 from twisted.python import log
+from bnw import formatting
 
 listeners = {}
 
@@ -114,6 +115,9 @@ def send_to_subscribers(queries, message, recommender=None, recocomment=None):
                     message['id'], target['jid']))
     defer.returnValue((qn, reccount))
 
+def renderPostOrComment(text, format):
+    return { 'insecure' = formatting.thumbify(text, format, False),
+             'secure' = formatting.thumbify(text, format, True) }
 
 @defer.inlineCallbacks
 def postMessage(user, tags, clubs, text, anon=False, anoncomments=False,
@@ -132,6 +136,7 @@ def postMessage(user, tags, clubs, text, anon=False, anoncomments=False,
     if len(text) > 10240:
         defer.returnValue(
             (False, 'Message is too long. %d/10240' % (len(text),)))
+    format = format or user.get('settings',{}).get('default_format')
     message = {'user': user['name'],
                'tags': tags,
                'clubs': clubs,
@@ -142,7 +147,8 @@ def postMessage(user, tags, clubs, text, anon=False, anoncomments=False,
                'anonymous': bool(anon),
                'anoncomments': bool(anoncomments),
                'recommendations': [],
-               'format': format if format else user.get('settings',{}).get('default_format'),
+               'format': format,
+               'html': renderPostOrComment(text, format),
                }
     if anon:
         message['real_user'] = message['user']
@@ -192,15 +198,18 @@ def postComment(message_id, comment_id, text, user, anon=False, format=None, sfr
     if message.get('anoncomments'):
         anon = True
 
+    format = format or user.get('settings',{}).get('default_format')
+    stored_text = ('@' + old_comment['user'] + ' 'if comment_id else '') + text
     comment = {'user': user['name'],
                'message': message_id,
                'date': time.time(),
                'replyto': old_comment['id'] if old_comment else None,
                'num': message['replycount'] + 1,
                'replytotext': cropstring(old_comment['text'] if comment_id else message['text'], 128),
-               'text': ('@' + old_comment['user'] + ' 'if comment_id else '') + text,
+               'text': stored_text,
                'anonymous': bool(anon),
-               'format': format if format else user.get('settings',{}).get('default_format'),
+               'format': format,
+               'html': renderPostOrComment(stored_text, format),
                }
 #              'depth': old_comment.get('depth',0)+1 if old_comment else 0,
     if anon:
