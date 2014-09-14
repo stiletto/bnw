@@ -1,0 +1,14 @@
+#!/bin/bash
+mongo 'bnw_test' --eval 'printjson(db.dropDatabase())'
+/tmp/venv/bin/python run.py
+ECODE="$?"
+echo
+if [ "$ECODE" == "0" ]; then
+    /tmp/venv/bin/coverage html --include='*/BnW-*'
+    echo -e "\033[1;32mAll tests passed.\033[0m"
+else
+    echo -e "\033[1;31mSome test failed.\033[0m"
+fi
+echo
+exit "$ECODE"
+

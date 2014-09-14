@@ -243,7 +243,7 @@ class User(MongoObject):
     dangerous_fields = ('_id', 'login_key', 'avatar', 'jid', 'jids',
                         'pending_jids', 'id', 'settings', 'blacklist')
     indexes = (
-        ((("name", 1)), True, False),
+        ((("name", 1),), True, False),
     )
 
     def send_plain(self, message, sfrom=None):
@@ -362,8 +362,8 @@ class Throttle(MongoObject):
     """ Троттлинг."""
     collection = CollectionWrapper("post_throttle")
     indexes = (
-        ((("user", 1)), True, False),
-        ((("bucket", 1)), False, False),
+        ((("user", 1),), True, False),
+        ((("bucket", 1),), False, False),
     )
 
 class UserTag(Tag):
