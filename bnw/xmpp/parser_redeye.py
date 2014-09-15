@@ -244,7 +244,7 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
                 if not handler_tuple:
                     raise CommandParserException(
                         'No such command: %s' % cmdname)
-            else:
+            elif len(wordbuf)>1:
                 prevopt, newopts = self.parseArgument(
                     argi, prevopt, ''.join(wordbuf))
                 if prevopt:

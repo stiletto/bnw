@@ -76,7 +76,7 @@ if __name__ == "__main__":
         ("login", (), "login", ),
     )
 
-    p = RedEyeParser(handlers, [])
+    p = RedEyeParser(handlers, {}, [])
     test = (
         ("post --tags=linux,anime,mplayer ваш ляликс - говно для просмотра аниме!",
             ("post", "text", {"tags": "linux,anime,mplayer"}, "ваш ляликс - говно для просмотра аниме!")),
@@ -93,6 +93,8 @@ if __name__ == "__main__":
             ("show", None, {"tag": "lol", "club": "fuck"}, "")),
         ("interface simplified",
             ("interface", "iface", {}, "simplified")),
+        ('c "" -am HUX2KJ/2BB ""',
+            ('comment', 'text', {"message": "HUX2KJ/2BB", 'anonymous': True}, "")),
     )
 
     class ShitMsg(object):
@@ -100,7 +102,7 @@ if __name__ == "__main__":
             self.body = b
     for t, r in test:
         msg = ShitMsg(t)
-        res = p.resolve(msg)
+        res = p.resolve(msg)[1:]
         print msg, res, r
         assert r == res
     print "Done ok."

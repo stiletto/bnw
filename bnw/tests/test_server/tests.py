@@ -83,6 +83,9 @@ def startTests(factory):
     sendText(factory, me, 'sub -m AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
     compareBody((yield factory.stanzaRecv()), 'ERROR. No such message.')
 
+    sendText(factory, me, 'c -am HUX2KJ/2BB ""')
+    compareBody((yield factory.stanzaRecv()), 'ERROR. So where is your comment\?')
+
     msgid = []
     for x in range(2):
         sendText(factory, me, 'post --format=md --tags=hui,pizda --clubs=jigurda %s' % (markdown_text,))
@@ -139,6 +142,7 @@ def startTests(factory):
     sendText(factory, me, 'post -t hui,pizda -c @,jigurda fuck ya')
     compareBody((yield factory.stanzaRecv()), 'OK. Message #([A-Z0-9]+) has been delivered to 1 users. http://localhost:9782/p/.*')
     compareBody((yield factory.stanzaRecv()), '\n\+\+\+ .*')
+
 
 #        cmd, replies = test[0], test[1:]
 #        factory.stanzaSend("""<message type='chat' from='hui@example.com' to='bnw.test'>
