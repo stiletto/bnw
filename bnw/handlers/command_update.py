@@ -3,6 +3,7 @@
 
 from base import *
 import bnw.core.bnw_objects as objs
+from bnw.core.post import renderPostOrComment
 from twisted.internet import defer
 from bnw.handlers import command_post
 
@@ -92,8 +93,9 @@ def cmd_update(request, message='', text='', club=False, tag=False,
         _ = yield update_internal(message, 'tags', delete, text)
 
     if format:
+        html = renderPostOrComment(message['text'], format)
         yield objs.Message.mupdate(
-            {'id': message}, {'$set': {'format': format}})
+            {'id': message}, {'$set': {'format': format, 'html': html}})
 
     defer.returnValue(
         dict(ok=True, desc='Message updated.')
