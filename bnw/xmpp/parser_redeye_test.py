@@ -93,7 +93,7 @@ if __name__ == "__main__":
             ("show", None, {"tag": "lol", "club": "fuck"}, "")),
         ("interface simplified",
             ("interface", "iface", {}, "simplified")),
-        ('c "" -am HUX2KJ/2BB ""',
+        ('c "" -am HUX2KJ/2BB',
             ('comment', 'text', {"message": "HUX2KJ/2BB", 'anonymous': True}, "")),
     )
 
