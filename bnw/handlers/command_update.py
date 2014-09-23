@@ -93,7 +93,7 @@ def cmd_update(request, message='', text='', club=False, tag=False,
         _ = yield update_internal(message, 'tags', delete, text)
 
     if format:
-        html = renderPostOrComment(message['text'], format)
+        html = renderPostOrComment(post['text'], format)
         yield objs.Message.mupdate(
             {'id': message}, {'$set': {'format': format, 'html': html}})
 

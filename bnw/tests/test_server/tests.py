@@ -91,6 +91,8 @@ def startTests(factory):
         sendText(factory, me, 'post --format=md --tags=hui,pizda --clubs=jigurda %s' % (markdown_text,))
         msgid.append(compareBody((yield factory.stanzaRecv()), 'OK. Message #([A-Z0-9]+) has been delivered to 0 users. http://localhost:9782/p/.*')[0])
 
+    sendText(factory, me, 'update -m %s -f markdown' % (msgid[1],))
+    compareBody((yield factory.stanzaRecv()), 'OK. Message updated.')
     sendText(factory, me, 'usub -m %s' % (msgid[1],))
     compareBody((yield factory.stanzaRecv()), 'OK. Unsubscribed.')
     sendText(factory, me, 'sub -m %s' % (msgid[1],))
