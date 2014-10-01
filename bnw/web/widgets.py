@@ -12,6 +12,7 @@ class Widgets(object):
         """Return russian numeral according to given number and
         basic numerals.
         """
+        n = n % 100
         if 10 < n < 15:
             return d5
         n = n % 10
