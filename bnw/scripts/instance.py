@@ -70,6 +70,11 @@ if config.rpc_enabled:
         config.rpc_port, server.Site(s.getRPC()),
         interface="127.0.0.1").setServiceParent(serviceCollection)
 
+if config.statd:
+    from bnw.core import statd
+    hostport = config.statd.split(':',1)
+    statd.setup(hostport[0], int(hostport[1]))
+
 if config.manhole:
     shell_factory = ShellFactory()
     shell_factory.password = config.manhole

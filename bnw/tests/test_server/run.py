@@ -21,7 +21,7 @@ if __name__=="__main__":
         sys.argv.append('bnw')
         sys.argv.append('-n')
         sys.argv.append('-l')
-        sys.argv.append('/dev/null')
+        sys.argv.append('test_server.log')
 #        sys.argv.append('--pidfile=testinst.pid')
         from bnw.scripts.entry import instance
         instance()

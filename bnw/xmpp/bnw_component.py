@@ -9,6 +9,7 @@ from twisted.web import xmlrpc
 
 import bnw.core.bnw_objects as objs
 from bnw.core.base import config
+from bnw.core import statd
 import stupid_handler
 
 PRESENCE = '/presence'  # this is an global xpath query to use in an observer
@@ -129,6 +130,7 @@ class BnwService(component.Service):
             t = objs.Timing({'date': stime, 'time': etime,
                             'command': unicode(body), 'jid': jid})
             t.save().addCallback(lambda x: None)
+            statd.send('xmpp-reqtime', etime/1000, 'ms')
             log.msg("%s - PROCESSING TIME (from %s): %f" % (
                 str(time.time()), jid, etime))
             if jid.split('/', 1)[0] == config.admin_jid:
@@ -167,6 +169,7 @@ class BnwService(component.Service):
                 ('http://jabber.org/protocol/chatstates', 'composing')))
             self.xmlstream.send(cmsg)
 
+        statd.send('xmpp-requests', 1, 'c')
         gp = stupid_handler.idiotic(msg)
         # self.send_plain(msg['from'],'processing...')
         # gp=getPage('http://localhost:8080/xmpp_rpc/message',
