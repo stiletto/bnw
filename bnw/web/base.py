@@ -11,7 +11,7 @@ import bnw.core.bnw_objects as objs
 from bnw.formatting import linkify, thumbify
 from widgets import widgets
 from bnw.core.base import config
-
+from bnw.core import statsd
 
 class BnwWebRequest(object):
     def __init__(self, user=None):
@@ -46,6 +46,7 @@ class BnwWebHandler(tornado.web.RequestHandler):
         d.addCallback(self.passargs, *args, **kwargs)
         d.addCallbacks(self.writeandfinish, self.errorfinish)
         self.start_time = self.render_time = time()
+        statsd.send('web-gets', 1, 'c')
         d.callback(self.respond)
 
     @tornado.web.asynchronous
@@ -54,6 +55,7 @@ class BnwWebHandler(tornado.web.RequestHandler):
         d.addCallback(self.passargs, *args, **kwargs)
         d.addCallbacks(self.writeandfinish, self.errorfinish)
         self.start_time = self.render_time = time()
+        statsd.send('web-posts', 1, 'c')
         d.callback(self.respond_post)
 
     def respond(self, *args, **kwargs):
@@ -98,6 +100,7 @@ class BnwWebHandler(tornado.web.RequestHandler):
 
     def logperformance(self):
         end_time = time()
+        statsd.send('web-reqtime', (end_time - self.start_time)/1000, 'ms')
         print 'PERFORMANCE',self.render_time-self.start_time, end_time-self.render_time, self.request.uri
 
     def static_url(self, path, include_host=None):

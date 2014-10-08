@@ -27,4 +27,4 @@ mapreduce_enabled = True
 thumbor = 'http://127.0.0.1:9785'
 thumbor_key = 'ABCDEF'
 thumbor_pars = { 'width': 256, 'height': 256, 'fit_in': True }
-statd = '127.0.0.1:8125'
+statsd = '127.0.0.1:8125'

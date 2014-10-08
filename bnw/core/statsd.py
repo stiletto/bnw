@@ -6,7 +6,7 @@ TIMING = 'ms'
 GAUGE = 'g'
 SET = 's'
 
-class StatD(DatagramProtocol):
+class StatsD(DatagramProtocol):
     def __init__(self, host=None, port=None):
         self.host = host
         self.port = port
@@ -33,7 +33,7 @@ class StatD(DatagramProtocol):
             self.transport.write(packet)
 
 
-client = StatD(None, None)
+client = StatsD(None, None)
 send = client.sendMetric
 
 def setup(host, port):
