@@ -18,11 +18,10 @@ def update_internal(message, what, delete, text):
     defer.returnValue((yield objs.Message.mupdate({'id': message}, {action: {what: text}})))
 
 
-@check_arg(message=MESSAGE_COMMENT_RE)
-@require_auth
 @defer.inlineCallbacks
-def cmd_update(request, message='', text='', club=False, tag=False,
-               delete=False, clubs=None, tags=None, api=False, format=None):
+def update_message_internal(request, message='', text='', club=False,
+            tag=False, delete=False, clubs=None, tags=None, api=False,
+            format=None):
     """Update message's clubs and tags."""
     message = canonic_message(message).upper()
     if (not message or not ((text and (club or tag)) or
@@ -100,3 +99,40 @@ def cmd_update(request, message='', text='', club=False, tag=False,
     defer.returnValue(
         dict(ok=True, desc='Message updated.')
     )
+
+@defer.inlineCallbacks
+def update_comment_internal(request, comment='', text='', club=False,
+            tag=False, delete=False, clubs=None, tags=None, api=False,
+            format=None):
+    """Update comment's format."""
+
+    comment = canonic_message_comment(comment).upper()
+    if not (comment and format):
+        defer.returnValue(dict(
+            ok = False,
+            desc = u"Please specify a comment to update and a format to set."))
+
+    if format and not format in command_post.acceptable_formats:
+        defer.returnValue(dict(ok=False, desc=u"'%s' is not a valid format! Choose one of: %s" % (format, command_post.acceptable_formats_str)))
+    else:
+        format = command_post.normalize_format(format)
+
+    if format:
+        yield objs.Comment.mupdate(
+            {'id': comment}, {'$set': {'format': format}})
+
+    defer.returnValue(
+        dict(ok=True, desc='Comment updated.')
+    )
+
+@check_arg(message=MESSAGE_COMMENT_RE)
+@require_auth
+@defer.inlineCallbacks
+def cmd_update(request, message='', text='', club=False, tag=False,
+               delete=False, clubs=None, tags=None, api=False, format=None):
+    if message == MESSAGE_REC.match(message).group(0):
+        # this is a message ID
+        defer.returnValue((yield update_message_internal(request, message, text, club, tag, delete, clubs, tags, api, format)))
+    elif message == MESSAGE_COMMENT_REC.match(message).group(0):
+        # this is a comment ID
+        defer.returnValue((yield update_comment_internal(request, message, text, club, tag, delete, clubs, tags, api, format)))
