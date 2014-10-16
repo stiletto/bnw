@@ -118,8 +118,10 @@ def update_comment_internal(request, comment='', text='', club=False,
         format = command_post.normalize_format(format)
 
     if format:
+        cmnt = yield objs.Comment.find_one({'id': comment})
+        html = renderPostOrComment(cmnt['text'], format)
         yield objs.Comment.mupdate(
-            {'id': comment}, {'$set': {'format': format}})
+            {'id': comment}, {'$set': {'format': format, 'html': html}})
 
     defer.returnValue(
         dict(ok=True, desc='Comment updated.')
