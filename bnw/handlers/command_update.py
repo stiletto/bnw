@@ -107,10 +107,22 @@ def update_comment_internal(request, comment='', text='', club=False,
     """Update comment's format."""
 
     comment = canonic_message_comment(comment).upper()
+
     if not (comment and format):
         defer.returnValue(dict(
             ok = False,
             desc = u"Please specify a comment to update and a format to set."))
+
+    cmnt = yield objs.Comment.find_one({'id': comment})
+
+    if not cmnt:
+        defer.returnValue(
+            dict(ok=False, desc='No such comment.')
+        )
+    if cmnt['user'] != request.user['name']:
+        defer.returnValue(
+            dict(ok=False, desc='Not your comment.')
+        )
 
     if format and not format in command_post.acceptable_formats:
         defer.returnValue(dict(ok=False, desc=u"'%s' is not a valid format! Choose one of: %s" % (format, command_post.acceptable_formats_str)))
@@ -118,8 +130,9 @@ def update_comment_internal(request, comment='', text='', club=False,
         format = command_post.normalize_format(format)
 
     if format:
+        html = renderPostOrComment(cmnt['text'], format)
         yield objs.Comment.mupdate(
-            {'id': comment}, {'$set': {'format': format}})
+            {'id': comment}, {'$set': {'format': format, 'html': html}})
 
     defer.returnValue(
         dict(ok=True, desc='Comment updated.')
