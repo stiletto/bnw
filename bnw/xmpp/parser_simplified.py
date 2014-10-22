@@ -4,7 +4,7 @@ import traceback
 import re
 import datetime
 
-from base import CommandParserException, BaseParser
+from base import CommandParserException, BaseParser, USER_RE
 from bnw.core.base import BnwResponse
 from twisted.internet import defer
 
@@ -20,7 +20,8 @@ def requireAuthSimplified(fun):
 
 class SimplifiedParser(BaseParser):
     SHOW_RE = re.compile(ur'^#([0-9A-Za-z]+)(/[0-9A-Za-z]+)?(\+)?$')
-    SHOW_USER_RE = re.compile(ur'^@([0-9A-Za-z_-]+)(\+)?$')
+    # this relises on the fact that USER_RE got one group inside it
+    SHOW_USER_RE = re.compile(ur'^' + USER_RE + '(\+)?$')
     # TAG_SYMS=u'0-9A-Za-zА-Яа-я_-'
     SHOW_TAG_RE = re.compile(ur'^\*(\S+)(\+)?$')
     REPLY_RE = re.compile(ur'\A#([0-9A-Za-z]+)(/[0-9A-Za-z]+)? (.+)\Z',

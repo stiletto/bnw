@@ -27,7 +27,7 @@ def cmd_register(request, name=""):
                      )
             )
         else:
-            name = name.lower()[:128]
+            name = canonic_user(name).lower()[:128]
             if name == 'anonymous':
                 defer.returnValue(
                     dict(ok=False, desc=u'You aren''t anonymous.')

@@ -45,7 +45,7 @@ def cmd_subscriptions(request):
 @defer.inlineCallbacks
 def cmd_subscribe(request, message="", user="", tag="", club="", newtab=None):
         """ Подписка """
-        user = user.lower()
+        user = canonic_user(user).lower()
         message = canonic_message(message).upper()
         tag = tag.lower()
         club = club.lower()
@@ -70,7 +70,7 @@ def cmd_subscribe(request, message="", user="", tag="", club="", newtab=None):
 def cmd_unsubscribe(request, message="", user="", tag="", club="", newtab=None):
         """ Отписывание """
         # В этой функции DRY всосало по полной
-        user = user.lower()
+        user = canonic_user(user).lower()
         message = canonic_message(message).upper()
         tag = tag.lower()
         club = club.lower()

@@ -3,12 +3,15 @@ import re
 from twisted.internet import defer, reactor
 import bnw.core.base
 
-USER_RE = ur'[0-9A-Za-z_-]+'
+# please don't remove the group from the regexp - it is used in
+# bnw/xmpp/parser_simplified.py
+USER_RE = ur'@?([0-9A-Za-z_-]+)'
 
 MESSAGE_RE = r'#?([0-9A-Za-z]+)'
 COMMENT_RE = r'#?([0-9A-Za-z]+(?:#|/)[0-9A-Za-z]+)'
 MESSAGE_COMMENT_RE = r'#?([0-9A-Za-z]+(?:(?:#|/)[0-9A-Za-z]+)?)'
 
+USER_REC = re.compile(USER_RE)
 MESSAGE_REC = re.compile(MESSAGE_RE)
 COMMENT_REC = re.compile(COMMENT_RE)
 MESSAGE_COMMENT_REC = re.compile(MESSAGE_COMMENT_RE)
@@ -27,6 +30,11 @@ def canonic_comment(s):
 def canonic_message_comment(s):
     m = MESSAGE_COMMENT_REC.match(s)
     return m.group(1).replace('#', '/') if m else ""
+
+
+def canonic_user(s):
+    m = USER_REC.match(s)
+    return m.group(1) if m else ""
 
 
 class CommandParserException(Exception):

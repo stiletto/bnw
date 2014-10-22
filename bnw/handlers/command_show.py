@@ -121,7 +121,7 @@ def cmd_show(request, message='', user='', tag='', club='', page='0',
         parameters = [('tags', tag), ('clubs', club), ('id', message.upper())]
         parameters = dict(p for p in parameters if p[1])
         if user:
-            user = user.lower()
+            user = canonic_user(user).lower()
             if show == 'messages':
                 user_spec = dict(user=user)
             elif show == 'recommendations':

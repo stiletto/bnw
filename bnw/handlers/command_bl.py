@@ -28,6 +28,7 @@ def cmd_blacklist(request, user="", tag="", club="", delete=""):
         )
 
     if user:
+        user = canonic_user(user)
         _ = yield bl_internal(request.user['name'], 'user', delete, user[:128])
     elif tag:
         _ = yield bl_internal(request.user['name'], 'tag', delete, tag[:256])
