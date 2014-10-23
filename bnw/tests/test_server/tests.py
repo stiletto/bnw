@@ -59,6 +59,7 @@ def startTests(factory):
     sys.setdefaultencoding('utf-8')
     me = 'hui@example.com'
     me2 = 'her@example.org'
+    me3 = 'another@example.org'
 
     sendText(factory, me, 'ping')
     compareBody((yield factory.stanzaRecv()), 'ERROR. Only for registered users')
@@ -70,11 +71,32 @@ def startTests(factory):
     sendText(factory, me2, 'register test2')
     compareBody((yield factory.stanzaRecv()), 'OK. We registered you as test2.')
 
+    sendText(factory, me3, 'register test3')
+    compareBody((yield factory.stanzaRecv()), 'OK. We registered you as test3.')
+
     sendText(factory, me, 'help')
     compareBody((yield factory.stanzaRecv()), 'OK. .*')
 
+
+    sendText(factory, me, 'sub -u @test3')
+    compareBody((yield factory.stanzaRecv()), '@test1 subscribed to your blog. http://localhost:9782/u/test1')
+    compareBody((yield factory.stanzaRecv()), 'OK. Subscribed.')
+
+    sendText(factory, me, 'usub -u @test3')
+    compareBody((yield factory.stanzaRecv()), 'OK. Unsubscribed.')
+
+
     sendText(factory, me, 'sub -u test3')
+    compareBody((yield factory.stanzaRecv()), '@test1 subscribed to your blog. http://localhost:9782/u/test1')
+    compareBody((yield factory.stanzaRecv()), 'OK. Subscribed.')
+
+    sendText(factory, me, 'usub -u test3')
+    compareBody((yield factory.stanzaRecv()), 'OK. Unsubscribed.')
+
+
+    sendText(factory, me, 'sub -u test4')
     compareBody((yield factory.stanzaRecv()), 'ERROR. No such user.')
+
 
     sendText(factory, me, 'sub -u test2')
     compareBody((yield factory.stanzaRecv()), '@test1 subscribed to your blog. http://localhost:9782/u/test1')
