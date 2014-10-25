@@ -12,7 +12,7 @@ from throttle import throttle_check
 def cmd_pm(request, text, user=""):
     """ Отправка приватного сообщения """
     yield throttle_check(request.user['name'])
-    user = user.lower()
+    user = canonic_user(user).lower()
     if len(text) > 2048:
         defer.returnValue(dict(ok=False, desc='Too long.'))
     target_user = yield objs.User.find_one({'name': user})

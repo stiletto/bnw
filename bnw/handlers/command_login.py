@@ -22,6 +22,7 @@ def cmd_passlogin(request, user=None, password=None):
     """ Логин паролем """
     if not (user and password):
         defer.returnValue(dict(ok=False, desc='Credentials cannot be empty.'))
+    user = canonic_user(user)
     u = yield objs.User.find_one({'name': user, 'settings.password': password})
     if u:
         defer.returnValue(dict(ok=True,

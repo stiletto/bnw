@@ -1,5 +1,6 @@
 from twisted.internet import defer
 
+from bnw.handlers.base import canonic_user
 import bnw.core.bnw_objects as objs
 
 
@@ -8,6 +9,7 @@ def cmd_userinfo(request, user=''):
     # DB interactions
     if not user:
         defer.returnValue(dict(ok=False, desc='Username required.'))
+    user = canonic_user(user)
     user_obj = yield objs.User.find_one({'name': user})
     if not user_obj:
         defer.returnValue(dict(ok=False, desc='User not found.'))
