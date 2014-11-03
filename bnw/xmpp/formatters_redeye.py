@@ -112,7 +112,7 @@ def formatter_userlist(request, result):
 
 
 def formatter_settings(request, result):
-    return ('Currrent settings:\n' +
+    return ('Current settings:\n' +
             '\n'.join('%s\t%s' % (k, v) for k, v in result['settings'].iteritems()))
 
 
