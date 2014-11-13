@@ -134,7 +134,11 @@ redeye_handlers = (
         ("on", (), command_onoff.cmd_on, ),
         ("off", (), command_onoff.cmd_off, ),
         ("delete", delete_args, command_delete.cmd_delete, ),
-        ("login", (), command_login.cmd_login, ),
+        ("login",
+            (
+                ("r", "reset", False, u"Reset login key"),
+            ),
+            command_login.cmd_login, ),
         ("bl", bl_args, command_bl.cmd_blacklist, ),
         ("vcard", (), command_vcard.cmd_vcard, ),
         ("pm",
