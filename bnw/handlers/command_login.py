@@ -16,7 +16,7 @@ def cmd_login(request,reset=""):
     user = request.user
     if reset:
         yield throttle_check(request.user['name'])
-        user = yield objs.User.findAndModify({'name': request.user['name']}, {'$set': {'login_key': uuid4().hex}}, new=True)
+        user = yield objs.User.find_and_modify({'name': request.user['name']}, {'$set': {'login_key': uuid4().hex}}, new=True)
     defer.returnValue(dict(
         ok=True,
         desc='%s/login?key=%s' % (
