@@ -10,7 +10,9 @@ from libthumbor import CryptoURL
 from bnw.core.base import config
 from bnw.handlers.base import USER_RE
 
-_USER_RE = re.compile(ur"""(?:(?<=[\s\W])|^)%s""" % USER_RE)
+# we strip first two characters of USER_RE, i.e. "@?", because we *require* "at
+# sign" to be present
+_USER_RE = re.compile(ur"""(?:(?<=[\s\W])|^)@%s""" % USER_RE[2:])
 
 bnw_types = (
     ('msg', _MSG_RE, lambda m: (m.group(1),)),
