@@ -8,6 +8,7 @@ import os
 
 import argparse
 import time
+import dateutil.parser
 from twisted.internet import defer
 from twisted.python import log
 import bnw.core.base
@@ -39,14 +40,15 @@ def defer_sleep(reactor, time):
 def action_rerender(reactor, args):
     from bnw.core import bnw_objects as objs
     from bnw.core.post import renderPostOrComment
-    counts = ((yield objs.Message.count()), (yield objs.Comment.count()))
+    q = { 'date': { '$gte': time.mktime(dateutil.parser.parse(args.since).timetuple()) } }
+    counts = ((yield objs.Message.count(q)), (yield objs.Comment.count(q)))
     print counts
     log.msg('There are %d messages and %d comments.' % counts)
     for tname, t, tcnt in [('message', objs.Message, counts[0]), ('comment', objs.Comment, counts[1])]:
         log.msg('Processing %ss' % (tname,))
         cnt = 0
         while True:
-            messages = list((yield t.find({}, limit=500, skip=cnt)))
+            messages = list((yield t.find(q, limit=500, skip=cnt)))
             if not messages:
                 log.msg('Done processing %ss.' % (tname,))
                 break
@@ -62,6 +64,8 @@ def twistedrun(reactor):
     parser.add_argument('--rerender', dest='action', action='store_const',
                    const=action_rerender, default=None,
                    help='regenerate HTML for all messages and comments')
+    parser.add_argument('--since', default='1970-01-01T00:00:00+0000',
+                   help='update only messages and comments created after this time')
     args = parser.parse_args()
     if args.action is None:
         parser.print_help()
