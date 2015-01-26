@@ -67,6 +67,7 @@ class BnwRenderer(HtmlRenderer):
         return text
 
     def normal_text(self, text):
+        text = _unicode(xhtml_escape(text))
         return bnwlinks(text)
 
     def block_quote(self, text):
