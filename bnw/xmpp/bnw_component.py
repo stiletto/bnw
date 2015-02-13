@@ -130,7 +130,7 @@ class BnwService(component.Service):
             t = objs.Timing({'date': stime, 'time': etime,
                             'command': unicode(body), 'jid': jid})
             t.save().addCallback(lambda x: None)
-            statsd.send('xmpp-reqtime', etime/1000, 'ms')
+            statsd.send('xmpp-reqtime', etime*1000, 'ms')
             log.msg("%s - PROCESSING TIME (from %s): %f" % (
                 str(time.time()), jid, etime))
             if jid.split('/', 1)[0] == config.admin_jid:

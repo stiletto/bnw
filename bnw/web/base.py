@@ -100,7 +100,7 @@ class BnwWebHandler(tornado.web.RequestHandler):
 
     def logperformance(self):
         end_time = time()
-        statsd.send('web-reqtime', (end_time - self.start_time)/1000, 'ms')
+        statsd.send('web-reqtime', (end_time - self.start_time)*1000, 'ms')
         print 'PERFORMANCE',self.render_time-self.start_time, end_time-self.render_time, self.request.uri
 
     def static_url(self, path, include_host=None):
