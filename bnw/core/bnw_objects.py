@@ -222,6 +222,7 @@ class Comment(MongoObject):
     dangerous_fields = ('_id', 'real_user')
     indexes = MongoObject.indexes + (
         ((("message", 1),), False, False),
+        ((("date", 1),), False, False),
         ((("user", 1),), False, False),
     )
 

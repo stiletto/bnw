@@ -37,11 +37,12 @@ def do_mapreduce():
 
     if (yield check_interval('today', 300)):
         start = now - 86400
-        yield objs.Comment.map_reduce(
-            map='function() { emit(this.message, 1); }',
-            reduce='function(k,vals) { var sum=0; for(var i in vals) sum += vals[i]; return sum; }',
-            query={'date': {'$gte': start}},
-            out={'replace': objs.Today.collection.collection_name})
+        yield objs.Comment.aggregate([
+            {'$match': {'date': {'$gte': start}}},
+            {'$group': {'_id': '$message', 'value': {'$sum': 1}, 'last': {'$max':'$date'}}},
+            {'$sort': {'value':-1, 'last':-1}},
+            {'$out': objs.Today.collection.collection_name}
+            ])
 
     if (yield check_interval('usertags', 86400)):
         yield objs.Message.map_reduce(
