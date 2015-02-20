@@ -3,6 +3,7 @@
 from base import *
 import time
 import pymongo.errors
+from bson.son import SON
 from bnw.core.base import config
 import bnw.core.bnw_objects as objs
 from twisted.python import log
@@ -40,7 +41,7 @@ def do_mapreduce():
         yield objs.Comment.aggregate([
             {'$match': {'date': {'$gte': start}}},
             {'$group': {'_id': '$message', 'value': {'$sum': 1}, 'last': {'$max':'$date'}}},
-            {'$sort': {'value':-1, 'last':-1}},
+            {'$sort': SON([('value', -1), ('last', -1)])},
             {'$out': objs.Today.collection.collection_name}
             ])
 

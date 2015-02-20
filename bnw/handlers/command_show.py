@@ -174,7 +174,7 @@ def cmd_today(request, use_bl=False):
     bl = get_user_bl(request, use_bl)
 
     for x in range(10):
-        postids = [x['_id'] for x in (yield objs.Today.find_sort({}, [('value', -1)], limit=20))]
+        postids = [x['_id'] for x in (yield objs.Today.find({}, limit=20))]
         if len(postids)>0: break
     qdict = {'id': {'$in': postids}}
     if bl: qdict['user'] = {'$nin': bl}
