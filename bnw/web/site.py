@@ -18,6 +18,7 @@ import uimodules
 import rss
 import base64
 import math
+import time
 
 from tornado.options import define, options
 
@@ -337,6 +338,7 @@ class MainHandler(BnwWebHandler, AuthMixin):
         hasmes = yield is_hasmes(qdict, page)
         uc = (yield objs.User.count())
         format = self.get_argument("format", "")
+        active = int((yield objs.User.count({'last_activity': {'$gt': time.time()-30*60}})))
 
         self.set_header("Cache-Control", "max-age=1")
         if format == 'rss':
@@ -363,6 +365,7 @@ class MainHandler(BnwWebHandler, AuthMixin):
                 'messages': messages,
                 'toptags': toptags,
                 'users_count': int(uc),
+                'active': active,
                 'page': page,
                 'tag': tag,
                 'club': club,
