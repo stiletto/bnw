@@ -47,6 +47,8 @@ def idiotic(msg):
         xmsg = XmppMessage(
             message_body, JID(msg['to']), message_from, message_user)
 
+        if message_user:
+            message_user.activity()
         try:
             iparser = 'redeye'
             if message_user:

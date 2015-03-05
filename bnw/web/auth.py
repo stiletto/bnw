@@ -32,6 +32,8 @@ class AuthMixin(object):
             key = self.get_cookie('bnw_loginkey', '')
             self.user = yield objs.User.find_one({'login_key': key}) \
                 if key else None
+            if self.user:
+                self.user.activity()
         defer.returnValue(self.user)
 
 

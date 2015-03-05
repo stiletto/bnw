@@ -30,6 +30,8 @@ class ApiHandler(BnwWebHandler):
                 ok=False,
                 desc='unknown command')))
         callogtuple = (id(self), cmd_name, user['name'] if user else '')
+        if user:
+            user.activity()
         print "API call %d '%s' by '%s' started." % callogtuple
         handler = api_handlers.handlers[cmd_name]
         args = dict(

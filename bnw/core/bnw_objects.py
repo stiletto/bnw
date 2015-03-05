@@ -242,9 +242,11 @@ class User(MongoObject):
     """ Няшка-пользователь."""
     collection = CollectionWrapper("users")
     dangerous_fields = ('_id', 'login_key', 'avatar', 'jid', 'jids',
-                        'pending_jids', 'id', 'settings', 'blacklist')
+                        'pending_jids', 'id', 'settings', 'blacklist',
+                        'last_activity', )
     indexes = (
         ((("name", 1),), True, False),
+        ((("last_activity", -1),), False, False),
     )
 
     def send_plain(self, message, sfrom=None):
@@ -253,6 +255,10 @@ class User(MongoObject):
         if self['jid']:
             send_plain(self['jid'], sfrom, message)
 
+    def activity(self):
+        activity = time.time()
+        self['last_activity'] = activity
+        return User.mupdate({'name': self['name']}, {'$set': {'last_activity': activity}})
 
 def massert(condition,code="assert"):
     if not condition:
