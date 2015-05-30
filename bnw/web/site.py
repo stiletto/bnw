@@ -438,7 +438,8 @@ class PostHandler(BnwWebHandler, AuthMixin):
                  .split(",", 5)[:5] if i]
         text = self.get_argument("text", "")
         user = yield self.get_auth_user()
-        ok, result = yield post.postMessage(user, tags, clubs, text)
+        anonymous = self.get_argument("anonymous", "")
+        ok, result = yield post.postMessage(user, tags, clubs, text, anonymous)
         if ok:
             (msg_id, qn, recs) = result
             self.redirect('/p/' + msg_id)

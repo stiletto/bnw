@@ -518,6 +518,7 @@ function new_post() {
     var post_form = $("#post_form");
     var tags_text = post_form.find("[name=tags]");
     var clubs_text = post_form.find("[name=clubs]");
+    var anonymous = post_form.find("[name=anonymous]");
     var textarea = $("#post_textarea");
     var sendb = $("#send_post");
     var hideb = $("#hide_post");
@@ -532,7 +533,7 @@ function new_post() {
         before();
         api_call(
             "post", {tags: tags_text.val(), clubs: clubs_text.val(),
-                     text: textarea.val()}, false,
+                     text: textarea.val(), anonymous: anonymous.val()}, false,
             // onsuccess
             function() {
                 after();
