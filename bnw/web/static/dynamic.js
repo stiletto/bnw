@@ -357,6 +357,7 @@ function add_message_page_actions(comment_id, comment_user) {
         var form2 = $("#comment_form");
         var hr2 = $("hr").last();
         var comment_text = form2.find("[name=comment]");
+        var anonymous = form2.find("[name=anonymous]");
         var textarea = $("#comment_textarea");
         var clearb = $("#clear_replyto");
         var sendb = $("#send_comment");
@@ -392,7 +393,7 @@ function add_message_page_actions(comment_id, comment_user) {
             }
             before();
             api_call(
-                "comment", {message: id, text: textarea.val()}, false,
+                "comment", {message: id, text: textarea.val(), anonymous: anonymous.val()}, false,
                 // onsuccess
                 function() {
                     after();

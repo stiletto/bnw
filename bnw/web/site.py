@@ -477,7 +477,8 @@ class CommentHandler(BnwWebHandler, AuthMixin):
         text = self.get_argument("text", "")
         noredir = self.get_argument("noredir", "")
         user = yield self.get_auth_user()
-        ok, result = yield post.postComment(msg, comment, text, user)
+        anonymous = self.get_argument("anonymous", "")
+        ok, result = yield post.postComment(msg, comment, text, user, anonymous)
         if ok:
             (msg_id, num, qn, recs) = result
             if noredir:
