@@ -393,7 +393,7 @@ function add_message_page_actions(comment_id, comment_user) {
             }
             before();
             api_call(
-                "comment", {message: id, text: textarea.val(), anonymous: anonymous.val()}, false,
+                "comment", {message: id, text: textarea.val(), anonymous: anonymous.is(":checked")}, false,
                 // onsuccess
                 function() {
                     after();
@@ -534,7 +534,7 @@ function new_post() {
         before();
         api_call(
             "post", {tags: tags_text.val(), clubs: clubs_text.val(),
-                     text: textarea.val(), anonymous: anonymous.val()}, false,
+                     text: textarea.val(), anonymous: anonymous.is(":checked")}, false,
             // onsuccess
             function() {
                 after();
