@@ -83,9 +83,9 @@
                 var matches, that = this;
                 if((matches = regexp.exec($(this).attr('src'))) !== null)
                 {
-                    $.get('//gdata.youtube.com/feeds/api/videos/'+matches[1], function (data)
+                    $.get('//www.googleapis.com/youtube/v3/videos?key=AIzaSyBWJsjsAOiNIx7J8Sy0rSw4mxoswX9hzOM&part=snippet&id='+matches[1], function (data)
                     {
-                        $(that).attr('title', $($(data).find('title')[0]).text());
+                        $(that).attr('title', data.items[0].snippet.title;
                     });
                 }
             });
