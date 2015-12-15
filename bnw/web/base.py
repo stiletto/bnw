@@ -104,7 +104,7 @@ class BnwWebHandler(tornado.web.RequestHandler):
         print 'PERFORMANCE',self.render_time-self.start_time, end_time-self.render_time, self.request.uri
 
     def static_url(self, path, include_host=None):
-        if self.request.host in (config.webui_base, 'www'+config.webui_base) and self.request.protocol=="http":
+        if self.request.host in (config.webui_base, 'www.'+config.webui_base):
             path = tornado.web.RequestHandler.static_url(self, path, False)
             return self.request.protocol + "://" + config.webui_static + path
         return tornado.web.RequestHandler.static_url(self, path, include_host)
