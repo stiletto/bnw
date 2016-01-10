@@ -1,0 +1,2 @@
+{% if page>0 %}<link href='?{% if page>1 %}page={{ page-1 }}{% end %}' rel='next' />{% end %}
+{% if hasmes %}<link href='?page={{ page+1 }}' rel='prev' />{% end %}

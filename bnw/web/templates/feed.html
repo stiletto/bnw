@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block title %}BnW — лента пользователя @{{auth_user['name']}}{% end %}
+{% block extrahead %}
+    {% include "pagination-head.html" %}
+{% end %}
 {% block body %}
 {% if not result['ok'] %}
     <div id="err_outer">
