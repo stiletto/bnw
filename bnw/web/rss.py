@@ -47,10 +47,10 @@ class BnwDescription(object):
     def publish(self, handler):
         handler.startElement('description', {})
         # handler.startCDATA()
-        handler._write('<![CDATA[')
+        handler._write(u'<![CDATA[')
         # handler.characters(self.text)
         handler._write(self.text.replace(']]>', ']]&gt;'))
-        handler._write(']]>')
+        handler._write(u']]>')
         # handler.endCDATA()
         handler.endElement('description')
 
