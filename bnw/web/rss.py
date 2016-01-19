@@ -74,7 +74,7 @@ def message_feed(messages, link, title, *args, **kwargs):
         guid=widgets.post_url(msg['id']),
         pubDate=datetime.utcfromtimestamp(msg['date']),
         categories=set(msg['tags']) | set(msg['clubs']),
-        title='@%s: #%s' % (msg['user'], msg['id']),
+        title='@%s: #%s %s' % (msg['user'], msg['id'], ', '.join(msg['tags'])),
         description=BnwDescription(linkify(msg['text'], msg.get('format')).replace('\n', '<br/>'))) for msg in messages]
 
     rss_feed = BnwRSSFeed(title=title,
