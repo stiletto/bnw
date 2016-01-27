@@ -1,6 +1,6 @@
 <div class='outerborder hentry message' id='{{ msg['id'] }}'>
     <div class='msg'>
-        <img class='avatar avatar_ps' alt='avatar' src='{% if not secure %}http://{{ config.webui_static }}{% end %}/u/{{ msg['user'] }}/avatar/thumb' />
+        <img class='avatar avatar_ps' alt='' src='{% if not secure %}http://{{ config.webui_static }}{% end %}/u/{{ msg['user'] }}/avatar/thumb' />
         {{ w.tags(msg['tags'], msg['clubs'], username) }}
         {% if msg.get('loltroll') %}
             <div class='pw entry-title entry-content'>{{ msg.get('loltroll') }}</div>
@@ -8,7 +8,7 @@
             {% set linkified, thumbs = msg['html']['secure' if secure else 'insecure'] %}
             {% if thumbs %}<div class="imgpreviews">
                 {% for thumb in thumbs %}<a class="imglink" href="{{ escape(thumb[0]) }}">
-                    <img class="imgpreview imgpreview_ps" src="{{ escape(thumb[1]) }}"/>
+                    <img class="imgpreview imgpreview_ps" src="{{ escape(thumb[1]) }}" alt="{{ escape(thumb[0]) }}"/>
                 </a>{% end %}
                 </div>{% end %}
             <div class='pw entry-title entry-content{{ ' hasthumbs' if thumbs else ''
