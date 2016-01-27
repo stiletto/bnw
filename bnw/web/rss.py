@@ -69,7 +69,7 @@ class AtomSelf(object):
 
 
 def message_feed(messages, link, title, *args, **kwargs):
-    tags = ' '.join("*" + t for t in msg['tags']))
+    tags = ' '.join("*" + t for t in msg['tags'])
     rss_items = [PyRSS2Gen.RSSItem(  # author=msg['user'],
         link=widgets.post_url(msg['id']),
         guid=widgets.post_url(msg['id']),
