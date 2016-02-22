@@ -109,6 +109,18 @@
             background-color: #000;
             color: #e5e5e5;
         }
+        .styledcheckbox {
+            width: 0;
+            margin: 0;
+            padding: 0;
+        }
+        .styledcheckbox + label::before {
+            background-color: #00CDCD;
+            content: '[\00a0]';
+        }
+        .styledcheckbox:checked + label::before {
+            content: '[X]';
+        }
         .msg {
             color: #000;
 
