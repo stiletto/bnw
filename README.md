@@ -1,5 +1,7 @@
 # BnW
 
+[![Build Status](https://travis-ci.org/stiletto/bnw.svg?branch=master)](https://travis-ci.org/stiletto/bnw)
+
 BnW is a XMPP microbblogging service written in Python. It's powered by  
 Twisted, Tornado and MongoDB and aims to be scalable and high-performance.
 
