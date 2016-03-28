@@ -112,6 +112,9 @@ class MainWsHandler(WsHandler, AuthMixin):
             'type': 'upd_recommendations_count', 'id': msg_id, 'num': num,
             'recommendations': recommendations}))
 
+    def check_origin(self, origin):
+        return True
+
 
 class UserWsHandler(MainWsHandler):
     """Deliver new events on user page via websockets."""
@@ -125,6 +128,10 @@ class UserWsHandler(MainWsHandler):
             ('upd_recommendations_count', self.upd_recommendations_count),
         )
 
+    def check_origin(self, origin):
+        return True
+
+
 class CommentsWsHandler(WsHandler):
     """Deliver new comments via websockets."""
 
@@ -135,6 +142,10 @@ class CommentsWsHandler(WsHandler):
 
     def new_comment(self, comment):
         self.write_message(json.dumps(comment))
+
+    def check_origin(self, origin):
+        return True
+
 
 class MessageWsHandler(MainWsHandler):
     """Deliver new events on message page via websockets."""
@@ -169,6 +180,10 @@ class MessageWsHandler(MainWsHandler):
     def del_comment(self, comment_id):
         self.write_message(json.dumps(
             {'type': 'del_comment', 'id': comment_id}))
+
+    def check_origin(self, origin):
+        return True
+
 
 
 def get_page(self):
