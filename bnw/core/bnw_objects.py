@@ -173,6 +173,14 @@ class MongoObject(WrappedDict):
                 del msg[fld]
         return msg
 
+    @classmethod
+    @defer.inlineCallbacks
+    def aggregate(cls, *args, **kwargs):
+        cursor = yield cls.collection.aggregate(*args, **kwargs)
+        limit = kwargs.get('limit',1000) # TODO: Document this
+        res = yield fudef(cursor.to_list(limit))
+        defer.returnValue(res) # we don't wrap resulting documents in our class because aggregation may be used for some weird shit
+
 
 class Message(MongoObject):
     """ Сообщение. Просто объект сообщения."""
