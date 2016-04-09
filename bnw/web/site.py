@@ -322,8 +322,14 @@ class MessageHandler(BnwWebHandler, AuthMixin):
             })
         else:
             is_subscribed = False
+        regions = self.regions()
+        if msg:
+            replace_banned(regions, msg)
         # TODO: Converting generator to list may be inefficient.
         comments = list((yield objs.Comment.find(qdict, sort=f, limit=10000)))
+        if comments:
+            for comment in comments:
+                replace_banned(regions, comment, 'comment')
         self.set_header("Cache-Control", "max-age=5")
         if not msg:
             self.set_status(404)
