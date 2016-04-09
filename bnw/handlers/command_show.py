@@ -107,8 +107,8 @@ def showComments(msgid, request, bl=None, after=''):
     if message.get('banned', False):
         comments = []
     else:
-        comments = list(yield objs.Comment.find_sort(
-            qdict, [('date', pymongo.ASCENDING)], limit=10000))
+        comments = list((yield objs.Comment.find_sort(
+            qdict, [('date', pymongo.ASCENDING)], limit=10000)))
         for comment in comments:
             replace_banned(regions, comment, 'comment')
     defer.returnValue(dict(
