@@ -1,4 +1,4 @@
-# -*18^- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 import traceback
 from time import time
@@ -14,10 +14,11 @@ from bnw.core.base import config
 from bnw.core import statsd
 
 class BnwWebRequest(object):
-    def __init__(self, user=None):
+    def __init__(self, user=None, regions=None):
         self.body = None
         self.to = None
         self.jid = JID(user['jid']) if user else None
+        self.regions = regions or set()
         self.user = user
 
 
@@ -39,6 +40,12 @@ class BnwWebHandler(tornado.web.RequestHandler):
     # Fucked twisted. How to run chain without passing result?
     def passargs(self, f, *args, **kwargs):
         return f(*args, **kwargs)
+
+    def regions(self):
+        hdr = self.request.headers.get('X-Region')
+        if hdr:
+            return set(rgn for rgn in hdr.split(',') if rgn)
+        return set()
 
     @tornado.web.asynchronous
     def get(self, *args, **kwargs):

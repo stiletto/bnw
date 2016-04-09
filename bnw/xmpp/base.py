@@ -12,6 +12,7 @@ class XmppMessage(object):
         self.jid = jid
         self.user = user
         self.type = 'xmpp'
+        self.regions = set(['xmpp'])
 
 
 class CommandParserException(Exception):

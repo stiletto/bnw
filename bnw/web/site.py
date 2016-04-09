@@ -27,7 +27,7 @@ import bnw.core.post as post
 import bnw.core.base
 from bnw.core.bnw_mongo import get_db
 from bnw.core.bnw_gridfs import get_fs
-from bnw.handlers.command_show import cmd_feed, cmd_today
+from bnw.handlers.command_show import cmd_feed, cmd_today, replace_banned
 from bnw.handlers.command_clubs import cmd_clubs, cmd_tags
 from bnw.handlers.command_userinfo import cmd_userinfo
 
@@ -88,6 +88,7 @@ class MainWsHandler(WsHandler, AuthMixin):
             return
         html = uimodules.Message(self).render(msg)
         msg = msg.copy()
+        replace_banned(self.regions(), msg)
         if user:
             msg['subscribed'] = user['name'] == msg['user']
         msg.update(dict(type='new_message', html=html))
@@ -98,6 +99,8 @@ class MainWsHandler(WsHandler, AuthMixin):
         user = yield self.get_auth_user()
         if user and ['user', msg['user']] in user.get('blacklist', []):
             return
+        msg = msg.copy()
+        replace_banned(self.regions(), msg)
         self.write_message(json.dumps(msg))
 
     def del_message(self, msg_id):
@@ -141,6 +144,8 @@ class CommentsWsHandler(WsHandler):
         )
 
     def new_comment(self, comment):
+        comment = comment.copy()
+        replace_banned(self.regions(), comment, 'comment')
         self.write_message(json.dumps(comment))
 
     def check_origin(self, origin):
@@ -171,10 +176,13 @@ class MessageWsHandler(MainWsHandler):
             return
         html = uimodules.Comment(self).render(comment)
         comment = comment.copy()
+        replace_banned(self.regions(), comment, 'comment')
         comment.update(dict(type='new_comment', html=html))
         self.write_message(json.dumps(comment))
 
     def new_comment_compat(self, comment):
+        comment = comment.copy()
+        replace_banned(self.regions(), comment, 'comment')
         self.write_message(json.dumps(comment))
 
     def del_comment(self, comment_id):
@@ -226,6 +234,8 @@ class UserHandler(BnwWebHandler, AuthMixin):
             tag = tornado.escape.url_unescape(tag)
             qdict['tags'] = tag
         messages = list((yield objs.Message.find_sort(qdict, sort=f, limit=20, skip=20 * page)))
+        for message in messages:
+            replace_banned(self.regions(), message)
         hasmes = yield is_hasmes(qdict, page)
 
         format = self.get_argument("format", "")
@@ -264,6 +274,8 @@ class UserRecoHandler(BnwWebHandler, AuthMixin):
             tag = tornado.escape.url_unescape(tag)
             qdict['tags'] = tag
         messages = list((yield objs.Message.find_sort(qdict, sort=f, limit=20, skip=20 * page)))
+        for message in messages:
+            replace_banned(self.regions(), message)
         hasmes = yield is_hasmes(qdict, page)
 
         self.set_header("Cache-Control", "max-age=1")
@@ -282,7 +294,7 @@ class UserInfoHandler(BnwWebHandler, AuthMixin):
 
     @defer.inlineCallbacks
     def respond(self, user):
-        req = BnwWebRequest((yield self.get_auth_user()))
+        req = BnwWebRequest((yield self.get_auth_user()), self.regions())
         self.set_header('Cache-Control', 'max-age=10')
         defer.returnValue((yield cmd_userinfo(req, user)))
 
@@ -333,6 +345,9 @@ class MainHandler(BnwWebHandler, AuthMixin):
 
         user = yield self.get_auth_user()
 
+        regions = self.regions()
+        req = BnwWebRequest(user, regions)
+
         page = get_page(self)
         qdict = {}
         if tag:
@@ -350,6 +365,8 @@ class MainHandler(BnwWebHandler, AuthMixin):
                 qdict['user'] = {'$nin': bl}
 
         messages = list((yield objs.Message.find_sort(qdict, sort=f, limit=20, skip=20 * page)))
+        for message in messages:
+            replace_banned(req.regions, message)
         hasmes = yield is_hasmes(qdict, page)
         uc = (yield objs.User.count())
         format = self.get_argument("format", "")
@@ -373,7 +390,6 @@ class MainHandler(BnwWebHandler, AuthMixin):
             defer.returnValue(json.dumps(json_messages, ensure_ascii=False))
 
         else:
-            req = BnwWebRequest((yield self.get_auth_user()))
             tagres = yield cmd_tags(req)
             toptags = tagres['tags'] if tagres['ok'] else []
             defer.returnValue({
@@ -395,7 +411,7 @@ class FeedHandler(BnwWebHandler, AuthMixin):
     @defer.inlineCallbacks
     def respond(self):
         page = get_page(self)
-        req = BnwWebRequest((yield self.get_auth_user()))
+        req = BnwWebRequest((yield self.get_auth_user()), self.regions())
         result = yield cmd_feed(req, page=page)
         self.set_header("Cache-Control", "max-age=1")
         defer.returnValue({
@@ -410,7 +426,7 @@ class TodayHandler(BnwWebHandler, AuthMixin):
 
     @defer.inlineCallbacks
     def respond(self):
-        req = BnwWebRequest((yield self.get_auth_user()))
+        req = BnwWebRequest((yield self.get_auth_user()), self.regions())
         result = yield cmd_today(req, use_bl=True)
         self.set_header("Cache-Control", "max-age=300")
         defer.returnValue({
@@ -424,7 +440,7 @@ class ClubsHandler(BnwWebHandler, AuthMixin):
     @defer.inlineCallbacks
     def respond(self):
         user = yield self.get_auth_user()
-        req = BnwWebRequest((yield self.get_auth_user()))
+        req = BnwWebRequest((yield self.get_auth_user()), self.regions())
         result = yield cmd_clubs(req)
         self.set_header("Cache-Control", "max-age=3600")
         defer.returnValue({

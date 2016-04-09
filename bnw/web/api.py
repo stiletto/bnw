@@ -9,8 +9,8 @@ import api_handlers
 
 
 class ApiRequest(BnwWebRequest):
-    def __init__(self, user=None):
-        super(ApiRequest, self).__init__(user)
+    def __init__(self, user=None, regions=None):
+        super(ApiRequest, self).__init__(user, regions)
         self.type = 'http-api'
 
 
@@ -45,7 +45,7 @@ class ApiHandler(BnwWebHandler):
             self.set_header('Access-Control-Allow-Origin', '*')
             print "API call %d '%s' by '%s' is CORS from '%s'" % (callogtuple + (cors_origin,))
         try:
-            result = yield handler(ApiRequest(user), **args)
+            result = yield handler(ApiRequest(user, self.regions()), **args)
         except BnwResponse as br:
             print "API call %d '%s' by '%s' failed with exception. %f.s" % (callogtuple + ((time.time() - stime),))
             defer.returnValue(json.dumps(dict(

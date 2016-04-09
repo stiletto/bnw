@@ -44,14 +44,25 @@ def set_subscriptions_info(request, messages):
         msg['subscribed'] = True if msg['id'] in sub_ids else False
     defer.returnValue(messages)
 
+def replace_banned(regions, message, kind='message'):
+    banned_regions = regions.intersection(set(message.get('banned_in', [])))
+    if len(banned_regions) > 0:
+        banmsg = 'This %s is banned in regions: %s' % (kind, ','.join(banned_regions))
+        message['banned'] = True
+        message['text'] = '**'+banmsg+'**'
+        banhtml = '''<span style='color: #f00;'>'''+banmsg+'</span>'
+        message['html'] = { 'secure': [banhtml, []], 'insecure': [banhtml, []] }
+    return message
+
 
 @defer.inlineCallbacks
 def showSearch(parameters, page, request):
-    # FIXME: THIS COMMAND IS FUCKING SLOW SLOW SLOW AND WAS WRITTEN BY A
-    # BRAIN-DAMAGED IDIOT
     messages = [x.filter_fields() for x in (yield objs.Message.find_sort(
         parameters, [('date', pymongo.DESCENDING)], limit=20, skip=page * 20))]
     messages = yield set_subscriptions_info(request, messages)
+    regions = request.regions
+    for message in messages:
+        replace_banned(regions, message)
     messages.reverse()
     defer.returnValue(dict(
         ok=True, format="messages", cache=5, cache_public=True,
@@ -59,13 +70,14 @@ def showSearch(parameters, page, request):
 
 
 @defer.inlineCallbacks
-def showComment(commentid):
+def showComment(commentid, request):
         comment = yield objs.Comment.find_one({'id': commentid})
         if comment is None:
             defer.returnValue(
                 dict(ok=False, desc='No such comment',
                      cache=5, cache_public=True)
             )
+        replace_banned(request.regions, comment, 'comment')
         defer.returnValue(
             dict(ok=True, format='comment', cache=5, cache_public=True,
                          comment=comment.filter_fields(),
@@ -90,8 +102,15 @@ def showComments(msgid, request, bl=None, after=''):
         after_comment = yield objs.Comment.find_one({'id':msgid+'/'+after.split('/')[-1]})
         if after_comment:
             qdict['date'] = {'$gte': after_comment['date']}
-    comments = yield objs.Comment.find_sort(
-        qdict, [('date', pymongo.ASCENDING)], limit=10000)
+    regions = request.regions
+    replace_banned(regions, message)
+    if message.get('banned', False):
+        comments = []
+    else:
+        comments = yield objs.Comment.find_sort(
+            qdict, [('date', pymongo.ASCENDING)], limit=10000)
+        for comment in comments:
+            replace_banned(regions, comment, 'comment')
     defer.returnValue(dict(
         ok=True, format='message_with_replies', cache=5, cache_public=True,
         msgid=msgid, message=message.filter_fields(),
@@ -106,7 +125,7 @@ def cmd_show(request, message='', user='', tag='', club='', page='0',
     message = canonic_message_comment(message).upper()
     bl = get_user_bl(request, use_bl)
     if '/' in message:
-        defer.returnValue((yield showComment(message)))
+        defer.returnValue((yield showComment(message, request)))
     if replies:
         if not message:
             defer.returnValue(dict(
@@ -160,6 +179,9 @@ def cmd_feed(request, page="0"):
                                                                                  [f['message']
                                                                                      for f in feed]
                                                                                  }}, [('date', pymongo.ASCENDING)]))]
+    regions = request.regions
+    for message in messages:
+        replace_banned(regions, message)
     defer.returnValue(
         dict(ok=True, format="messages",
              messages=messages,
@@ -182,6 +204,9 @@ def cmd_today(request, use_bl=False):
         (x['id'], x.filter_fields())
         for x in (yield objs.Message.find(qdict)))
     messages = [dbposts[x] for x in postids if (x in dbposts)]
+    regions = request.regions
+    for message in messages:
+        replace_banned(regions, message)
     messages = yield set_subscriptions_info(request, messages)
     messages.reverse()
     defer.returnValue(
