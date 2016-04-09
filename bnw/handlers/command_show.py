@@ -104,10 +104,12 @@ def showComments(msgid, request, bl=None, after=''):
             qdict['date'] = {'$gte': after_comment['date']}
     regions = request.regions
     replace_banned(regions, message)
-    comments = yield objs.Comment.find_sort(
-        qdict, [('date', pymongo.ASCENDING)], limit=10000)
-    for comment in comments:
-        replace_banned(regions, comment, 'comment')
+    comments = []
+    if not message.get('banned', False):
+        comments = yield objs.Comment.find_sort(
+            qdict, [('date', pymongo.ASCENDING)], limit=10000)
+        for comment in comments:
+            replace_banned(regions, comment, 'comment')
     defer.returnValue(dict(
         ok=True, format='message_with_replies', cache=5, cache_public=True,
         msgid=msgid, message=message.filter_fields(),
