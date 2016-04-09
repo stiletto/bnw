@@ -48,6 +48,12 @@ class WsHandler(tornado.websocket.WebSocketHandler):
     def get_handlers(self, *args):
         return ()
 
+    def regions(self):
+        hdr = self.request.headers.get('X-Region')
+        if hdr:
+            return set(rgn for rgn in hdr.split(',') if rgn)
+        return set()
+
     def open(self, *args):
         self.version = self.request.arguments.get('v', ['0'])[0]
         self.handlers = self.get_handlers(*args)
