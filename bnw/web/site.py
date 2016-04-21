@@ -386,6 +386,7 @@ class MainHandler(BnwWebHandler, AuthMixin):
         else:
             tagres = yield cmd_tags(req)
             toptags = tagres['tags'] if tagres['ok'] else []
+            result['messages'].reverse()
             defer.returnValue({
                 'messages': result['messages'],
                 'toptags': toptags,
