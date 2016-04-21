@@ -27,7 +27,7 @@ import bnw.core.post as post
 import bnw.core.base
 from bnw.core.bnw_mongo import get_db
 from bnw.core.bnw_gridfs import get_fs
-from bnw.handlers.command_show import cmd_feed, cmd_today, replace_banned
+from bnw.handlers.command_show import cmd_feed, cmd_today, cmd_show, replace_banned
 from bnw.handlers.command_clubs import cmd_clubs, cmd_tags
 from bnw.handlers.command_userinfo import cmd_userinfo
 
@@ -311,16 +311,18 @@ class MessageHandler(BnwWebHandler, AuthMixin):
     @defer.inlineCallbacks
     def respond(self, msgid):
         user = yield self.get_auth_user()
-        f = [("date", 1)]
-        msg = (yield objs.Message.find_one({'id': msgid}))
-        qdict = {'message': msgid}
+        req = BnwWebRequest(user, self.regions())
+        result = yield cmd_show(req, message=msgid, replies=True, use_bl=True)
+        if not result['ok']:
+            self.set_status(404)
+            defer.returnValue({
+                'msgid': msgid,
+                'msg': None,
+                'auth_user': user,
+                'comments': [],
+                'is_subscribed': None,
+            })
         if user:
-            bl = []
-            for e in user.get('blacklist', []):
-                if e[0] == 'user':
-                    bl.append(e[1])
-            if bl:
-                qdict['user'] = {'$nin': bl}
             is_subscribed = yield objs.Subscription.count({
                 'user': user['name'],
                 'type': 'sub_message',
@@ -328,22 +330,12 @@ class MessageHandler(BnwWebHandler, AuthMixin):
             })
         else:
             is_subscribed = False
-        regions = self.regions()
-        if msg:
-            replace_banned(regions, msg)
-        # TODO: Converting generator to list may be inefficient.
-        comments = list((yield objs.Comment.find(qdict, sort=f, limit=10000)))
-        if comments:
-            for comment in comments:
-                replace_banned(regions, comment, 'comment')
         self.set_header("Cache-Control", "max-age=5")
-        if not msg:
-            self.set_status(404)
         defer.returnValue({
             'msgid': msgid,
-            'msg': msg,
+            'msg': result['message'],
             'auth_user': user,
-            'comments': comments,
+            'comments': result['replies'],
             'is_subscribed': is_subscribed,
         })
 
@@ -360,6 +352,7 @@ class MainHandler(BnwWebHandler, AuthMixin):
         regions = self.regions()
         req = BnwWebRequest(user, regions)
 
+
         page = get_page(self)
         qdict = {}
         if tag:
@@ -368,17 +361,11 @@ class MainHandler(BnwWebHandler, AuthMixin):
         if club:
             club = tornado.escape.url_unescape(club, plus=False)
             qdict['clubs'] = club
-        if user:
-            bl = []
-            for e in user.get('blacklist', []):
-                if e[0] == 'user':
-                    bl.append(e[1])
-            if bl:
-                qdict['user'] = {'$nin': bl}
+        result = yield cmd_show(req, page=str(page), club=club, tag=tag, use_bl=True)
+        if not result['ok']:
+            self.set_status(400)
+            defer.returnValue(result['desc'])
 
-        messages = list((yield objs.Message.find_sort(qdict, sort=f, limit=20, skip=20 * page)))
-        for message in messages:
-            replace_banned(req.regions, message)
         hasmes = yield is_hasmes(qdict, page)
         uc = (yield objs.User.count())
         format = self.get_argument("format", "")
@@ -394,18 +381,13 @@ class MainHandler(BnwWebHandler, AuthMixin):
                 base = bnw.core.base.get_http_webui_base()
             defer.returnValue(
                 rss.message_feed(
-                    messages, link=base,
+                    result['messages'], link=base,
                     title='Коллективное бессознательное BnW'))
-
-        elif format == 'json':
-            json_messages = [message.filter_fields() for message in messages]
-            defer.returnValue(json.dumps(json_messages, ensure_ascii=False))
-
         else:
             tagres = yield cmd_tags(req)
             toptags = tagres['tags'] if tagres['ok'] else []
             defer.returnValue({
-                'messages': messages,
+                'messages': result['messages'],
                 'toptags': toptags,
                 'users_count': int(uc),
                 'active': active,

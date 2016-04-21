@@ -17,8 +17,10 @@ def get_user_bl(request, use_bl=False):
     """
     if use_bl and request.user:
         bl = request.user.get('blacklist', [])
-        bl = [el[1] for el in bl if el[0] == 'user']
-        return bl
+        result = {'tag':set(), 'user':set(), 'club': set()}
+        for el in bl:
+            result[el[0]].add(el[1])
+        return result
     else:
         return []
 
@@ -97,7 +99,7 @@ def showComments(msgid, request, bl=None, after=''):
         message['subscribed'] = bool(subscribed)
     qdict = {'message': msgid.upper()}
     if bl:
-        qdict['user'] = {'$nin': bl}
+        qdict['user'] = {'$nin': list(bl['user'])}
     if after:
         after_comment = yield objs.Comment.find_one({'id':msgid+'/'+after.split('/')[-1]})
         if after_comment:
@@ -150,7 +152,17 @@ def cmd_show(request, message='', user='', tag='', club='', page='0',
                     'recommendations': user}]}
             parameters.update(user_spec)
         elif bl:
-            parameters['user'] = {'$nin': bl}
+            if parameters.get('user'):
+                parameters['user'] = {'$in': [parameters['user']] }
+            else:
+                parameters['user'] = {}
+            parameters['user']['$nin'] = list(bl['tag'])
+        if bl and not tag:
+            if parameters.get('tags'):
+                parameters['tags'] = {'$in': [parameters['tags']] }
+            else:
+                parameters['tags'] = {}
+            parameters['tags']['$nin'] = list(bl['tag'])
 
         if before:
             befmsg = yield objs.Message.find_one({'id': before})
@@ -199,7 +211,9 @@ def cmd_today(request, use_bl=False):
         postids = [x['_id'] for x in (yield objs.Today.find({}, limit=20))]
         if len(postids)>0: break
     qdict = {'id': {'$in': postids}}
-    if bl: qdict['user'] = {'$nin': bl}
+    if bl:
+        qdict['user'] = {'$nin': list(bl['user'])}
+        qdict['tags'] = {'$nin': list(bl['tag'])}
     dbposts = dict(
         (x['id'], x.filter_fields())
         for x in (yield objs.Message.find(qdict)))
