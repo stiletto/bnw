@@ -88,11 +88,9 @@ def vcard(iq, iq_user):
         if res:
             avatar, mimetype, thumb = res
             yield agent.request('PUT',utf8(config.blob_storage+'put/'+av_key),
-                Headers({'Content-Type': [mimetype],
-                         'Content-Length': [str(len(avatar))]}), StringProducer(avatar))
+                Headers({'Content-Type': [mimetype]}), StringProducer(avatar))
             yield agent.request('PUT',utf8(config.blob_storage+'put/'+av_key+'/thumb'),
-                Headers({'Content-Type': ['image/png'],
-                         'Content-Length': [str(len(thumb))]}), StringProducer(thumb))
+                Headers({'Content-Type': ['image/png']}), StringProducer(thumb))
             yield objs.User.mupdate(
                 {'name': iq_user['name']},
                     {'$set': {'avatar': 'blobstorage'}})
