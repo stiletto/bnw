@@ -39,12 +39,12 @@ def postMessage(request, tags, clubs, text, anon=False, anoncomments=False,
         ok, rest = yield bnw.core.post.postMessage(
             request.user, tags, clubs, text, anon, anoncomments, format, sfrom=sfrom)
         if ok:
-            msgid, qn, recepients = rest
+            msgid, qn, recipients = rest
             defer.returnValue(
                 dict(ok=True,
                      desc='Message #%s has been delivered '
                           'to %d users. %s/p/%s' % (
-                     msgid, recepients, get_webui_base(request.user),
+                     msgid, recipients, get_webui_base(request.user),
                      msgid),
                      id=msgid))
         else:
@@ -99,12 +99,12 @@ def cmd_comment(request, message="", anonymous="", format="", text=""):
         ok, rest = yield bnw.core.post.postComment(
             message_id, comment_id, text, request.user, anonymous, format, sfrom=sfrom)
         if ok:
-            msgid, num, qn, recepients = rest
+            msgid, num, qn, recipients = rest
             defer.returnValue(
                 dict(ok=True,
                      desc='Comment #%s (%d) has been delivered '
                           'to %d users. %s/p/%s' % (
-                     msgid, num, recepients, get_webui_base(
+                     msgid, num, recipients, get_webui_base(
                      request.user),
                      msgid.replace('/', '#')),
                      id=msgid,
@@ -151,11 +151,11 @@ def cmd_recommend(request, message="", comment="", unrecommend=""):
         ok, rest = yield bnw.core.post.recommendMessage(
             request.user, message_obj, comment)
         if ok:
-            qn, recepients, replies = rest
+            qn, recipients, replies = rest
             defer.returnValue(dict(
                 ok=True,
                 desc='Recommended and delivered to %d users (%d replies).' % (
-                    recepients, replies)))
+                    recipients, replies)))
         else:
             defer.returnValue(dict(
                 ok=False,
