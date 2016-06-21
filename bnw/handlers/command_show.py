@@ -156,7 +156,7 @@ def cmd_show(request, message='', user='', tag='', club='', page='0',
                 parameters['user'] = {'$in': [parameters['user']] }
             else:
                 parameters['user'] = {}
-            parameters['user']['$nin'] = list(bl['tag'])
+            parameters['user']['$nin'] = list(bl['user'])
         if bl and not tag:
             if parameters.get('tags'):
                 parameters['tags'] = {'$in': [parameters['tags']] }
