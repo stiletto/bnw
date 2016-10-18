@@ -43,7 +43,7 @@ linkhostings = [
     (ur'https?://(?:www\.)?(?:youtube.com/watch\?(?:.+&)?v\=|youtu.be/)([A-Z0-9a-z_-]+)(?:[&?].+)?', lambda m,s: 'http%s://img.youtube.com/vi/%s/default.jpg' % (s,m(1))),
     (ur'(?i)https?://upload.wikimedia.org/wikipedia/commons/([0-9]{1}\/[A-Za-z0-9]+)/([A-Za-z0-9_.]+)', lambda m,s: 'http%s://upload.wikimedia.org/wikipedia/commons/thumb/%s/%s/256px-%s' % (s,m(1),m(2),m(2))),
     (ur'(?i)https?://(pbs.twimg.com/media/[A-Z0-9a-z_-]+\.(?:png|gif|jpg|jpeg))(?:\:(?:orig|thumb|small|medium|large))?', lambda m,s: 'http%s://%s:thumb' % (s,m(1))),
-    (ur'(?i)https?://([^/]+.jpg.to(/.*)?|(.+.(?:png|gif|jpg|jpeg)))', own_thumbnail),
+    (ur'(?i)https?://([^/]+.jpg.to(/.*)?|(.+.(?:png|gif|jpg|jpeg|webp)))', own_thumbnail),
 ]
 linkhostings = [(re.compile('^' + k + '$'), v, k) for (k, v) in linkhostings]
 
