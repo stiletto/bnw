@@ -72,14 +72,14 @@ def cmd_post(request, tags="", clubs="", anonymous="", anoncomments="", format="
 
 
 @defer.inlineCallbacks
-def cmd_post_simple(request, text, tag1=None, tag2=None, tag3=None, tag4=None, tag5=None):
+def cmd_post_simple(request, text, tag1=None, tag2=None, tag3=None, tag4=None, tag5=None, anonymous="", anoncomments=""):
 #        (ur'(?:(?P<tag1>[\*!]\S+)?(?: (?P<tag2>[\*!]\S+))?(?: (?P<tag3>[\*!]\S+))?(?: (?P<tag4>[\*!]\S+))?(?: (?P<tag5>[\*!]\S+))? )?(?P<text>.+)',
 #            command_post.cmd_post_simple),
     """ Отправка псто """
     raw_tags = [t for t in (tag1, tag2, tag3, tag4, tag5) if t]
     clubs = ','.join([x[1:] for x in raw_tags if x.startswith('!')])
     tags = ','.join([x[1:] for x in raw_tags if x.startswith('*')])
-    defer.returnValue((yield cmd_post(request, tags=tags, clubs=clubs, text=text)))
+    defer.returnValue((yield cmd_post(request, tags=tags, clubs=clubs, text=text, anonymous=anonymous, anoncomments=anoncomments)))
 
 
 @require_auth
