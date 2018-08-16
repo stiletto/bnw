@@ -13,7 +13,7 @@ setup(name='BnW',
                       'http://github.com/mongodb/mongo-python-driver/tarball/master#egg=pymongo-2.6',
                       'http://github.com/stiletto/linkshit/tarball/master#egg=linkshit-0.2'],
 
-    install_requires=['tornado>=2.0', 'twisted', 'Pillow', 'PyRSS2Gen', 'python-dateutil', 'misaka<2.0.0', 'motor', 'linkshit', 'libthumbor'],
+    install_requires=['tornado>=2.0', 'twisted<16.3.0', 'Pillow', 'PyRSS2Gen', 'python-dateutil', 'misaka<2.0.0', 'motor==0.7', 'linkshit', 'libthumbor'],
     package_data={'bnw.web': ['templates/*.html','static/*.*', 'static/flot/*', 'static/web-socket-js/*']},
     entry_points = {
         'console_scripts': [
