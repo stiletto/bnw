@@ -30,9 +30,14 @@ def subscribe(user, target_type, target, fast=False, sfrom=None):
             tuser = yield objs.User.find_one({'name': target})
             if not tuser:
                 defer.returnValue((False, 'No such user.'))
-            _ = yield tuser.send_plain(
-                '@%s subscribed to your blog. %s/u/%s' % (
-                    user['name'], get_webui_base(tuser), user['name']))
+            else:
+                for bl_item in tuser.get('blacklist', []):
+                    if bl_item == ['user', user['name']]:
+                        break
+                else:
+                    yield tuser.send_plain(
+                        '@%s subscribed to your blog. %s/u/%s' % (
+                            user['name'], get_webui_base(tuser), user['name']))
             pass
         elif target_type == 'sub_message':
             if not fast:
