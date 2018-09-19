@@ -119,10 +119,10 @@
 
             border: thin solid black;
         }
-        .comments div:target {
+        #comments div:target {
 	    background-color: #ffff00;
         }
-        .comments div:target .comment {
+        #comments div:target .comment {
 	    background-color: #e5e5e5;
         }
         .comment {
