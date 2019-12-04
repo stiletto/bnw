@@ -14,8 +14,12 @@ bnw.core.bnw_mongo.open_db()
 
 application = service.Application('BnW search service')
 r = RPCSearch(config.search_db, config.search_language)
+if isinstance(config.search_port, str) and ':' in config.search_port:
+    search_host, search_port = config.search_port.rsplit(":", 1)
+else:
+    search_host, search_port = "127.0.0.1", config.search_port
 search_service = internet.TCPServer(
-    config.search_port, server.Site(r), interface='127.0.0.1')
+    search_port, server.Site(r), interface=search_host)
 search_service.setServiceParent(application)
 
 def runintwistd():

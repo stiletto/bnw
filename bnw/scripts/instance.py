@@ -50,6 +50,12 @@ bnw.core.base.notifiers.add(xmpp_notifier.XmppNotifier())
 serviceCollection = service.IServiceCollection(application)
 sm.setServiceParent(serviceCollection)
 
+def parse_port(port):
+    if isinstance(port, str) and ':' in port:
+        host, port = port.rsplit(":", 1)
+        return host, int(port)
+    return "127.0.0.1", int(port)
+
 if config.trace_shutdown:
     def beforeandaftershutdown(when):
         import inspect
@@ -66,14 +72,14 @@ if config.trace_shutdown:
     reactor.addSystemEventTrigger('after', 'shutdown', beforeandaftershutdown, 'After')
 
 if config.rpc_enabled:
+    rpc_host, rpc_port = parse_port(config.rpc_port)
     internet.TCPServer(
-        config.rpc_port, server.Site(s.getRPC()),
-        interface="127.0.0.1").setServiceParent(serviceCollection)
+        rpc_port, server.Site(s.getRPC()),
+        interface=rpc_host).setServiceParent(serviceCollection)
 
 if config.statsd:
     from bnw.core import statsd
-    hostport = config.statsd.split(':',1)
-    statsd.setup(hostport[0], int(hostport[1]))
+    statsd.setup(*parse_port(config.statsd))
 
 if config.manhole:
     shell_factory = ShellFactory()
@@ -84,7 +90,8 @@ if config.manhole:
 if config.webui_enabled:
     import bnw.web.site
     http_server = bnw.web.site.get_site()
-    http_server.listen(config.webui_port, "127.0.0.1")
+    webui_host, webui_port = parse_port(config.webui_port)
+    http_server.listen(webui_port, webui_host)
 
 bnw.core.base.timertime = 0
 def checkload(lasttime):
