@@ -1,0 +1,31 @@
+# -*- coding: utf-8 -*-
+import os
+
+srvc_name = os.environ['BNW_SRVC_NAME']
+srvc_pwd = os.environ['BNW_SRVC_PWD']
+xmpp_server = os.environ.get('BNW_XMPP_SERVER', '127.0.0.1:5347')
+admin_jid = os.environ.get('BNW_ADMIN_JID', 'admin@localhost')
+database_uri = os.environ.get('BNW_DATABASE_URI', 'mongodb://127.0.0.1/bnw')
+database_rs = os.environ.get('BNW_DATABASE_RS', '')
+database = os.environ.get('BNW_DATABASE', 'bnw')
+database_fs = os.environ.get('BNW_DATABASE_FS', 'bnw_fs')
+webui_enabled = bool(os.environ.get('BNW_WEBUI_ENABLED', 'JA'))
+webui_port = os.environ.get('BNW_WEBUI_PORT', 7808)
+webui_base = os.environ.get('BNW_WEBUI_BASE', 'localhost:7808')
+webui_wsbase = os.environ.get('BNW_WEBUI_WSBASE', webui_base)
+webui_static = os.environ.get('BNW_WEBUI_STATIC', webui_base)
+search_db = os.environ.get('BNW_SEARCH_DB', '/tmp/bnw_xapian')
+search_language = os.environ.get('BNW_SEARCH_LANGUAGE', 'english')
+search_port = os.environ.get('BNW_SEARCH_PORT', 7850)
+rpc_enabled = bool(os.environ.get('BNW_RPC_ENABLED', ''))
+rpc_port = os.environ.get('BNW_RPC_PORT', 8081)
+blob_storage = os.environ.get('BNW_BLOB_STORAGE', 'http://127.0.0.1:6421/')
+manhole = os.environ.get('BNW_MANHOLE', '')
+trace_shutdown = bool(os.environ.get('BNW_TRACE_SHUTDOWN', ''))
+throttle_leak_speed = int(os.environ.get('BNW_THROTTLE_LEAK_SPEED', 5))
+throttle_bucket_size = int(os.environ.get('BNW_THROTTLE_LEAK_SPEED', 5))
+mapreduce_enabled = bool(os.environ.get('BNW_MAPREDUCE_ENABLED', 'YEP'))
+thumbor = os.environ.get('BNW_THUMBOR', '%(proto)s://example.com')
+thumbor_key = os.environ.get('BNW_THUMBOR_KEY', 'ABCDEF')
+thumbor_pars = { 'width': 256, 'height': 256, 'fit_in': True }
+statsd = os.environ.get('BNW_STATSD', None)
