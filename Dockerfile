@@ -1,4 +1,4 @@
-FROM docker.io/debian:stable AS base
+FROM docker.io/debian:buster AS base
 
 RUN export DEBIAN_FRONTEND=noninteractive; apt-get -qq update && \
     apt-get -qqy install python2.7 python-xapian
