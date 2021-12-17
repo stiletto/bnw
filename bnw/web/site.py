@@ -237,7 +237,7 @@ class UserHandler(BnwWebHandler, AuthMixin):
             qdict = {'user': username}
 
         if tag:
-            tag = tornado.escape.url_unescape(tag)
+            tag = tornado.escape.url_unescape(tag, plus=False)
             qdict['tags'] = tag
         messages = list((yield objs.Message.find_sort(qdict, sort=f, limit=20, skip=20 * page)))
         for message in messages:
@@ -277,7 +277,7 @@ class UserRecoHandler(BnwWebHandler, AuthMixin):
         page = get_page(self)
         qdict = {'recommendations': username}
         if tag:
-            tag = tornado.escape.url_unescape(tag)
+            tag = tornado.escape.url_unescape(tag, plus=False)
             qdict['tags'] = tag
         messages = list((yield objs.Message.find_sort(qdict, sort=f, limit=20, skip=20 * page)))
         for message in messages:
