@@ -55,7 +55,9 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
     def parseArgument(self, argi, prevopt, arg):
             # print "PA",prevopt,arg
         if prevopt:
-            return None, ((prevopt, arg),)
+            return None, ((prevopt, arg),), False
+        elif arg == '--':
+            return None, (), True
         elif arg.startswith('--'):
             namevalue = arg[2:].split('=')
             name = namevalue[0]
@@ -68,7 +70,7 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
                 value = namevalue[1]
             else:
                 value = True
-            return False, ((name, value),)
+            return False, ((name, value),), False
         elif arg.startswith('-'):
             shorts = []
             for j, c in enumerate(arg[1:]):
@@ -82,7 +84,7 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
                     shorts.append((argi['short'][c][1], True))
                 else:
                     prevopt = argi['short'][c][1]
-            return prevopt, shorts
+            return prevopt, shorts, False
 
     def generate_help_message(self, cmd, alias):
         # Example entry of self.commands:
@@ -210,10 +212,13 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
                             return None, None, cmdname, None, None
                         argi = self.getHashed(cmdname)
                     else:
-                        prevopt, newopts = self.parseArgument(
+                        prevopt, newopts, stop = self.parseArgument(
                             argi, prevopt, ''.join(wordbuf))
                         for name, value in newopts:
                             options[name] = value
+                        if stop:
+                            rest = text[i+1:]
+                            break
                 wordbuf = []
                 firstsym = True
             elif c in ('"', "'"):
@@ -245,7 +250,7 @@ class RedEyeParser(parser_basexmpp.BaseXmppParser):
                     raise CommandParserException(
                         'No such command: %s' % cmdname)
             elif len(wordbuf) > 0:
-                prevopt, newopts = self.parseArgument(
+                prevopt, newopts, stop = self.parseArgument(
                     argi, prevopt, ''.join(wordbuf))
                 if prevopt:
                     raise CommandParserException(
