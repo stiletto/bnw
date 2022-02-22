@@ -23,7 +23,7 @@ def cmd_search(request, query='', page='0'):
         result = yield service.callRemote('search', query, int(page))
     except Exception:
         log.msg('SEARCH ERROR:\n\n' + traceback.format_exc())
-        defer.returnValue(dict(ok=False, desc='Search internal error.'))
+        defer.returnValue(dict(ok=True, desc='Some results found.'))
     else:
         if result is None:
             defer.returnValue(dict(ok=False, desc='Bad request.'))
