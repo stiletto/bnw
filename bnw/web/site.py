@@ -464,7 +464,9 @@ class PostHandler(BnwWebHandler, AuthMixin):
                  .split(",", 5)[:5] if i]
         text = self.get_argument("text", "")
         user = yield self.get_auth_user()
-        ok, result = yield post.postMessage(user, tags, clubs, text)
+        anon = bool(self.get_argument("anonymous", False))
+        anoncomments = bool(self.get_argument("anoncomments", False))
+        ok, result = yield post.postMessage(user, tags, clubs, text, anon, anoncomments)
         if ok:
             (msg_id, qn, recs) = result
             self.redirect('/p/' + msg_id)
@@ -497,12 +499,13 @@ class CommentHandler(BnwWebHandler, AuthMixin):
     def respond_post(self):
         msg = self.get_argument("msg", "")
         comment = self.get_argument("comment", "")
+        anon = bool(self.get_argument("anonymous", False))
         if comment:
             comment = msg + "/" + comment
         text = self.get_argument("text", "")
         noredir = self.get_argument("noredir", "")
         user = yield self.get_auth_user()
-        ok, result = yield post.postComment(msg, comment, text, user)
+        ok, result = yield post.postComment(msg, comment, text, user, anon)
         if ok:
             (msg_id, num, qn, recs) = result
             if noredir:

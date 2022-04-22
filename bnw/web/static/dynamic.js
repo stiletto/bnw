@@ -358,6 +358,7 @@ function add_message_page_actions(comment_id, comment_user) {
         var hr2 = $("hr").last();
         var comment_text = form2.find("[name=comment]");
         var textarea = $("#comment_textarea");
+        var anon = $("#anon_comment");
         var clearb = $("#clear_replyto");
         var sendb = $("#send_comment");
         var old_value, iid;
@@ -390,9 +391,11 @@ function add_message_page_actions(comment_id, comment_user) {
             if (comment_text.val()) {
                 id += "/" + comment_text.val();
             }
+            var is_anon = anon.is(':checked') || undefined;
             before();
             api_call(
-                "comment", {message: id, text: textarea.val()}, false,
+                "comment", {message: id, text: textarea.val(),
+                            anonymous: is_anon}, false,
                 // onsuccess
                 function() {
                     after();
@@ -519,6 +522,8 @@ function new_post() {
     var tags_text = post_form.find("[name=tags]");
     var clubs_text = post_form.find("[name=clubs]");
     var textarea = $("#post_textarea");
+    var anon = $("#anon_post");
+    var anon_comments = $("#anon_comments");
     var sendb = $("#send_post");
     var hideb = $("#hide_post");
     var old_value, iid;
@@ -529,10 +534,13 @@ function new_post() {
             // Use non-ajax submit if websocket not opened.
             return true;
         }
+        var is_anon = anon.is(':checked') || undefined;
+        var is_anoncomments = anon_comments.is(':checked') || undefined;
         before();
         api_call(
             "post", {tags: tags_text.val(), clubs: clubs_text.val(),
-                     text: textarea.val()}, false,
+                     text: textarea.val(), anonymous: is_anon,
+                     anoncomments: is_anoncomments}, false,
             // onsuccess
             function() {
                 after();
